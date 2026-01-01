@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serenity IdentitySpa | Luxury Wellness & Relaxation</title>
+    <meta name="description"
+        content="Experience the ultimate relaxation at Serenity IdentitySpa. Luxury massages, facials, and wellness treatments.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="container header-container">
+            <a href="#" class="logo">Serenity Identity</a>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="#home" class="nav-link">Home</a></li>
+                    <li><a href="#services" class="nav-link">Services</a></li>
+                    <li><a href="#gallery" class="nav-link">Gallery</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                </ul>
+            </nav>
+            <button class="menu-toggle" aria-label="Toggle Menu">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="#book" class="btn btn-primary nav-cta">Book Now</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="hero">
+            <div class="hero-bg">
+                <!-- Image will be inserted here via CSS or img tag -->
+            </div>
+            <div class="hero-overlay"></div>
+            <div class="container hero-content">
+                <h1 class="fade-in-up">Find Your Inner <span class="text-accent">Peace</span></h1>
+                <p class="fade-in-up delay-1">Experience luxury wellness treatments designed to rejuvenate your body and
+                    mind.</p>
+                <div class="hero-btns fade-in-up delay-2">
+                    <a href="#services" class="btn btn-primary">Discover Treatments</a>
+                    <a href="#video" class="btn btn-outline">Watch Video</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="section services">
+            <div class="container">
+                <div class="section-header text-center">
+                    <span class="subheading">Our Menu</span>
+                    <h2>Wellness Services</h2>
+                    <div class="separator"></div>
+                </div>
+
+                <div class="services-grid">
+                    <!-- Service Card 1 -->
+                    <div class="service-card scroll-reveal">
+                        <div class="service-img">
+                            <img src="service-massage.png" alt="Relaxing Massage">
+                        </div>
+                        <div class="service-info">
+                            <h3>Signature Massage</h3>
+                            <p>A full-body relaxation experience using aromatic oils and Swedish techniques.</p>
+                            <a href="massage.html" class="read-more">Learn More</a>
+                        </div>
+                    </div>
+
+                    <!-- Service Card 2 -->
+                    <div class="service-card scroll-reveal delay-1">
+                        <div class="service-img">
+                            <img src="service-facial.png" alt="Rejuvenating Facial">
+                        </div>
+                        <div class="service-info">
+                            <h3>Rejuvenating Facial</h3>
+                            <p>Restore your skin's natural glow with our organic, chemical-free facial treatments.</p>
+                            <a href="facial.html" class="read-more">Learn More</a>
+                        </div>
+                    </div>
+
+                    <!-- Service Card 3 -->
+                    <div class="service-card scroll-reveal delay-2">
+                        <div class="service-img">
+                            <img src="service-sauna.png" alt="Thermal Sauna">
+                        </div>
+                        <div class="service-info">
+                            <h3>Thermal Sauna</h3>
+                            <p>Detoxify and unwind in our state-of-the-art cedar wood thermal sauna suites.</p>
+                            <a href="sauna.html" class="read-more">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section id="gallery" class="section gallery">
+            <div class="container">
+                <div class="section-header text-center">
+                    <span class="subheading">The Experience</span>
+                    <h2>A Sanctuary of Calm</h2>
+                    <div class="separator"></div>
+                </div>
+                <div class="gallery-grid">
+                    <div class="gallery-item scroll-reveal">
+                        <img src="gallery-1.png" alt="Spa Interior">
+                    </div>
+                    <div class="gallery-item scroll-reveal delay-1">
+                        <img src="service-massage.png" alt="Relaxing Atmosphere">
+                    </div>
+                    <div class="gallery-item scroll-reveal delay-2">
+                        <img src="service-facial.png" alt="Wellness Treatment">
+                    </div>
+                    <div class="gallery-item scroll-reveal">
+                        <img src="service-sauna.png" alt="Sauna Details">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section id="testimonials" class="section testimonials">
+            <div class="container text-center">
+                <span class="subheading">Loved by Locals</span>
+                <h2>What Our Clients Say</h2>
+                <div class="separator"></div>
+
+                <div class="testimonial-carousel fade-in-up delay-1">
+                    <div class="testimonial-item">
+                        <p>"The most relaxing experience of my life. The ambience is unmatched."</p>
+                        <h4>- Sarah Jenkins</h4>
+                    </div>
+                    <!-- More items could be added here with JS carousel logic -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact/Footer Section -->
+        <section id="contact" class="section contact">
+            <div class="container">
+                <div class="visit-card">
+                    <h2>Visit Us</h2>
+                    <p> A Mini Van, Quincy, Mass 02170</p>
+                    <p>Open Daily: 9am - 8pm</p>
+                    <a href="mailto:hello@serenityspa.com" class="contact-link">hello@serenityspa.com</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Serenity IdentitySpa. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
