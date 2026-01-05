@@ -86,20 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.querySelector('.nav-links');
 
     mobileBtn.addEventListener('click', () => {
-        // Toggle display or add a class
-        if (navLinks.style.display === 'flex') {
-            navLinks.style.display = 'none';
-        } else {
-            navLinks.style.display = 'flex';
-            navLinks.style.flexDirection = 'column';
-            navLinks.style.position = 'absolute';
-            navLinks.style.top = '100%';
-            navLinks.style.left = '0';
-            navLinks.style.width = '100%';
-            navLinks.style.background = 'rgba(255,255,255,0.95)';
-            navLinks.style.padding = '2rem';
-            navLinks.style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)';
-        }
+        // Toggle CSS class instead of inline styles for dark mode support
+        navLinks.classList.toggle('mobile-active');
     });
 
     // --- Typing Effect Restart Loop (Optional) ---
