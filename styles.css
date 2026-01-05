@@ -770,6 +770,31 @@ main {
         display: block;
     }
 
+    /* Mobile menu when active */
+    .nav-links.mobile-active {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    /* Dark mode mobile menu */
+    body.dark-mode .nav-links.mobile-active {
+        background: rgba(30, 30, 30, 0.95);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    body.dark-mode .nav-links.mobile-active a {
+        color: var(--md-sys-color-on-surface);
+    }
+
     .timeline::before {
         left: 0;
     }
