@@ -1109,6 +1109,145 @@
 
         /* Magnetic hover for interactive elements */
         .magnetic { transition: transform var(--duration-fast) ease; }
+
+        /* ============================================
+           GITHUB ACTIVITY FEED
+           ============================================ */
+        .gh-feed {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+        }
+
+        .gh-loading {
+            text-align: center;
+            padding: var(--space-2xl);
+            color: var(--text-tertiary);
+        }
+
+        .gh-loading .spinner {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            border: 2.5px solid var(--glass-border);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: ghSpin 0.8s linear infinite;
+            margin-bottom: var(--space-md);
+        }
+
+        @keyframes ghSpin { to { transform: rotate(360deg); } }
+
+        .gh-event {
+            display: flex;
+            gap: var(--space-md);
+            padding: var(--space-lg);
+            align-items: flex-start;
+            transition: all var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .gh-event:hover {
+            transform: translateY(-2px);
+        }
+
+        .gh-icon {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-primary);
+            font-size: 1.1rem;
+        }
+
+        .gh-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .gh-title {
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            line-height: 1.5;
+        }
+
+        .gh-title a {
+            color: var(--accent-primary);
+            font-weight: 600;
+            transition: opacity var(--duration-fast) ease;
+        }
+        .gh-title a:hover { opacity: 0.8; }
+
+        .gh-meta {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+        }
+
+        .gh-commits {
+            margin-top: var(--space-sm);
+            padding-left: var(--space-md);
+            border-left: 2px solid var(--glass-border);
+        }
+
+        .gh-commit {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            padding: 3px 0;
+            line-height: 1.5;
+        }
+
+        .gh-commit code {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--accent-primary);
+            background: var(--accent-subtle);
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 6px;
+        }
+
+        .gh-empty {
+            text-align: center;
+            padding: var(--space-2xl);
+            color: var(--text-tertiary);
+            font-size: 0.95rem;
+        }
+
+        .gh-footer {
+            text-align: center;
+            padding-top: var(--space-lg);
+        }
+
+        .gh-view-all {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            color: var(--accent-primary);
+            letter-spacing: 0.04em;
+            padding: 10px 24px;
+            border: 1px solid rgba(200, 170, 110, 0.25);
+            border-radius: var(--radius-full);
+            background: var(--accent-subtle);
+            transition: all var(--duration-normal) var(--ease-spring);
+        }
+        .gh-view-all:hover {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
     </style>
 </head>
 <body>
@@ -1133,6 +1272,7 @@
                 <li><a href="#skills">Skills</a></li>
                 <li><a href="#experience">Experience</a></li>
                 <li><a href="#education">Education</a></li>
+                <li><a href="#github">GitHub</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
             <div class="nav-actions">
@@ -1155,6 +1295,7 @@
         <a href="#skills" class="mobile-nav-link">Skills</a>
         <a href="#experience" class="mobile-nav-link">Experience</a>
         <a href="#education" class="mobile-nav-link">Education</a>
+        <a href="#github" class="mobile-nav-link">GitHub</a>
         <a href="#contact" class="mobile-nav-link">Contact</a>
     </div>
 
@@ -1412,10 +1553,31 @@
             </div>
         </section>
 
+        <!-- GitHub Activity -->
+        <section id="github" class="section">
+            <div class="section-header reveal">
+                <span class="section-label">05 / Activity</span>
+                <h2 class="section-title">GitHub Contributions</h2>
+                <div class="section-divider"></div>
+            </div>
+            <div id="ghFeed" class="gh-feed">
+                <div class="gh-loading">
+                    <div class="spinner"></div>
+                    <p>Loading latest activity&hellip;</p>
+                </div>
+            </div>
+            <div class="gh-footer reveal">
+                <a href="https://github.com/infrabrew" target="_blank" class="gh-view-all">
+                    View Full Profile
+                    <span class="material-symbols-rounded" style="font-size:1rem;">open_in_new</span>
+                </a>
+            </div>
+        </section>
+
         <!-- Interests -->
         <section id="interests" class="section" style="text-align:center;">
             <div class="section-header reveal" style="text-align:center;">
-                <span class="section-label">05 / Beyond Code</span>
+                <span class="section-label">06 / Beyond Code</span>
                 <h2 class="section-title">Interests &amp; Hobbies</h2>
                 <div class="section-divider" style="margin:var(--space-md) auto 0;"></div>
             </div>
@@ -1436,7 +1598,7 @@
     <!-- Footer / Contact -->
     <footer id="contact" class="footer container">
         <div class="section-header reveal" style="text-align:center;">
-            <span class="section-label">06 / Connect</span>
+            <span class="section-label">07 / Connect</span>
             <h2 class="section-title">Get In Touch</h2>
             <div class="section-divider" style="margin:var(--space-md) auto 0;"></div>
         </div>
@@ -1678,6 +1840,136 @@
                 el.style.transform = '';
             });
         });
+
+        // ─── GitHub Activity Feed ───
+        (async function loadGitHub() {
+            const feed = document.getElementById('ghFeed');
+            const GH_USER = 'infrabrew';
+            const MAX_EVENTS = 10;
+
+            // Event type config: icon, verb
+            const typeMap = {
+                PushEvent:          { icon: 'commit', verb: 'Pushed to' },
+                CreateEvent:        { icon: 'add_circle', verb: 'Created' },
+                DeleteEvent:        { icon: 'remove_circle', verb: 'Deleted' },
+                PullRequestEvent:   { icon: 'merge', verb: 'Pull request on' },
+                IssuesEvent:        { icon: 'bug_report', verb: 'Issue on' },
+                IssueCommentEvent:  { icon: 'chat', verb: 'Commented on' },
+                WatchEvent:         { icon: 'star', verb: 'Starred' },
+                ForkEvent:          { icon: 'fork_right', verb: 'Forked' },
+                ReleaseEvent:       { icon: 'new_releases', verb: 'Released on' },
+                PublicEvent:        { icon: 'public', verb: 'Made public' },
+            };
+
+            function timeAgo(dateStr) {
+                const diff = Date.now() - new Date(dateStr).getTime();
+                const mins = Math.floor(diff / 60000);
+                if (mins < 1) return 'just now';
+                if (mins < 60) return mins + 'm ago';
+                const hrs = Math.floor(mins / 60);
+                if (hrs < 24) return hrs + 'h ago';
+                const days = Math.floor(hrs / 24);
+                if (days < 30) return days + 'd ago';
+                const months = Math.floor(days / 30);
+                return months + 'mo ago';
+            }
+
+            function renderEvent(ev) {
+                const info = typeMap[ev.type] || { icon: 'code', verb: ev.type.replace('Event','') };
+                const repo = ev.repo.name;
+                const repoUrl = 'https://github.com/' + repo;
+                const time = timeAgo(ev.created_at);
+
+                let extra = '';
+
+                // Show commit messages for PushEvents
+                if (ev.type === 'PushEvent' && ev.payload.commits && ev.payload.commits.length) {
+                    const commits = ev.payload.commits.slice(0, 3);
+                    extra = '<div class="gh-commits">' +
+                        commits.map(c => {
+                            const sha = c.sha.slice(0, 7);
+                            const msg = c.message.split('\n')[0];
+                            const safeMsg = msg.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                            return '<div class="gh-commit"><code>' + sha + '</code>' + safeMsg + '</div>';
+                        }).join('') +
+                        (ev.payload.commits.length > 3
+                            ? '<div class="gh-commit" style="color:var(--text-tertiary);">+' + (ev.payload.commits.length - 3) + ' more</div>'
+                            : '') +
+                        '</div>';
+                }
+
+                // Detail for CreateEvent
+                if (ev.type === 'CreateEvent') {
+                    const ref = ev.payload.ref_type;
+                    const name = ev.payload.ref || '';
+                    info.verb = 'Created ' + ref + (name ? ' <strong>' + name + '</strong> in' : ' for');
+                }
+
+                // Detail for PullRequestEvent
+                if (ev.type === 'PullRequestEvent' && ev.payload.pull_request) {
+                    const action = ev.payload.action;
+                    info.verb = action.charAt(0).toUpperCase() + action.slice(1) + ' PR on';
+                }
+
+                // Push count
+                let countBadge = '';
+                if (ev.type === 'PushEvent' && ev.payload.size) {
+                    countBadge = '<span style="opacity:0.5;">&middot;</span> ' + ev.payload.size + ' commit' + (ev.payload.size > 1 ? 's' : '');
+                }
+
+                return '<div class="gh-event glass glass-shimmer reveal">' +
+                    '<div class="gh-icon"><span class="material-symbols-rounded">' + info.icon + '</span></div>' +
+                    '<div class="gh-body">' +
+                        '<div class="gh-title">' + info.verb + ' <a href="' + repoUrl + '" target="_blank">' + repo.split('/')[1] + '</a></div>' +
+                        '<div class="gh-meta"><span>' + time + '</span> ' + countBadge + '</div>' +
+                        extra +
+                    '</div>' +
+                '</div>';
+            }
+
+            async function fetchWithRetry(url, retries = 2, delay = 1500) {
+                for (let i = 0; i <= retries; i++) {
+                    try {
+                        const res = await fetch(url);
+                        if (!res.ok) throw new Error(res.status);
+                        return await res.json();
+                    } catch (err) {
+                        if (i === retries) throw err;
+                        await new Promise(r => setTimeout(r, delay));
+                    }
+                }
+            }
+
+            async function loadFeed() {
+                feed.innerHTML = '<div class="gh-loading"><div class="spinner"></div><p>Loading latest activity&hellip;</p></div>';
+                try {
+                    const events = await fetchWithRetry(
+                        'https://api.github.com/users/' + GH_USER + '/events/public?per_page=30'
+                    );
+
+                    const meaningful = events
+                        .filter(e => typeMap[e.type])
+                        .slice(0, MAX_EVENTS);
+
+                    if (meaningful.length === 0) {
+                        feed.innerHTML = '<div class="gh-empty"><span class="material-symbols-rounded" style="font-size:2rem;display:block;margin-bottom:var(--space-sm);">code_off</span>No recent public activity</div>';
+                    } else {
+                        feed.innerHTML = meaningful.map(renderEvent).join('');
+                        feed.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+                    }
+                } catch (err) {
+                    feed.innerHTML = '<div class="gh-empty">' +
+                        '<span class="material-symbols-rounded" style="font-size:2rem;display:block;margin-bottom:var(--space-sm);">cloud_off</span>' +
+                        'Unable to load activity right now' +
+                        '<br><button onclick="window.__retryGH()" style="margin-top:var(--space-md);padding:8px 20px;border-radius:var(--radius-full);border:1px solid var(--accent-primary);background:var(--accent-subtle);color:var(--accent-primary);cursor:pointer;font-family:var(--font-mono);font-size:0.82rem;transition:all 0.3s ease;">Retry</button>' +
+                        '<br><a href="https://github.com/' + GH_USER + '" target="_blank" style="color:var(--text-tertiary);font-size:0.8rem;margin-top:var(--space-sm);display:inline-block;">or visit GitHub profile &rarr;</a>' +
+                    '</div>';
+                }
+            }
+
+            window.__retryGH = loadFeed;
+            loadFeed();
+        })();
 
         // ─── Smooth Scroll for anchor links ───
         document.querySelectorAll('a[href^="#"]').forEach(a => {
