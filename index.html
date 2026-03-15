@@ -94,9 +94,9 @@ a{color:inherit;text-decoration:none}ul{list-style:none}img{max-width:100%;displ
 .hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(6,6,11,.92) 0%,rgba(6,6,11,.7) 35%,rgba(6,6,11,.5) 60%,rgba(6,6,11,.75) 100%)}
 .hero-bg .vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(6,6,11,.6) 100%)}
 .hero-bg .bottom-fade{position:absolute;bottom:0;left:0;right:0;height:200px;background:linear-gradient(to top,var(--bg),transparent)}
-[data-theme="light"] .hero-bg img{filter:saturate(.9) brightness(.85)}
-[data-theme="light"] .hero-bg::after{background:linear-gradient(135deg,rgba(246,243,237,.88) 0%,rgba(246,243,237,.6) 35%,rgba(246,243,237,.4) 60%,rgba(246,243,237,.7) 100%)}
-[data-theme="light"] .hero-bg .vignette{background:radial-gradient(ellipse at center,transparent 40%,rgba(246,243,237,.5) 100%)}
+[data-theme="light"] .hero-bg img{filter:saturate(.5) brightness(1.2) opacity(.18)}
+[data-theme="light"] .hero-bg::after{background:rgba(246,243,237,.97)}
+[data-theme="light"] .hero-bg .vignette{display:none}
 [data-theme="light"] .hero-bg .bottom-fade{background:linear-gradient(to top,var(--bg),transparent)}
 .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;max-width:1140px;margin:0 auto;padding:0 2rem;position:relative;z-index:1}
 .hero-text{position:relative;z-index:1}
