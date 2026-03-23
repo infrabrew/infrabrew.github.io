@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecting the Post-Transformer Paradigm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   CSS CUSTOM PROPERTIES / THEME SYSTEM
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-xl: 36px;
+  --glass-blur: 24px;
+  --transition-base: 0.4s var(--ease-out-expo);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #12121a;
+  --bg-tertiary: #1a1a26;
+  --bg-card: rgba(255,255,255,0.04);
+  --bg-glass: rgba(255,255,255,0.06);
+  --bg-glass-border: rgba(255,255,255,0.1);
+  --bg-glass-hover: rgba(255,255,255,0.1);
+  --text-primary: #f0eef5;
+  --text-secondary: #a8a3b8;
+  --text-tertiary: #6e6882;
+  --accent-1: #7c6aef;
+  --accent-2: #5ce0d8;
+  --accent-3: #ef6a9a;
+  --accent-4: #efc06a;
+  --gradient-hero: linear-gradient(135deg, #7c6aef 0%, #5ce0d8 50%, #ef6a9a 100%);
+  --gradient-card: linear-gradient(135deg, rgba(124,106,239,0.08), rgba(92,224,216,0.05));
+  --shadow-glass: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+  --shadow-neo: 8px 8px 20px rgba(0,0,0,0.5), -4px -4px 16px rgba(255,255,255,0.03);
+  --shadow-neo-inset: inset 4px 4px 12px rgba(0,0,0,0.4), inset -2px -2px 8px rgba(255,255,255,0.04);
+  --nav-bg: rgba(10,10,15,0.85);
+  --table-row-alt: rgba(255,255,255,0.02);
+  --table-header-bg: rgba(124,106,239,0.15);
+  --scrollbar-track: #1a1a26;
+  --scrollbar-thumb: #3a3a4e;
+  --code-bg: rgba(0,0,0,0.4);
+  --badge-bg: rgba(124,106,239,0.15);
+  --badge-text: #a99ef5;
+  --cover-overlay: rgba(10,10,15,0.6);
+}
+
+[data-theme="light"] {
+  --bg-primary: #f4f2f8;
+  --bg-secondary: #eae7f0;
+  --bg-tertiary: #ddd9e6;
+  --bg-card: rgba(255,255,255,0.7);
+  --bg-glass: rgba(255,255,255,0.6);
+  --bg-glass-border: rgba(0,0,0,0.08);
+  --bg-glass-hover: rgba(255,255,255,0.85);
+  --text-primary: #1a1428;
+  --text-secondary: #4a4360;
+  --text-tertiary: #7a7490;
+  --accent-1: #5a44d6;
+  --accent-2: #0ea89e;
+  --accent-3: #d6448a;
+  --accent-4: #d6a024;
+  --gradient-hero: linear-gradient(135deg, #5a44d6 0%, #0ea89e 50%, #d6448a 100%);
+  --gradient-card: linear-gradient(135deg, rgba(90,68,214,0.06), rgba(14,168,158,0.04));
+  --shadow-glass: 0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+  --shadow-neo: 6px 6px 16px rgba(0,0,0,0.1), -4px -4px 12px rgba(255,255,255,0.8);
+  --shadow-neo-inset: inset 3px 3px 8px rgba(0,0,0,0.08), inset -2px -2px 6px rgba(255,255,255,0.9);
+  --nav-bg: rgba(244,242,248,0.88);
+  --table-row-alt: rgba(0,0,0,0.02);
+  --table-header-bg: rgba(90,68,214,0.1);
+  --scrollbar-track: #eae7f0;
+  --scrollbar-thumb: #c5c0d4;
+  --code-bg: rgba(0,0,0,0.05);
+  --badge-bg: rgba(90,68,214,0.1);
+  --badge-text: #5a44d6;
+  --cover-overlay: rgba(244,242,248,0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  transition: background var(--transition-base), color var(--transition-base);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+
+a { color: var(--accent-1); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--accent-2); }
+
+/* ═══════════════════════════════════════════════════════════════
+   COVER / HERO
+   ═══════════════════════════════════════════════════════════════ */
+.cover {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+.cover__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.cover__bg canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.cover__overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--cover-overlay);
+  z-index: 1;
+}
+
+.cover__content {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+}
+
+.cover__badge {
+  display: inline-block;
+  padding: 6px 20px;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: var(--badge-bg);
+  color: var(--badge-text);
+  border: 1px solid var(--bg-glass-border);
+  margin-bottom: 2rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.8s var(--ease-out-expo) 0.3s forwards;
+}
+
+.cover__title {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 6vw, 5rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  background: var(--gradient-hero);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeUp 1s var(--ease-out-expo) 0.5s forwards;
+}
+
+.cover__subtitle {
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  color: var(--text-secondary);
+  font-weight: 300;
+  max-width: 700px;
+  margin: 0 auto 2rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.8s var(--ease-out-expo) 0.8s forwards;
+}
+
+.cover__meta {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: var(--text-tertiary);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.8s var(--ease-out-expo) 1s forwards;
+}
+
+.cover__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cover__meta-item svg { width: 16px; height: 16px; stroke: var(--accent-1); }
+
+.cover__scroll-cue {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: fadeUp 0.8s var(--ease-out-expo) 1.4s forwards;
+}
+
+.cover__scroll-line {
+  width: 1px;
+  height: 40px;
+  background: var(--accent-1);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(0.5); }
+  50% { opacity: 1; transform: scaleY(1); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════════════════════════ */
+.main-wrapper {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  max-width: 1500px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 1.5rem 0.75rem 2rem 1.5rem;
+  border-right: 1px solid var(--bg-glass-border);
+  background: var(--nav-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  z-index: 100;
+  scrollbar-width: none;
+  transition: transform 0.4s var(--ease-out-expo), background var(--transition-base);
+}
+
+.sidebar::-webkit-scrollbar { display: none; }
+
+.sidebar__title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  padding: 0 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.sidebar__nav { list-style: none; }
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  transition: all 0.25s ease;
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  margin-bottom: 2px;
+}
+
+.sidebar__link:hover {
+  background: var(--bg-glass-hover);
+  color: var(--text-primary);
+}
+
+.sidebar__link.active {
+  background: var(--bg-glass-hover);
+  color: var(--accent-1);
+  font-weight: 600;
+}
+
+.sidebar__link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: var(--accent-1);
+  border-radius: 2px;
+}
+
+.sidebar__num {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  min-width: 22px;
+}
+
+.content-area {
+  padding: 3rem 4rem 6rem;
+  max-width: 920px;
+  min-width: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE NAV
+   ═══════════════════════════════════════════════════════════════ */
+.mobile-nav-toggle {
+  display: none;
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  z-index: 200;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid var(--bg-glass-border);
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-glass);
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 1.3rem;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s var(--ease-spring);
+}
+
+.mobile-nav-toggle:active { transform: scale(0.9); }
+
+.sidebar__close {
+  display: none;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   THEME TOGGLE
+   ═══════════════════════════════════════════════════════════════ */
+.theme-toggle {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 200;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--bg-glass-border);
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-glass);
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s var(--ease-spring), background var(--transition-base);
+}
+
+.theme-toggle:hover { transform: scale(1.1); }
+.theme-toggle:active { transform: scale(0.92); }
+
+/* ═══════════════════════════════════════════════════════════════
+   GLASS CARD
+   ═══════════════════════════════════════════════════════════════ */
+.glass-card {
+  background: var(--bg-glass);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-glass);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  transition: background var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.glass-card:hover {
+  border-color: rgba(124,106,239,0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TYPOGRAPHY
+   ═══════════════════════════════════════════════════════════════ */
+.section {
+  padding: 3rem 0;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo);
+}
+
+.section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.section__number {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-1);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+.section__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+h3 {
+  font-family: var(--font-body);
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 2.5rem 0 1rem;
+  color: var(--text-primary);
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 2rem 0 0.75rem;
+  color: var(--text-primary);
+}
+
+p {
+  color: var(--text-secondary);
+  margin-bottom: 1.25rem;
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+strong { color: var(--text-primary); font-weight: 600; }
+
+.highlight {
+  color: var(--accent-1);
+  font-weight: 600;
+}
+
+.equation {
+  display: block;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+  background: var(--code-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--bg-glass-border);
+  color: var(--accent-2);
+  overflow-x: auto;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--code-bg);
+  padding: 2px 7px;
+  border-radius: 6px;
+  color: var(--accent-2);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERACTIVE TABLES
+   ═══════════════════════════════════════════════════════════════ */
+.table-container {
+  position: relative;
+  margin: 2rem 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--bg-glass-border);
+  background: var(--bg-glass);
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-glass);
+}
+
+.table-container__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--bg-glass-border);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.table-container__title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.table-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.table-btn {
+  padding: 5px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--bg-glass-border);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.table-btn:hover, .table-btn.active {
+  background: var(--accent-1);
+  color: #fff;
+  border-color: var(--accent-1);
+}
+
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  min-width: 600px;
+}
+
+thead th {
+  background: var(--table-header-bg);
+  padding: 0.85rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--bg-glass-border);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+thead th:hover { background: rgba(124,106,239,0.2); }
+
+thead th .sort-icon {
+  margin-left: 4px;
+  opacity: 0.4;
+  font-size: 0.7rem;
+}
+
+tbody td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--bg-glass-border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+
+tbody tr:nth-child(even) { background: var(--table-row-alt); }
+tbody tr:hover { background: var(--bg-glass-hover); }
+
+.cell-highlight {
+  color: var(--accent-2);
+  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.cell-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 100px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.cell-badge--green { background: rgba(92,224,216,0.15); color: var(--accent-2); }
+.cell-badge--purple { background: rgba(124,106,239,0.15); color: var(--accent-1); }
+.cell-badge--pink { background: rgba(239,106,154,0.15); color: var(--accent-3); }
+.cell-badge--yellow { background: rgba(239,192,106,0.15); color: var(--accent-4); }
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPARISON SLIDER
+   ═══════════════════════════════════════════════════════════════ */
+.comparison-slider {
+  margin: 2rem 0;
+}
+
+.comparison-slider__label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  margin-bottom: 0.5rem;
+}
+
+.comparison-slider input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, var(--accent-1), var(--accent-2));
+  outline: none;
+  cursor: pointer;
+}
+
+.comparison-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+
+.comparison-slider input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  cursor: pointer;
+  border: none;
+}
+
+.comparison-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.comparison-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.comparison-bar__label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  min-width: 140px;
+  text-align: right;
+}
+
+.comparison-bar__track {
+  flex: 1;
+  height: 28px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--bg-glass-border);
+}
+
+.comparison-bar__fill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #fff;
+  transition: width 0.6s var(--ease-out-expo);
+  white-space: nowrap;
+}
+
+.comparison-bar__fill--a { background: linear-gradient(90deg, var(--accent-1), rgba(124,106,239,0.7)); }
+.comparison-bar__fill--b { background: linear-gradient(90deg, var(--accent-2), rgba(92,224,216,0.7)); }
+.comparison-bar__fill--c { background: linear-gradient(90deg, var(--accent-3), rgba(239,106,154,0.7)); }
+
+.comparison-bar__value {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  min-width: 60px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DIAGRAM CARDS (SVG inline)
+   ═══════════════════════════════════════════════════════════════ */
+.diagram {
+  margin: 2rem 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--bg-glass-border);
+  background: var(--bg-glass);
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-glass);
+}
+
+.diagram__header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--bg-glass-border);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.diagram__body {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+}
+
+.diagram__body svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STAT CARDS
+   ═══════════════════════════════════════════════════════════════ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.stat-card {
+  background: var(--bg-glass);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-neo);
+  transition: transform 0.3s var(--ease-spring), box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-glass);
+}
+
+.stat-card__value {
+  font-family: var(--font-mono);
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: var(--gradient-hero);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.35rem;
+}
+
+.stat-card__label {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   KEYWORD TAGS
+   ═══════════════════════════════════════════════════════════════ */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.tag {
+  padding: 4px 14px;
+  border-radius: 100px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  background: var(--badge-bg);
+  color: var(--badge-text);
+  border: 1px solid var(--bg-glass-border);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PROGRESS INDICATOR
+   ═══════════════════════════════════════════════════════════════ */
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: var(--gradient-hero);
+  z-index: 1000;
+  transition: width 0.1s linear;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ABSTRACT CALLOUT
+   ═══════════════════════════════════════════════════════════════ */
+.abstract-box {
+  position: relative;
+  padding: 2rem 2rem 2rem 2.5rem;
+  border-radius: var(--radius-lg);
+  background: var(--gradient-card);
+  border: 1px solid var(--bg-glass-border);
+  margin: 2rem 0;
+}
+
+.abstract-box::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--gradient-hero);
+  border-radius: 2px;
+}
+
+.abstract-box p {
+  font-size: 0.92rem;
+  line-height: 1.85;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BACK TO TOP
+   ═══════════════════════════════════════════════════════════════ */
+.back-to-top {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 150;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--bg-glass-border);
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-glass);
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s var(--ease-spring);
+}
+
+.back-to-top.show { opacity: 1; pointer-events: auto; }
+.back-to-top:hover { transform: scale(1.1); }
+
+/* ═══════════════════════════════════════════════════════════════
+   REFERENCES
+   ═══════════════════════════════════════════════════════════════ */
+.ref-search-box {
+  margin-bottom: 1.5rem;
+}
+
+.ref-search-box input {
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--bg-glass-border);
+  background: var(--bg-glass);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.ref-search-box input::placeholder { color: var(--text-tertiary); }
+
+.ref-search-box input:focus {
+  border-color: var(--accent-1);
+  box-shadow: 0 0 0 3px rgba(124,106,239,0.15);
+}
+
+.ref-list {
+  list-style: none;
+  counter-reset: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ref-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-glass);
+  border: 1px solid var(--bg-glass-border);
+  transition: background 0.25s, border-color 0.25s, opacity 0.3s, transform 0.3s;
+}
+
+.ref-item:hover {
+  background: var(--bg-glass-hover);
+  border-color: rgba(124,106,239,0.2);
+}
+
+.ref-item.hidden {
+  display: none;
+}
+
+.ref-num {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent-1);
+  min-width: 30px;
+  padding-top: 1px;
+}
+
+.ref-body {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.ref-authors {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.ref-title {
+  font-style: italic;
+}
+
+.ref-body a {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .content-area { padding: 2rem 2.5rem 4rem; }
+}
+
+@media (max-width: 768px) {
+  .main-wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    transform: translateX(-100%);
+    z-index: 300;
+    border-right: 1px solid var(--bg-glass-border);
+  }
+
+  .sidebar.open { transform: translateX(0); }
+
+  .sidebar__close { display: block; }
+
+  .mobile-nav-toggle { display: flex; }
+
+  .content-area {
+    padding: 1.5rem 1.25rem 4rem;
+  }
+
+  .glass-card { padding: 1.5rem; }
+
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+
+  .comparison-bar__label { min-width: 80px; font-size: 0.7rem; }
+
+  .table-container__header { padding: 0.75rem 1rem; }
+
+  table { font-size: 0.78rem; }
+  thead th, tbody td { padding: 0.6rem 0.75rem; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .cover__meta { flex-direction: column; gap: 0.75rem; }
+}
+
+/* Overlay for mobile sidebar */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 250;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.sidebar-overlay.show {
+  display: block;
+  opacity: 1;
+}
+</style>
+</head>
+<body>
+
+<!-- Reading Progress -->
+<div class="reading-progress" id="readingProgress"></div>
+
+<!-- Theme Toggle -->
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">☀️</button>
+
+<!-- Mobile Nav Toggle -->
+<button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Open navigation">☰</button>
+
+<!-- Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Back to Top -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<!-- ══════════════════════════════════════════════════════════
+     COVER PAGE
+     ══════════════════════════════════════════════════════════ -->
+<section class="cover" id="cover">
+  <div class="cover__bg"><canvas id="heroCanvas"></canvas></div>
+  <div class="cover__overlay"></div>
+  <div class="cover__content">
+    <span class="cover__badge">Comprehensive Research Manuscript — March 2026</span>
+    <h1 class="cover__title">Architecting the Post-Transformer Paradigm</h1>
+    <p class="cover__subtitle">A Comprehensive Synthesis of Mamba-3, Mixture of Experts, Recursive Language Models, and Dense Verification</p>
+    <div class="cover__meta">
+      <span class="cover__meta-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Peter A. Aldrich Jr.
+      </span>
+      <span class="cover__meta-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        March 2026
+      </span>
+      <span class="cover__meta-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        33 Pages
+      </span>
+    </div>
+  </div>
+  <div class="cover__scroll-cue">
+    <span>Scroll to explore</span>
+    <div class="cover__scroll-line"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     MAIN CONTENT
+     ══════════════════════════════════════════════════════════ -->
+<div class="main-wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar__close" id="sidebarClose">✕</button>
+    <div class="sidebar__title">Chapters</div>
+    <ul class="sidebar__nav" id="sidebarNav">
+      <li><a class="sidebar__link" href="#abstract"><span class="sidebar__num">00</span>Abstract</a></li>
+      <li><a class="sidebar__link" href="#sec1"><span class="sidebar__num">01</span>Introduction</a></li>
+      <li><a class="sidebar__link" href="#sec2"><span class="sidebar__num">02</span>State Space Models &amp; Mamba-3</a></li>
+      <li><a class="sidebar__link" href="#sec3"><span class="sidebar__num">03</span>Latent Mixture of Experts</a></li>
+      <li><a class="sidebar__link" href="#sec4"><span class="sidebar__num">04</span>Recursive Language Models</a></li>
+      <li><a class="sidebar__link" href="#sec5"><span class="sidebar__num">05</span>Dense Verification Layer</a></li>
+      <li><a class="sidebar__link" href="#sec6"><span class="sidebar__num">06</span>Architectural Synthesis</a></li>
+      <li><a class="sidebar__link" href="#sec7"><span class="sidebar__num">07</span>Training &amp; Optimization</a></li>
+      <li><a class="sidebar__link" href="#sec8"><span class="sidebar__num">08</span>Hardware &amp; Deployment</a></li>
+      <li><a class="sidebar__link" href="#sec9"><span class="sidebar__num">09</span>Hardware Resource Analysis</a></li>
+      <li><a class="sidebar__link" href="#sec10"><span class="sidebar__num">10</span>Production Integrations</a></li>
+      <li><a class="sidebar__link" href="#sec11"><span class="sidebar__num">11</span>Evaluation Paradigms</a></li>
+      <li><a class="sidebar__link" href="#sec12"><span class="sidebar__num">12</span>Maintenance &amp; Drift</a></li>
+      <li><a class="sidebar__link" href="#sec13"><span class="sidebar__num">13</span>Challenges</a></li>
+      <li><a class="sidebar__link" href="#sec14"><span class="sidebar__num">14</span>Conclusion</a></li>
+      <li><a class="sidebar__link" href="#references"><span class="sidebar__num">◆</span>References</a></li>
+    </ul>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="content-area">
+
+    <!-- ABSTRACT -->
+    <section class="section" id="abstract">
+      <div class="section__number">Section 00</div>
+      <h2 class="section__title">Abstract</h2>
+      <div class="abstract-box">
+        <p>Pure Transformer architectures face fundamental scaling limitations: <strong>quadratic attention cost</strong> in sequence length, <strong>uniform parameter activation</strong> regardless of task complexity, and <strong>no built-in mechanism for iterative self-improvement</strong>. This paper provides a comprehensive, unified analysis of a multi-paradigm hybrid architecture synthesizing four pillars: <strong>Mamba-3</strong> (MIMO State Space Model), <strong>Latent Mixture of Experts</strong> (LatentMoE), <strong>Recursive Language Models</strong> (RLMs), and a <strong>Dense Verification Layer</strong>.</p>
+        <p>By evaluating structural synthesis, scaling algorithms, and deployment across disaggregated rack-scale hardware — including production systems such as Tencent's Hunyuan-TurboS (560B), NVIDIA's Nemotron-H (56B), and AI21's Jamba (52B) — this research demonstrates how the proposed engine achieves <strong>top-tier benchmark performance at 45% lower cost per token</strong> than pure Transformer baselines.</p>
+      </div>
+      <div class="tags">
+        <span class="tag">State Space Models</span>
+        <span class="tag">Mamba-3</span>
+        <span class="tag">Mixture of Experts</span>
+        <span class="tag">Recursive Language Models</span>
+        <span class="tag">Reinforcement Learning</span>
+        <span class="tag">Dense Verification</span>
+        <span class="tag">Hybrid Architectures</span>
+        <span class="tag">Inference Optimization</span>
+        <span class="tag">Agentic AI</span>
+      </div>
+    </section>
+
+    <!-- SECTION 1 — Introduction -->
+    <section class="section" id="sec1">
+      <div class="section__number">Section 01</div>
+      <h2 class="section__title">Introduction: The Inference-First Epoch</h2>
+      <p>The trajectory of AI research has historically been dominated by the scaling laws of dense Transformer architectures. Through self-attention mechanisms, these models established unprecedented capabilities in zero-shot reasoning, semantic generalization, and in-context learning. However, as deployment transitions from simple chatbot interactions to <strong>complex, unbounded agentic workflows</strong>, the fundamental architectural limitations of the standard Transformer have become increasingly intractable.</p>
+      <p>The core bottleneck lies in the <strong>quadratic computational complexity</strong> of self-attention and the <strong>linear memory scaling</strong> of the KV cache. For a 128K-token context, this means roughly <span class="highlight">16 billion pairwise interactions per layer</span>. These limitations have driven four parallel lines of innovation:</p>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card__value">O(n²)</div>
+          <div class="stat-card__label">Attention complexity per layer</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value">16B</div>
+          <div class="stat-card__label">Pairwise interactions at 128K tokens</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value">4</div>
+          <div class="stat-card__label">Parallel innovation pillars</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value">45%</div>
+          <div class="stat-card__label">Lower cost vs. Transformer baseline</div>
+        </div>
+      </div>
+
+      <p>These four pillars — <strong>State Space Models</strong> (replacing quadratic attention with linear-time recurrences), <strong>Mixture of Experts</strong> (decoupling capacity from compute via sparse activation), <strong>Reasoning methods</strong> (variable compute at inference time), and <strong>Recursive self-refinement</strong> (iterative improvement through feedback) — form the foundation analyzed in this paper.</p>
+    </section>
+
+    <!-- SECTION 2 — Mamba-3 -->
+    <section class="section" id="sec2">
+      <div class="section__number">Section 02</div>
+      <h2 class="section__title">State Space Models &amp; Mamba-3</h2>
+
+      <h3>From S4 to Selective State Spaces</h3>
+      <p>State Space Models formalize sequence processing through continuous-time linear dynamical systems:</p>
+      <div class="equation">x'(t) = A·x(t) + B·u(t),&emsp;y(t) = C·x(t)</div>
+      <p>The breakthrough <strong>S4 model</strong> (Gu, Goel, Ré 2022) demonstrated that HiPPO-initialized matrices could solve tasks requiring reasoning over 16,000+ tokens. <strong>Mamba-1</strong> introduced the selective mechanism (S6), making B, C, and Δ input-dependent. At 2.8B parameters, Mamba matched Transformers twice its size while delivering <span class="highlight">5× higher inference throughput</span>.</p>
+
+      <h3>Mamba-3: Three Core Innovations</h3>
+      <p>Mamba-3 is engineered around an <strong>"inference-first" philosophy</strong>, addressing the "cold GPU" problem where hardware sits idle during autoregressive decoding. It introduces three methodological innovations:</p>
+
+      <div class="glass-card">
+        <h4>① Exponential-Trapezoidal Discretization</h4>
+        <p>Replaces first-order Euler discretization (truncation error ∝ Δ²) with a second-order scheme reducing error to <strong>∝ Δ³</strong>. The three-term update eliminates the need for Conv1D layers, streamlining the GPU memory hierarchy.</p>
+        <h4>② Complex-Valued State Space</h4>
+        <p>Transitions the hidden state from real to complex domain. Recurrence updates function as <strong>continuous rotations</strong> in latent space — equivalent to data-dependent RoPE. This eliminates catastrophic forgetting on parity and modular arithmetic tasks where Mamba-2 performs at random chance.</p>
+        <h4>③ MIMO Formulation</h4>
+        <p>Generalizes SISO to <strong>Multi-Input Multi-Output</strong>, transforming the memory-bound outer product into a compute-bound matmul. Computes up to <strong>4× more decoding FLOPs</strong> by absorbing idle GPU tensor core cycles.</p>
+      </div>
+
+      <h3>Empirical Results</h3>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card__value">57.6%</div>
+          <div class="stat-card__label">Avg accuracy at 1.5B scale (+2.2pp over Transformer)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value">7×</div>
+          <div class="stat-card__label">Speedup over Llama-3.2-1B at 16K tokens</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value">2×</div>
+          <div class="stat-card__label">Effective throughput per hardware footprint</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value">140.6s</div>
+          <div class="stat-card__label">Mamba-3 at 16K vs 976.5s Llama</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3 — MoE -->
+    <section class="section" id="sec3">
+      <div class="section__number">Section 03</div>
+      <h2 class="section__title">Latent Mixture of Experts</h2>
+      <p>Purely recurrent architectures lack the massive parameter capacity required for broad world knowledge. MoE modules replace dense FFNs with <strong>dynamic routing layers</strong> that assign each token to a sparse subset of specialized expert sub-networks.</p>
+
+      <h3>The LatentMoE Configuration</h3>
+      <p>Standard Expert Parallelism creates devastating all-to-all communication bottlenecks. LatentMoE compresses tokens via a <strong>learnable down-projection</strong> into a reduced latent space (e.g., 8× compression), routes within that compressed space, then projects back up. This enables <strong>Wide-Expert Parallelism</strong> across rack-scale domains.</p>
+
+      <!-- Table 1 -->
+      <div class="table-container">
+        <div class="table-container__header">
+          <span class="table-container__title">Table 1 — Dense vs. Latent Routing Paradigms</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Dense MoE</th>
+                <th>LatentMoE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Input Projection</td><td>Identity Matrix</td><td class="cell-highlight">Learnable Down-Projection</td></tr>
+              <tr><td>Computation Space</td><td>Full Hidden Dimension</td><td class="cell-highlight">Compressed Latent Space</td></tr>
+              <tr><td>Inter-GPU Payload</td><td><span class="cell-badge cell-badge--pink">Maximal</span></td><td><span class="cell-badge cell-badge--green">Minimal (8× reduced)</span></td></tr>
+              <tr><td>Active Experts / Token</td><td>2 – 4</td><td class="cell-highlight">Up to 22</td></tr>
+              <tr><td>Total Parameter Scale</td><td>~30B – 50B</td><td class="cell-highlight">120B+</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4 — RLM -->
+    <section class="section" id="sec4">
+      <div class="section__number">Section 04</div>
+      <h2 class="section__title">Recursive Language Models</h2>
+      <p>Despite linear memory scaling from Mamba-3, embedding millions of tokens into a hidden state induces <strong>context rot</strong> — 40–80% performance degradation on massive documents. The RLM paradigm resolves this by shifting from static sequence modeling to <strong>active environmental orchestration</strong>.</p>
+
+      <h3>The REPL Paradigm</h3>
+      <p>The model is encapsulated within a <strong>Read-Eval-Print Loop (REPL)</strong> sandbox. When a user submits an unbounded prompt (10M+ tokens), the text is loaded into REPL memory as a string variable. The model receives only <strong>constant-size metadata</strong> (variable handle, string length, preview) and generates executable code to traverse the data. This transforms probabilistic attention over millions of tokens into <strong>deterministic algorithmic search</strong>.</p>
+
+      <!-- Table 2 -->
+      <div class="table-container">
+        <div class="table-container__header">
+          <span class="table-container__title">Table 2 — Context Extension Benchmark Superiority</span>
+          <div class="table-controls">
+            <button class="table-btn active" data-filter="all">All</button>
+            <button class="table-btn" data-filter="oolong">OOLONG</button>
+            <button class="table-btn" data-filter="browse">BrowseComp+</button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table id="table2">
+            <thead>
+              <tr>
+                <th>Model / Framework</th>
+                <th>OOLONG (131K)</th>
+                <th>BrowseComp+ (~5M)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-cat="oolong browse"><td>GPT-5 Base (Dense)</td><td>30.2</td><td>~40%</td></tr>
+              <tr data-cat="browse"><td>GPT-5 + RAG (BM25)</td><td>N/A</td><td>~60%</td></tr>
+              <tr data-cat="browse"><td>ReAct + GPT-5 + RAG</td><td>N/A</td><td>~80%</td></tr>
+              <tr data-cat="oolong"><td>RLM (GPT-5-mini)</td><td><span class="cell-highlight">64.7 (+114%)</span></td><td>N/A</td></tr>
+              <tr data-cat="browse"><td>RLM (GPT-5 Root)</td><td>N/A</td><td><span class="cell-highlight">100%</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3>The Overthinking Anomaly</h3>
+      <p>Unbounded recursion is dangerous. Depth-1 RLM boosts accuracy, but depth-2+ <strong>paradoxically degrades performance</strong>: query time scales from 3.6s to 344.5s, with no corresponding accuracy gains. This necessitates the Dense Verification Layer.</p>
+    </section>
+
+    <!-- SECTION 5 — Dense Verification -->
+    <section class="section" id="sec5">
+      <div class="section__number">Section 05</div>
+      <h2 class="section__title">Dense Verification Layer</h2>
+      <p>LLMs <strong>cannot reliably self-correct</strong> without external feedback. When evaluator and generator share the same parameter space, iterative loops merely rearrange errors. Formalized as a Markov chain, approximately <span class="highlight">75% of reachable improvement is captured in the first two rounds</span>.</p>
+      <p>The Dense Verification Layer forces a <strong>full-capacity, high-attention evaluation</strong> over the drafted response and REPL state history. It performs factual grounding validation (every claim must trace to REPL variables) and coherence checks. Verification tasks are batch-delayed by one iteration step, removing dense overhead from the critical inference path.</p>
+    </section>
+
+    <!-- SECTION 6 — Synthesis -->
+    <section class="section" id="sec6">
+      <div class="section__number">Section 06</div>
+      <h2 class="section__title">Architectural Synthesis</h2>
+      <p>The synthesis creates a multi-layered engine: a backbone of <strong>interleaved Mamba-3 MIMO blocks and LatentMoE attention blocks</strong> (4–7 Mamba blocks per 1 attention block), orchestrated by the external RLM framework.</p>
+
+      <!-- Architecture Diagram -->
+      <div class="diagram">
+        <div class="diagram__header">Data Flow — Mamba3-MoE-RLM-Dense Architecture</div>
+        <div class="diagram__body">
+          <svg viewBox="0 0 780 320" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Outfit', sans-serif;">
+            <defs>
+              <linearGradient id="gPurple" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c6aef"/><stop offset="100%" stop-color="#5a44d6"/></linearGradient>
+              <linearGradient id="gTeal" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#5ce0d8"/><stop offset="100%" stop-color="#0ea89e"/></linearGradient>
+              <linearGradient id="gPink" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ef6a9a"/><stop offset="100%" stop-color="#d6448a"/></linearGradient>
+              <linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#efc06a"/><stop offset="100%" stop-color="#d6a024"/></linearGradient>
+              <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <!-- Input -->
+            <rect x="10" y="130" width="110" height="60" rx="14" fill="url(#gPurple)" opacity="0.9"/>
+            <text x="65" y="157" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">User Prompt</text>
+            <text x="65" y="173" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">10M+ tokens</text>
+            <!-- Arrow -->
+            <line x1="120" y1="160" x2="155" y2="160" stroke="var(--text-tertiary)" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+            <!-- RLM -->
+            <rect x="155" y="110" width="120" height="100" rx="16" fill="none" stroke="url(#gTeal)" stroke-width="2" stroke-dasharray="6 3"/>
+            <text x="215" y="138" text-anchor="middle" fill="var(--accent-2)" font-size="11" font-weight="700">RLM / REPL</text>
+            <text x="215" y="157" text-anchor="middle" fill="var(--text-secondary)" font-size="9">Metadata only →</text>
+            <text x="215" y="172" text-anchor="middle" fill="var(--text-secondary)" font-size="9">8K root context</text>
+            <text x="215" y="190" text-anchor="middle" fill="var(--text-tertiary)" font-size="8">CPU RAM: strings</text>
+            <!-- Arrow -->
+            <line x1="275" y1="160" x2="310" y2="160" stroke="var(--text-tertiary)" stroke-width="1.5"/>
+            <!-- Mamba-3 -->
+            <rect x="310" y="55" width="130" height="54" rx="14" fill="url(#gPurple)" opacity="0.85"/>
+            <text x="375" y="78" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Mamba-3 MIMO</text>
+            <text x="375" y="95" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">×56 layers, O(n)</text>
+            <!-- Attn-MoE -->
+            <rect x="310" y="125" width="130" height="54" rx="14" fill="url(#gTeal)" opacity="0.85"/>
+            <text x="375" y="148" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Attn + LatentMoE</text>
+            <text x="375" y="165" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">×8 layers, sparse</text>
+            <!-- Interleave bracket -->
+            <text x="455" y="105" fill="var(--text-tertiary)" font-size="10" font-weight="500">} interleaved</text>
+            <!-- Arrow -->
+            <line x1="440" y1="150" x2="500" y2="200" stroke="var(--text-tertiary)" stroke-width="1.5"/>
+            <line x1="440" y1="82" x2="500" y2="200" stroke="var(--text-tertiary)" stroke-width="1.5"/>
+            <!-- Draft -->
+            <rect x="500" y="180" width="110" height="54" rx="14" fill="var(--bg-glass)" stroke="var(--bg-glass-border)" stroke-width="1.5"/>
+            <text x="555" y="203" text-anchor="middle" fill="var(--text-primary)" font-size="11" font-weight="600">Draft Output</text>
+            <text x="555" y="220" text-anchor="middle" fill="var(--text-tertiary)" font-size="9">candidate answer</text>
+            <!-- Arrow -->
+            <line x1="610" y1="207" x2="645" y2="207" stroke="var(--text-tertiary)" stroke-width="1.5"/>
+            <!-- Dense Verify -->
+            <rect x="645" y="175" width="125" height="64" rx="14" fill="url(#gPink)" opacity="0.85"/>
+            <text x="707" y="200" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Dense Verify</text>
+            <text x="707" y="216" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Full-capacity pass</text>
+            <text x="707" y="230" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="8">grounding + coherence</text>
+            <!-- Reject loop -->
+            <path d="M 707 240 Q 707 280 555 280 Q 400 280 330 210" fill="none" stroke="var(--accent-3)" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrowPink)"/>
+            <text x="530" y="270" text-anchor="middle" fill="var(--accent-3)" font-size="8" font-weight="600">reject → re-generate</text>
+            <!-- Accept -->
+            <text x="707" y="260" text-anchor="middle" fill="var(--accent-2)" font-size="9" font-weight="600">✓ accept → emit</text>
+            <!-- Arrow markers -->
+            <defs>
+              <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--text-tertiary)"/></marker>
+              <marker id="arrowPink" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--accent-3)"/></marker>
+            </defs>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Table 3 — Comparative -->
+      <div class="table-container">
+        <div class="table-container__header">
+          <span class="table-container__title">Table 3 — Comparative Architecture Performance</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Metric</th><th>Dense Transformer</th><th>Pure Mamba-2</th><th>Hybrid Mamba3-MoE-RLM</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Complexity</td><td>O(N²)</td><td>O(N)</td><td><span class="cell-highlight">O(N) + algorithmic search</span></td></tr>
+              <tr><td>KV Cache</td><td><span class="cell-badge cell-badge--pink">Severe linear growth</span></td><td><span class="cell-badge cell-badge--green">Constant state</span></td><td><span class="cell-badge cell-badge--green">Minimal periodic caching</span></td></tr>
+              <tr><td>Param Efficiency</td><td>Low (100% active)</td><td>Low (hard limits)</td><td><span class="cell-highlight">Very High (sparse LatentMoE)</span></td></tr>
+              <tr><td>Effective Context</td><td>~128K–2M</td><td>~1M</td><td><span class="cell-highlight">Unbounded (10M+ via REPL)</span></td></tr>
+              <tr><td>HW Utilization</td><td>Poor during decode</td><td>Low arithmetic intensity</td><td><span class="cell-highlight">Exceptional (MIMO)</span></td></tr>
+              <tr><td>State Tracking</td><td>Excellent</td><td>Poor</td><td><span class="cell-highlight">Excellent (complex-valued)</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 7 — Training -->
+    <section class="section" id="sec7">
+      <div class="section__number">Section 07</div>
+      <h2 class="section__title">Training &amp; Optimization</h2>
+
+      <h3>Phased Specialization</h3>
+      <p>Joint optimization causes <strong>gradient interference</strong>: attention layers learn rapidly and dominate early updates, while SSM modules and MoE routers require more iterations. The solution is <strong>Phased Specialization</strong> — differential learning rates that temporally decouple module updates:</p>
+
+      <div class="glass-card">
+        <p><strong>Phase 1 (Attention Lead, epochs 1–4):</strong> Attention &amp; MoE at 3×10⁻⁴, Mamba-3 at 1×10⁻⁵</p>
+        <p><strong>Phase 2 (SSM Specialization, epochs 5–8):</strong> Reduce attention LR, maximize Mamba-3 LR</p>
+        <p style="margin-bottom:0"><strong>Critical:</strong> Never hard-freeze (LR = 0) any module. A persistent minimal update maintains cross-module compatibility.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card__value">53%</div>
+          <div class="stat-card__label">Conflict rate reduction</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value">70%</div>
+          <div class="stat-card__label">Cross-seed variance reduction</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value">34pt</div>
+          <div class="stat-card__label">Perplexity improvement over joint training</div>
+        </div>
+      </div>
+
+      <h3>LongR: Dense Utility Rewards</h3>
+      <p>Standard RL suffers from <strong>vanishing gradient</strong> when the agent performs 20 iterations and receives reward only at the final step. LongR augments outcome-based reward with a continuous, dense verification signal at every intermediate step using <strong>Relative Information Gain</strong> (token-level NLL from an external model). This yields a <strong>9% gain on LongBench v2</strong>.</p>
+    </section>
+
+    <!-- SECTION 8 — Hardware -->
+    <section class="section" id="sec8">
+      <div class="section__number">Section 08</div>
+      <h2 class="section__title">Hardware &amp; Deployment</h2>
+      <p>Scaling 120B+ parameters across distributed clusters requires <strong>Expert Parallelism</strong> (distributing individual experts across GPUs), <strong>Disaggregated Serving</strong> (decoupling prefill from decode), and a <strong>polyglot kernel stack</strong> (Triton for SISO transitions, TileLang for MIMO prefill, CuTe DSL for fused MoE gating).</p>
+      <p>The LatentMoE's latent compression reduces inter-GPU routing payloads by <strong>87.5%</strong>, enabling Wide-Expert Parallelism. Disaggregated serving assigns prefill to compute-optimized nodes and decode to memory-bandwidth nodes, achieving near-maximum tensor core utilization on the NVIDIA GB200 NVL72.</p>
+    </section>
+
+    <!-- SECTION 9 — Resource Analysis -->
+    <section class="section" id="sec9">
+      <div class="section__number">Section 09</div>
+      <h2 class="section__title">Hardware Resource Analysis</h2>
+
+      <h3>KV Cache: The Structural Advantage</h3>
+      <p>This is the most decisive hardware differentiation. Where a dense 80-layer Transformer's KV cache balloons to <strong>3.3 TB at 10M tokens</strong> (physically impossible on any GPU), the hybrid consumes <strong>248 MB of GPU memory</strong> — a <span class="highlight">13,300× reduction</span>.</p>
+
+      <!-- Interactive Comparison -->
+      <div class="glass-card">
+        <h4>KV Cache vs. Context Length — Interactive Comparison</h4>
+        <div class="comparison-slider">
+          <div class="comparison-slider__label">
+            <span>4K tokens</span>
+            <span id="sliderValue">128K tokens</span>
+            <span>10M tokens</span>
+          </div>
+          <input type="range" id="contextSlider" min="0" max="5" step="1" value="2">
+        </div>
+        <div class="comparison-bars" id="kvBars">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Table 9 — KV Cache -->
+      <div class="table-container">
+        <div class="table-container__header">
+          <span class="table-container__title">Table 9 — KV Cache at Increasing Context Lengths</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Context</th><th>Dense 80-Layer</th><th>Hybrid Attn Cache</th><th>Mamba-3 State</th><th>REPL (CPU)</th><th>Hybrid Total</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>4K</td><td>1.3 GB</td><td>67 MB</td><td class="cell-highlight">118 MB (const)</td><td>0</td><td><span class="cell-badge cell-badge--green">185 MB</span></td></tr>
+              <tr><td>32K</td><td>10.5 GB</td><td>0.54 GB</td><td class="cell-highlight">118 MB (const)</td><td>0</td><td><span class="cell-badge cell-badge--green">0.66 GB</span></td></tr>
+              <tr><td>128K</td><td>42 GB</td><td>2.1 GB</td><td class="cell-highlight">118 MB (const)</td><td>0</td><td><span class="cell-badge cell-badge--green">2.2 GB</span></td></tr>
+              <tr><td>512K</td><td><span class="cell-badge cell-badge--pink">168 GB ✗</span></td><td>~130 MB</td><td class="cell-highlight">118 MB (const)</td><td>~1 GB</td><td><span class="cell-badge cell-badge--green">248 MB + 1 GB CPU</span></td></tr>
+              <tr><td>1M</td><td><span class="cell-badge cell-badge--pink">336 GB ✗</span></td><td>~130 MB</td><td class="cell-highlight">118 MB (const)</td><td>~2 GB</td><td><span class="cell-badge cell-badge--green">248 MB + 2 GB CPU</span></td></tr>
+              <tr><td>10M</td><td><span class="cell-badge cell-badge--pink">3.3 TB ✗✗</span></td><td>~130 MB</td><td class="cell-highlight">118 MB (const)</td><td>~20 GB</td><td><span class="cell-badge cell-badge--green">248 MB + 20 GB CPU</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Cost Per Query -->
+      <h3>Dollar Cost Per Query</h3>
+      <div class="table-container">
+        <div class="table-container__header">
+          <span class="table-container__title">Table 10 — Estimated Cost Per Query (H100 @ $2.50/GPU-hr)</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Query Type</th><th>Dense 70B (4×H100)</th><th>Dense MoE 670B (8×H100)</th><th>Hybrid 60B (1×H100+CPU)</th><th>Ratio</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Simple (4K ctx)</td><td>$0.0028</td><td>$0.0040</td><td class="cell-highlight">$0.0004</td><td><span class="cell-badge cell-badge--green">7× cheaper</span></td></tr>
+              <tr><td>Medium (128K ctx)</td><td>$0.014</td><td>$0.008</td><td class="cell-highlight">$0.0009</td><td><span class="cell-badge cell-badge--green">15× cheaper</span></td></tr>
+              <tr><td>Complex (1M ctx)</td><td><span class="cell-badge cell-badge--pink">Infeasible</span></td><td>$0.042</td><td class="cell-highlight">$0.006</td><td><span class="cell-badge cell-badge--green">7× vs MoE</span></td></tr>
+              <tr><td>Extreme (10M ctx)</td><td><span class="cell-badge cell-badge--pink">Impossible</span></td><td><span class="cell-badge cell-badge--pink">Impossible</span></td><td class="cell-highlight">$0.05–$0.12</td><td><span class="cell-badge cell-badge--yellow">Only option</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 10 — Production -->
+    <section class="section" id="sec10">
+      <div class="section__number">Section 10</div>
+      <h2 class="section__title">Production Integrations</h2>
+
+      <div class="table-container">
+        <div class="table-container__header">
+          <span class="table-container__title">Table 4 — Production-Scale Hybrid Deployments</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Model</th><th>Total Params</th><th>Active Params</th><th>SSM Variant</th><th>MoE Config</th><th>Context / KV</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Jamba</strong> (AI21)</td><td>52B</td><td>12B</td><td>Mamba-1</td><td>1:7 Attn:Mamba; 16 exp, top-2</td><td>256K, 8× smaller cache</td></tr>
+              <tr><td><strong>Nemotron-H</strong> (NVIDIA)</td><td>56B (47B compressed)</td><td>~12B</td><td>Mamba-2/3</td><td>Majority Mamba; MiniPuzzle</td><td>Constant memory/token</td></tr>
+              <tr><td><strong>Hunyuan-TurboS</strong> (Tencent)</td><td class="cell-highlight">560B</td><td class="cell-highlight">56B</td><td>Mamba-2</td><td>57 Mamba, 7 Attn, 64 MoE; 32+1 exp</td><td>Adaptive CoT</td></tr>
+              <tr><td><strong>Phi-4-mini-flash</strong> (MS)</td><td>3.8B</td><td>3.8B</td><td>Mamba-1 SambaY</td><td>Synthetic RL data</td><td>10× throughput vs Transformer</td></tr>
+              <tr><td><strong>Nemotron-3 Nano</strong> (NVIDIA)</td><td>30B</td><td>3B</td><td>Mamba-2</td><td>LatentMoE + RL reasoning</td><td>3.3× throughput vs Qwen3-30B</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 11 — Evaluation -->
+    <section class="section" id="sec11">
+      <div class="section__number">Section 11</div>
+      <h2 class="section__title">Evaluation Paradigms</h2>
+      <p>Standard MMLU-style benchmarks are inadequate for recursive architectures. Evaluating an RLM requires <strong>auditing the entire cognitive trajectory</strong>, not just the final output.</p>
+      <div class="table-container">
+        <div class="table-container__header">
+          <span class="table-container__title">Table 5 — Evaluation Criteria for Recursive Agents</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Metric</th><th>Target Analysis</th><th>Vulnerability Detected</th></tr></thead>
+            <tbody>
+              <tr><td>Contextual Aggregation (OOLONG)</td><td>Synthesize data across 10M+ tokens</td><td><span class="cell-badge cell-badge--pink">Context rot, attention saturation</span></td></tr>
+              <tr><td>Trajectory Convergence</td><td>Efficiency of RLM path to final state</td><td><span class="cell-badge cell-badge--pink">Infinite looping, redundant REPL calls</span></td></tr>
+              <tr><td>Intermediate Exact-Match</td><td>Accuracy of sandbox-generated code</td><td><span class="cell-badge cell-badge--pink">Syntax errors, hallucinated variables</span></td></tr>
+              <tr><td>Verification Pass Rate</td><td>Frequency of rejection by supervisor</td><td><span class="cell-badge cell-badge--pink">Logical divergence, prompt drift</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 12 — Maintenance -->
+    <section class="section" id="sec12">
+      <div class="section__number">Section 12</div>
+      <h2 class="section__title">Maintenance &amp; Drift Mitigation</h2>
+      <p>An agent that performs flawlessly in testing can rapidly degrade in production — <strong>agent drift</strong>. Three vectors: <strong>concept drift</strong> (user intents evolve), <strong>data drift</strong> (APIs update, breaking REPL code), and <strong>model drift</strong> (subtle reasoning shifts after dependency updates).</p>
+      <p>Maintainers must monitor: step count anomalies (recursive depth spike from 4 → 15), response length volatility, and MoE routing distributions (expert collapse where one expert receives the vast majority of tokens). The Dense Verification Layer serves as the <strong>primary runtime security and stability monitor</strong>.</p>
+    </section>
+
+    <!-- SECTION 13 — Challenges -->
+    <section class="section" id="sec13">
+      <div class="section__number">Section 13</div>
+      <h2 class="section__title">Challenges &amp; Open Problems</h2>
+      <div class="glass-card">
+        <p><strong>Training Stability:</strong> MoE routing introduces non-differentiable decisions creating sparse gradients. ~10% of routers select different experts between training and inference.</p>
+        <p><strong>Hardware Co-design:</strong> SSMs require parallel scans and complex-valued arithmetic that have received far less optimization than attention operations.</p>
+        <p><strong>Loop Termination:</strong> Fixed iteration counts and quality-score thresholds remain largely heuristic. Reward hacking causes score inflation without quality improvement.</p>
+        <p style="margin-bottom:0"><strong>Evaluation:</strong> No existing benchmark suite evaluates compound benefits across long-context reasoning, efficiency tradeoffs, recursive improvement, and expert specialization simultaneously.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 14 — Conclusion -->
+    <section class="section" id="sec14">
+      <div class="section__number">Section 14</div>
+      <h2 class="section__title">Conclusion</h2>
+      <p>Three key insights emerge from this synthesis:</p>
+      <div class="glass-card">
+        <p><strong>1. Complementary, not competing:</strong> SSMs handle efficient sequence processing, MoE provides scalable capacity, RL reasoning enables variable-depth thinking, and recursive refinement catches errors.</p>
+        <p><strong>2. Reasoning is a training methodology, not an architecture:</strong> It transfers across SSM hybrids, dense models, and MoE systems, but efficient architectures make it economically viable at scale.</p>
+        <p style="margin-bottom:0"><strong>3. Full integration is achievable but not yet optimized:</strong> Hunyuan-TurboS proves all four paradigms can coexist at 560B parameters. Principled methods for joint optimization remain the critical frontier.</p>
+      </div>
+      <p>When optimized via Phased Specialization and deployed on rack-scale hardware, this hybrid framework establishes an economically viable, high-throughput, and rigorously verifiable foundation for the <strong>post-Transformer era of computational intelligence</strong>.</p>
+    </section>
+
+    <!-- REFERENCES -->
+    <section class="section" id="references">
+      <div class="section__number">References</div>
+      <h2 class="section__title">References</h2>
+
+      <div class="ref-search-box">
+        <input type="text" id="refSearch" placeholder="Search references..." aria-label="Search references">
+      </div>
+
+      <ol class="ref-list" id="refList">
+        <li class="ref-item" data-tags="transformer attention foundation">
+          <span class="ref-num">[1]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Vaswani, A. et al.</span> (2017). <span class="ref-title">Attention Is All You Need.</span> NeurIPS 2017. <a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">arXiv:1706.03762</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="ssm s4 state space structured">
+          <span class="ref-num">[2]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Gu, A., Goel, K., and Ré, C.</span> (2022). <span class="ref-title">Efficiently Modeling Long Sequences with Structured State Spaces.</span> ICLR 2022. <a href="https://arxiv.org/abs/2111.00396" target="_blank" rel="noopener">arXiv:2111.00396</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="mamba ssm selective state space">
+          <span class="ref-num">[3]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Gu, A. and Dao, T.</span> (2023). <span class="ref-title">Mamba: Linear-Time Sequence Modeling with Selective State Spaces.</span> COLM. <a href="https://arxiv.org/abs/2312.00752" target="_blank" rel="noopener">arXiv:2312.00752</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="mamba-2 ssm ssd duality transformer">
+          <span class="ref-num">[4]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Dao, T. and Gu, A.</span> (2024). <span class="ref-title">Transformers are SSMs: Generalized Models Through Structured State Space Duality.</span> ICML 2024. <a href="https://arxiv.org/abs/2405.21060" target="_blank" rel="noopener">arXiv:2405.21060</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="mamba-3 mimo complex-valued inference">
+          <span class="ref-num">[5]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Lahoti, P. et al.</span> (2026). <span class="ref-title">Mamba-3: Improved Sequence Modeling using State Space Principles.</span> ICLR 2026. <a href="https://arxiv.org/abs/2603.15569" target="_blank" rel="noopener">arXiv:2603.15569</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="moe mixture experts mixtral routing">
+          <span class="ref-num">[6]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Jiang, A. et al.</span> (2024). <span class="ref-title">Mixtral of Experts.</span> Mistral AI. <a href="https://arxiv.org/abs/2401.04088" target="_blank" rel="noopener">arXiv:2401.04088</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="deepseek moe scaling auxiliary loss">
+          <span class="ref-num">[7]</span>
+          <div class="ref-body">
+            <span class="ref-authors">DeepSeek-AI.</span> (2024). <span class="ref-title">DeepSeek-V3 Technical Report.</span> <a href="https://arxiv.org/abs/2412.19437" target="_blank" rel="noopener">arXiv:2412.19437</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="deepseek reasoning reinforcement learning grpo">
+          <span class="ref-num">[8]</span>
+          <div class="ref-body">
+            <span class="ref-authors">DeepSeek-AI.</span> (2025). <span class="ref-title">DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning.</span> Nature 2025. <a href="https://arxiv.org/abs/2501.12948" target="_blank" rel="noopener">arXiv:2501.12948</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="jamba hybrid transformer mamba moe ai21">
+          <span class="ref-num">[9]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Lieber, O. et al.</span> (2024). <span class="ref-title">Jamba: A Hybrid Transformer-Mamba Language Model.</span> AI21 Labs. ICLR 2025. <a href="https://arxiv.org/abs/2403.19887" target="_blank" rel="noopener">arXiv:2403.19887</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="nemotron nvidia hybrid mamba fp8">
+          <span class="ref-num">[10]</span>
+          <div class="ref-body">
+            <span class="ref-authors">NVIDIA.</span> (2025). <span class="ref-title">Nemotron-H: A Family of Accurate and Efficient Hybrid Mamba-Transformer Models.</span> <a href="https://arxiv.org/abs/2504.03624" target="_blank" rel="noopener">arXiv:2504.03624</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="hunyuan tencent mamba moe chain-of-thought">
+          <span class="ref-num">[11]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Tencent Hunyuan Team.</span> (2025). <span class="ref-title">Hunyuan-TurboS: Advancing LLMs through Mamba-Transformer Synergy and Adaptive Chain-of-Thought.</span> <a href="https://arxiv.org/abs/2505.15431" target="_blank" rel="noopener">arXiv:2505.15431</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="phi microsoft reasoning sambay">
+          <span class="ref-num">[12]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Microsoft.</span> (2025). <span class="ref-title">Phi-4-mini-flash-reasoning.</span> <a href="https://arxiv.org/abs/2507.06607" target="_blank" rel="noopener">arXiv:2507.06607</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="rlm recursive language model repl context">
+          <span class="ref-num">[13]</span>
+          <div class="ref-body">
+            <span class="ref-title">Recursive Language Models.</span> <a href="https://arxiv.org/abs/2512.24601" target="_blank" rel="noopener">arXiv:2512.24601</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="rlm prime intellect repl paradigm 2026">
+          <span class="ref-num">[14]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Prime Intellect.</span> (2026). <span class="ref-title">Recursive Language Models: the paradigm of 2026.</span> <a href="https://primeintellect.ai/blog/rlm" target="_blank" rel="noopener">primeintellect.ai/blog/rlm</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="mamba-3 tri dao blog inference">
+          <span class="ref-num">[15]</span>
+          <div class="ref-body">
+            <span class="ref-title">Mamba-3 Part 1 | Tri Dao.</span> <a href="https://tridao.me/blog/2026/mamba3-part1/" target="_blank" rel="noopener">tridao.me/blog/2026/mamba3-part1/</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="mamba-3 goomba methodology deep dive">
+          <span class="ref-num">[16]</span>
+          <div class="ref-body">
+            <span class="ref-title">Mamba-3 Part 2 — Methodological Deep Dive.</span> Goomba Lab. <a href="https://goombalab.github.io/blog/2026/mamba3-part2/" target="_blank" rel="noopener">goombalab.github.io</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="phased specialization training optimization hybrid">
+          <span class="ref-num">[17]</span>
+          <div class="ref-body">
+            <span class="ref-title">Phased Specialization: Unlocking Hybrid Sequence Models via Optimization-Aware Training.</span> <a href="https://medium.com/@mbonsign" target="_blank" rel="noopener">medium.com/@mbonsign</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="longr reinforcement learning dense utility reward context">
+          <span class="ref-num">[18]</span>
+          <div class="ref-body">
+            <span class="ref-title">LongR: Unleashing Long-Context Reasoning via Reinforcement Learning with Dense Utility Rewards.</span> <a href="https://arxiv.org/abs/2602.05758" target="_blank" rel="noopener">arXiv:2602.05758</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="llamba distillation recurrent scaling">
+          <span class="ref-num">[19]</span>
+          <div class="ref-body">
+            <span class="ref-title">Llamba: Scaling Distilled Recurrent Models for Efficient Language Processing.</span> <a href="https://arxiv.org/abs/2502.14458" target="_blank" rel="noopener">arXiv:2502.14458</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="oolong benchmark long context evaluation">
+          <span class="ref-num">[20]</span>
+          <div class="ref-body">
+            <span class="ref-title">Oolong: Evaluating Long Context Reasoning and Aggregation Capabilities.</span> <a href="https://openreview.net" target="_blank" rel="noopener">OpenReview</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="rlm overthinking recursive depth reproducing">
+          <span class="ref-num">[21]</span>
+          <div class="ref-body">
+            <span class="ref-title">Think, But Don't Overthink: Reproducing Recursive Language Models.</span> <a href="https://arxiv.org/abs/2603.02615" target="_blank" rel="noopener">arXiv:2603.02615</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="nemotron nano nvidia moe agentic hybrid">
+          <span class="ref-num">[22]</span>
+          <div class="ref-body">
+            <span class="ref-title">NVIDIA Nemotron 3 Super: Complete Guide To Hybrid MoE Agentic AI.</span> <a href="https://marketingagent.blog" target="_blank" rel="noopener">marketingagent.blog</a> (2026).
+          </div>
+        </li>
+        <li class="ref-item" data-tags="test-time compute scaling inference reasoning">
+          <span class="ref-num">[23]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Snell, C. et al.</span> (2024). <span class="ref-title">Scaling LLM Test-Time Compute Optimally.</span> <a href="https://arxiv.org/abs/2408.03314" target="_blank" rel="noopener">arXiv:2408.03314</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="process reward verification step-by-step">
+          <span class="ref-num">[24]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Lightman, H. et al.</span> (2023). <span class="ref-title">Let's Verify Step by Step.</span> ICLR 2024. <a href="https://arxiv.org/abs/2305.20050" target="_blank" rel="noopener">arXiv:2305.20050</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="self-refine iterative refinement feedback">
+          <span class="ref-num">[25]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Madaan, A. et al.</span> (2023). <span class="ref-title">Self-Refine: Iterative Refinement with Self-Feedback.</span> NeurIPS 2023. <a href="https://arxiv.org/abs/2303.17651" target="_blank" rel="noopener">arXiv:2303.17651</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="self-correct reasoning llm cannot">
+          <span class="ref-num">[26]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Huang, J. et al.</span> (2024). <span class="ref-title">Large Language Models Cannot Self-Correct Reasoning Yet.</span> ICLR 2024.
+          </div>
+        </li>
+        <li class="ref-item" data-tags="self-correct llm markov chain verification">
+          <span class="ref-num">[27]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Yang, Z. et al.</span> (2025). <span class="ref-title">Can LLMs Correct Themselves?</span> EMNLP 2025. <a href="https://arxiv.org/abs/2510.16062" target="_blank" rel="noopener">arXiv:2510.16062</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="chain-of-thought prompting reasoning cot">
+          <span class="ref-num">[28]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Wei, J. et al.</span> (2022). <span class="ref-title">Chain-of-Thought Prompting Elicits Reasoning in Large Language Models.</span> NeurIPS 2022. <a href="https://arxiv.org/abs/2201.11903" target="_blank" rel="noopener">arXiv:2201.11903</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="star bootstrapping reasoning self-taught">
+          <span class="ref-num">[29]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Zelikman, E. et al.</span> (2022). <span class="ref-title">STaR: Bootstrapping Reasoning With Reasoning.</span> NeurIPS 2022. <a href="https://arxiv.org/abs/2203.14465" target="_blank" rel="noopener">arXiv:2203.14465</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="constitutional ai harmlessness anthropic">
+          <span class="ref-num">[30]</span>
+          <div class="ref-body">
+            <span class="ref-authors">Bai, Y. et al.</span> (2022). <span class="ref-title">Constitutional AI: Harmlessness from AI Feedback.</span> Anthropic. <a href="https://arxiv.org/abs/2212.08073" target="_blank" rel="noopener">arXiv:2212.08073</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="nemotron nvidia super blog">
+          <span class="ref-num">[31]</span>
+          <div class="ref-body">
+            <span class="ref-authors">NVIDIA.</span> <span class="ref-title">Introducing Nemotron 3 Super.</span> <a href="https://developer.nvidia.com/blog" target="_blank" rel="noopener">developer.nvidia.com/blog</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="granite ibm hybrid enterprise">
+          <span class="ref-num">[32]</span>
+          <div class="ref-body">
+            <span class="ref-authors">IBM.</span> (2025). <span class="ref-title">Granite 4.0: Hyper-efficient, High Performance Hybrid Models for Enterprise.</span>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="ssm tensor parallelism scaling gpu">
+          <span class="ref-num">[33]</span>
+          <div class="ref-body">
+            <span class="ref-title">Scaling State-Space Models on Multiple GPUs with Tensor Parallelism.</span> <a href="https://arxiv.org/abs/2602.21144" target="_blank" rel="noopener">arXiv:2602.21144</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="safety multi-agent control verification">
+          <span class="ref-num">[34]</span>
+          <div class="ref-body">
+            <span class="ref-title">QuadSentinel: Sequent Safety for Machine-Checkable Control in Multi-agent Systems.</span> <a href="https://openreview.net" target="_blank" rel="noopener">OpenReview</a>
+          </div>
+        </li>
+        <li class="ref-item" data-tags="rlm mit infinite context solution">
+          <span class="ref-num">[35]</span>
+          <div class="ref-body">
+            <span class="ref-title">Recursive Language Models: MIT's Solution to Infinite Context.</span> <a href="https://medium.com/@reliabledataengineering" target="_blank" rel="noopener">medium.com/@reliabledataengineering</a> (2026).
+          </div>
+        </li>
+      </ol>
+    </section>
+
+  </main>
+     ══════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ─── Theme Toggle ────────────────────────────────────────
+  const html = document.documentElement;
+  const themeBtn = document.getElementById('themeToggle');
+  const stored = localStorage.getItem('theme');
+  if (stored) { html.setAttribute('data-theme', stored); }
+  updateThemeIcon();
+
+  themeBtn.addEventListener('click', () => {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    updateThemeIcon();
+  });
+
+  function updateThemeIcon() {
+    themeBtn.textContent = html.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+  }
+
+  // ─── Mobile Sidebar ──────────────────────────────────────
+  const sidebar = document.getElementById('sidebar');
+  const mobileToggle = document.getElementById('mobileNavToggle');
+  const sidebarClose = document.getElementById('sidebarClose');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('show'); }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+
+  mobileToggle.addEventListener('click', openSidebar);
+  sidebarClose.addEventListener('click', closeSidebar);
+  overlay.addEventListener('click', closeSidebar);
+
+  // Close sidebar on nav link click (mobile)
+  sidebar.querySelectorAll('.sidebar__link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768) closeSidebar();
+    });
+  });
+
+  // ─── Active Section Tracking ─────────────────────────────
+  const sections = document.querySelectorAll('.section');
+  const navLinks = document.querySelectorAll('.sidebar__link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      // Fade-in animation
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -10% 0px' });
+
+  sections.forEach(sec => observer.observe(sec));
+
+  // Active nav tracking via scroll
+  function updateActiveNav() {
+    let current = '';
+    sections.forEach(sec => {
+      const top = sec.getBoundingClientRect().top;
+      if (top < window.innerHeight * 0.4) current = sec.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+  }
+
+  // ─── Reading Progress ────────────────────────────────────
+  const progressBar = document.getElementById('readingProgress');
+
+  function updateProgress() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    progressBar.style.width = pct + '%';
+  }
+
+  // ─── Back to Top ─────────────────────────────────────────
+  const backBtn = document.getElementById('backToTop');
+
+  function updateBackToTop() {
+    backBtn.classList.toggle('show', window.scrollY > window.innerHeight);
+  }
+
+  backBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Throttled scroll handler
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        updateActiveNav();
+        updateProgress();
+        updateBackToTop();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  // ─── Hero Canvas (Particle Network) ─────────────────────
+  const canvas = document.getElementById('heroCanvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let w, h;
+
+  function resizeCanvas() {
+    w = canvas.width = canvas.offsetWidth;
+    h = canvas.height = canvas.offsetHeight;
+  }
+
+  function initParticles() {
+    particles = [];
+    const count = Math.min(80, Math.floor((w * h) / 12000));
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        r: Math.random() * 2 + 1,
+        color: ['#7c6aef', '#5ce0d8', '#ef6a9a', '#efc06a'][Math.floor(Math.random() * 4)]
+      });
+    }
+  }
+
+  function drawParticles() {
+    ctx.clearRect(0, 0, w, h);
+    const maxDist = 120;
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > w) p.vx *= -1;
+      if (p.y < 0 || p.y > h) p.vy *= -1;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = 0.6;
+      ctx.fill();
+
+      for (let j = i + 1; j < particles.length; j++) {
+        const q = particles[j];
+        const dx = p.x - q.x, dy = p.y - q.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < maxDist) {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(q.x, q.y);
+          ctx.strokeStyle = p.color;
+          ctx.globalAlpha = 0.08 * (1 - dist / maxDist);
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(drawParticles);
+  }
+
+  resizeCanvas();
+  initParticles();
+  drawParticles();
+  window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+
+  // ─── Table Filter (Table 2) ──────────────────────────────
+  document.querySelectorAll('.table-controls .table-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const filter = this.dataset.filter;
+      const container = this.closest('.table-container');
+      container.querySelectorAll('.table-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+
+      const rows = container.querySelectorAll('tbody tr');
+      rows.forEach(row => {
+        if (filter === 'all') {
+          row.style.display = '';
+        } else {
+          row.style.display = row.dataset.cat && row.dataset.cat.includes(filter) ? '' : 'none';
+        }
+      });
+    });
+  });
+
+  // ─── KV Cache Interactive Comparison ─────────────────────
+  const kvData = [
+    { label: '4K', dense: 1.3, hybrid: 0.185, hybridLabel: '185 MB' },
+    { label: '32K', dense: 10.5, hybrid: 0.66, hybridLabel: '0.66 GB' },
+    { label: '128K', dense: 42, hybrid: 2.2, hybridLabel: '2.2 GB' },
+    { label: '512K', dense: 168, hybrid: 0.248, hybridLabel: '248 MB GPU + 1 GB CPU', hybridNote: '(RLM active)' },
+    { label: '1M', dense: 336, hybrid: 0.248, hybridLabel: '248 MB GPU + 2 GB CPU', hybridNote: '(RLM active)' },
+    { label: '10M', dense: 3300, hybrid: 0.248, hybridLabel: '248 MB GPU + 20 GB CPU', hybridNote: '(RLM active)' }
+  ];
+
+  const slider = document.getElementById('contextSlider');
+  const sliderLabel = document.getElementById('sliderValue');
+  const barsContainer = document.getElementById('kvBars');
+
+  function renderKVBars(idx) {
+    const d = kvData[idx];
+    sliderLabel.textContent = d.label + ' tokens';
+    const maxVal = Math.max(d.dense, 50);
+    const densePct = Math.min((d.dense / maxVal) * 100, 100);
+    const hybridPct = Math.max((d.hybrid / maxVal) * 100, 2);
+    const denseLabel = d.dense >= 100 ? (d.dense >= 1000 ? (d.dense/1000).toFixed(1) + ' TB' : d.dense + ' GB') + (d.dense > 80 ? ' — infeasible' : '') : d.dense + ' GB';
+
+    barsContainer.innerHTML = `
+      <div class="comparison-bar">
+        <div class="comparison-bar__label">Dense 80-Layer</div>
+        <div class="comparison-bar__track">
+          <div class="comparison-bar__fill comparison-bar__fill--a" style="width:${densePct}%"></div>
+        </div>
+        <div class="comparison-bar__value">${denseLabel}</div>
+      </div>
+      <div class="comparison-bar">
+        <div class="comparison-bar__label">Hybrid (GPU)</div>
+        <div class="comparison-bar__track">
+          <div class="comparison-bar__fill comparison-bar__fill--b" style="width:${hybridPct}%"></div>
+        </div>
+        <div class="comparison-bar__value">${d.hybridLabel}</div>
+      </div>
+    `;
+  }
+
+  slider.addEventListener('input', () => renderKVBars(parseInt(slider.value)));
+  renderKVBars(2);
+
+  // ─── Reference Search ─────────────────────────────────────
+  const refSearch = document.getElementById('refSearch');
+  const refItems = document.querySelectorAll('.ref-item');
+
+  if (refSearch) {
+    refSearch.addEventListener('input', function() {
+      const q = this.value.toLowerCase().trim();
+      refItems.forEach(item => {
+        if (!q) {
+          item.classList.remove('hidden');
+          return;
+        }
+        const text = item.textContent.toLowerCase();
+        const tags = (item.dataset.tags || '').toLowerCase();
+        item.classList.toggle('hidden', !text.includes(q) && !tags.includes(q));
+      });
+    });
+  }
+
+  // ─── Initial trigger ─────────────────────────────────────
+  updateActiveNav();
+  updateProgress();
+})();
+</script>
+</body>
+</html>
