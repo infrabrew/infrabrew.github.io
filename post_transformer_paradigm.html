@@ -5,85 +5,93 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Architecting the Post-Transformer Paradigm</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Fraunces:opsz,wght@9..144,700;9..144,800;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   CSS CUSTOM PROPERTIES / THEME SYSTEM
+   CSS CUSTOM PROPERTIES / BLUE-WHITE THEME
    ═══════════════════════════════════════════════════════════════ */
 :root {
-  --font-display: 'Playfair Display', serif;
-  --font-body: 'Outfit', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Fraunces', serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --radius-sm: 12px;
-  --radius-md: 20px;
-  --radius-lg: 28px;
-  --radius-xl: 36px;
-  --glass-blur: 24px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --glass-blur: 20px;
   --transition-base: 0.4s var(--ease-out-expo);
 }
 
 [data-theme="dark"] {
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #12121a;
-  --bg-tertiary: #1a1a26;
-  --bg-card: rgba(255,255,255,0.04);
-  --bg-glass: rgba(255,255,255,0.06);
-  --bg-glass-border: rgba(255,255,255,0.1);
-  --bg-glass-hover: rgba(255,255,255,0.1);
-  --text-primary: #f0eef5;
-  --text-secondary: #a8a3b8;
-  --text-tertiary: #6e6882;
-  --accent-1: #7c6aef;
-  --accent-2: #5ce0d8;
-  --accent-3: #ef6a9a;
-  --accent-4: #efc06a;
-  --gradient-hero: linear-gradient(135deg, #7c6aef 0%, #5ce0d8 50%, #ef6a9a 100%);
-  --gradient-card: linear-gradient(135deg, rgba(124,106,239,0.08), rgba(92,224,216,0.05));
-  --shadow-glass: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
-  --shadow-neo: 8px 8px 20px rgba(0,0,0,0.5), -4px -4px 16px rgba(255,255,255,0.03);
-  --shadow-neo-inset: inset 4px 4px 12px rgba(0,0,0,0.4), inset -2px -2px 8px rgba(255,255,255,0.04);
-  --nav-bg: rgba(10,10,15,0.85);
-  --table-row-alt: rgba(255,255,255,0.02);
-  --table-header-bg: rgba(124,106,239,0.15);
-  --scrollbar-track: #1a1a26;
-  --scrollbar-thumb: #3a3a4e;
+  --bg-primary: #060b18;
+  --bg-secondary: #0b1224;
+  --bg-tertiary: #111b33;
+  --bg-card: rgba(100,160,255,0.04);
+  --bg-glass: rgba(100,160,255,0.06);
+  --bg-glass-border: rgba(100,180,255,0.12);
+  --bg-glass-hover: rgba(100,160,255,0.1);
+  --text-primary: #e8edf8;
+  --text-secondary: #8d9ec0;
+  --text-tertiary: #546080;
+  --accent-1: #3b8bff;
+  --accent-2: #60d4ff;
+  --accent-3: #ff6b8a;
+  --accent-4: #ffb84d;
+  --gradient-hero: linear-gradient(135deg, #1e60d0 0%, #3b8bff 40%, #60d4ff 100%);
+  --gradient-card: linear-gradient(135deg, rgba(59,139,255,0.07), rgba(96,212,255,0.04));
+  --shadow-glass: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(100,180,255,0.08);
+  --shadow-neo: 6px 6px 18px rgba(0,0,0,0.5), -3px -3px 12px rgba(60,140,255,0.03);
+  --shadow-neo-inset: inset 4px 4px 12px rgba(0,0,0,0.4), inset -2px -2px 8px rgba(60,140,255,0.04);
+  --nav-bg: rgba(6,11,24,0.9);
+  --table-row-alt: rgba(59,139,255,0.03);
+  --table-header-bg: rgba(59,139,255,0.12);
+  --scrollbar-track: #0b1224;
+  --scrollbar-thumb: #1e3a60;
   --code-bg: rgba(0,0,0,0.4);
-  --badge-bg: rgba(124,106,239,0.15);
-  --badge-text: #a99ef5;
-  --cover-overlay: rgba(10,10,15,0.6);
+  --badge-bg: rgba(59,139,255,0.12);
+  --badge-text: #6aafff;
+  --cover-overlay: rgba(6,11,24,0.55);
+  --pillar-ssm: #3b8bff;
+  --pillar-moe: #60d4ff;
+  --pillar-rlm: #ff6b8a;
+  --pillar-dense: #ffb84d;
 }
 
 [data-theme="light"] {
-  --bg-primary: #f4f2f8;
-  --bg-secondary: #eae7f0;
-  --bg-tertiary: #ddd9e6;
-  --bg-card: rgba(255,255,255,0.7);
-  --bg-glass: rgba(255,255,255,0.6);
-  --bg-glass-border: rgba(0,0,0,0.08);
-  --bg-glass-hover: rgba(255,255,255,0.85);
-  --text-primary: #1a1428;
-  --text-secondary: #4a4360;
-  --text-tertiary: #7a7490;
-  --accent-1: #5a44d6;
-  --accent-2: #0ea89e;
-  --accent-3: #d6448a;
-  --accent-4: #d6a024;
-  --gradient-hero: linear-gradient(135deg, #5a44d6 0%, #0ea89e 50%, #d6448a 100%);
-  --gradient-card: linear-gradient(135deg, rgba(90,68,214,0.06), rgba(14,168,158,0.04));
-  --shadow-glass: 0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8);
-  --shadow-neo: 6px 6px 16px rgba(0,0,0,0.1), -4px -4px 12px rgba(255,255,255,0.8);
-  --shadow-neo-inset: inset 3px 3px 8px rgba(0,0,0,0.08), inset -2px -2px 6px rgba(255,255,255,0.9);
-  --nav-bg: rgba(244,242,248,0.88);
-  --table-row-alt: rgba(0,0,0,0.02);
-  --table-header-bg: rgba(90,68,214,0.1);
-  --scrollbar-track: #eae7f0;
-  --scrollbar-thumb: #c5c0d4;
-  --code-bg: rgba(0,0,0,0.05);
-  --badge-bg: rgba(90,68,214,0.1);
-  --badge-text: #5a44d6;
-  --cover-overlay: rgba(244,242,248,0.5);
+  --bg-primary: #f0f4fb;
+  --bg-secondary: #e4eaf6;
+  --bg-tertiary: #d4ddef;
+  --bg-card: rgba(255,255,255,0.75);
+  --bg-glass: rgba(255,255,255,0.65);
+  --bg-glass-border: rgba(30,96,208,0.1);
+  --bg-glass-hover: rgba(255,255,255,0.9);
+  --text-primary: #0a1628;
+  --text-secondary: #3d506e;
+  --text-tertiary: #6b7fa0;
+  --accent-1: #1e60d0;
+  --accent-2: #0095c8;
+  --accent-3: #d03060;
+  --accent-4: #c88a20;
+  --gradient-hero: linear-gradient(135deg, #1e60d0 0%, #2878e8 40%, #0095c8 100%);
+  --gradient-card: linear-gradient(135deg, rgba(30,96,208,0.05), rgba(0,149,200,0.03));
+  --shadow-glass: 0 8px 32px rgba(30,96,208,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+  --shadow-neo: 5px 5px 14px rgba(30,96,208,0.08), -3px -3px 10px rgba(255,255,255,0.9);
+  --shadow-neo-inset: inset 3px 3px 8px rgba(30,96,208,0.06), inset -2px -2px 6px rgba(255,255,255,0.95);
+  --nav-bg: rgba(240,244,251,0.92);
+  --table-row-alt: rgba(30,96,208,0.03);
+  --table-header-bg: rgba(30,96,208,0.08);
+  --scrollbar-track: #e4eaf6;
+  --scrollbar-thumb: #b0bdd4;
+  --code-bg: rgba(30,96,208,0.05);
+  --badge-bg: rgba(30,96,208,0.08);
+  --badge-text: #1e60d0;
+  --cover-overlay: rgba(240,244,251,0.4);
+  --pillar-ssm: #1e60d0;
+  --pillar-moe: #0095c8;
+  --pillar-rlm: #d03060;
+  --pillar-dense: #c88a20;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -107,7 +115,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar { width: 7px; }
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
 ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
 
@@ -135,11 +143,7 @@ a:hover { color: var(--accent-2); }
   z-index: 0;
 }
 
-.cover__bg canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
+.cover__bg canvas { width: 100%; height: 100%; display: block; }
 
 .cover__overlay {
   position: absolute;
@@ -151,14 +155,14 @@ a:hover { color: var(--accent-2); }
 .cover__content {
   position: relative;
   z-index: 2;
-  max-width: 900px;
+  max-width: 880px;
 }
 
 .cover__badge {
   display: inline-block;
-  padding: 6px 20px;
+  padding: 7px 22px;
   border-radius: 100px;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -173,10 +177,10 @@ a:hover { color: var(--accent-2); }
 
 .cover__title {
   font-family: var(--font-display);
-  font-size: clamp(2.4rem, 6vw, 5rem);
+  font-size: clamp(2.2rem, 5.5vw, 4.6rem);
   font-weight: 900;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
   background: var(--gradient-hero);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -188,11 +192,11 @@ a:hover { color: var(--accent-2); }
 }
 
 .cover__subtitle {
-  font-size: clamp(1rem, 2vw, 1.35rem);
+  font-size: clamp(0.95rem, 1.8vw, 1.25rem);
   color: var(--text-secondary);
   font-weight: 300;
-  max-width: 700px;
-  margin: 0 auto 2rem;
+  max-width: 680px;
+  margin: 0 auto 2.5rem;
   opacity: 0;
   transform: translateY(20px);
   animation: fadeUp 0.8s var(--ease-out-expo) 0.8s forwards;
@@ -203,20 +207,61 @@ a:hover { color: var(--accent-2); }
   gap: 2rem;
   justify-content: center;
   flex-wrap: wrap;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-tertiary);
   opacity: 0;
   transform: translateY(20px);
   animation: fadeUp 0.8s var(--ease-out-expo) 1s forwards;
 }
 
-.cover__meta-item {
+.cover__meta-item { display: flex; align-items: center; gap: 0.5rem; }
+.cover__meta-item svg { width: 16px; height: 16px; stroke: var(--accent-1); }
+
+/* Pillars interactive orbit */
+.cover__pillars {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2.5rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.8s var(--ease-out-expo) 1.2s forwards;
 }
 
-.cover__meta-item svg { width: 16px; height: 16px; stroke: var(--accent-1); }
+.pillar-chip {
+  padding: 8px 20px;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border: 1.5px solid;
+  cursor: default;
+  transition: transform 0.3s var(--ease-spring), box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.pillar-chip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  border-radius: inherit;
+  transition: opacity 0.3s;
+}
+
+.pillar-chip:hover { transform: translateY(-3px) scale(1.04); }
+.pillar-chip:hover::before { opacity: 0.16; }
+
+.pillar-chip--ssm { border-color: var(--pillar-ssm); color: var(--pillar-ssm); }
+.pillar-chip--ssm::before { background: var(--pillar-ssm); }
+.pillar-chip--moe { border-color: var(--pillar-moe); color: var(--pillar-moe); }
+.pillar-chip--moe::before { background: var(--pillar-moe); }
+.pillar-chip--rlm { border-color: var(--pillar-rlm); color: var(--pillar-rlm); }
+.pillar-chip--rlm::before { background: var(--pillar-rlm); }
+.pillar-chip--dense { border-color: var(--pillar-dense); color: var(--pillar-dense); }
+.pillar-chip--dense::before { background: var(--pillar-dense); }
 
 .cover__scroll-cue {
   position: absolute;
@@ -229,24 +274,21 @@ a:hover { color: var(--accent-2); }
   align-items: center;
   gap: 0.5rem;
   color: var(--text-tertiary);
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   opacity: 0;
-  animation: fadeUp 0.8s var(--ease-out-expo) 1.4s forwards;
+  animation: fadeUp 0.8s var(--ease-out-expo) 1.6s forwards;
 }
 
 .cover__scroll-line {
   width: 1px;
-  height: 40px;
+  height: 36px;
   background: var(--accent-1);
   animation: scrollPulse 2s ease-in-out infinite;
 }
 
-@keyframes fadeUp {
-  to { opacity: 1; transform: translateY(0); }
-}
-
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 @keyframes scrollPulse {
   0%, 100% { opacity: 0.3; transform: scaleY(0.5); }
   50% { opacity: 1; transform: scaleY(1); }
@@ -257,8 +299,8 @@ a:hover { color: var(--accent-2); }
    ═══════════════════════════════════════════════════════════════ */
 .main-wrapper {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  max-width: 1500px;
+  grid-template-columns: 260px 1fr;
+  max-width: 1440px;
   margin: 0 auto;
   position: relative;
 }
@@ -268,7 +310,7 @@ a:hover { color: var(--accent-2); }
   top: 0;
   height: 100vh;
   overflow-y: auto;
-  padding: 1.5rem 0.75rem 2rem 1.5rem;
+  padding: 1.5rem 0.75rem 2rem 1.25rem;
   border-right: 1px solid var(--bg-glass-border);
   background: var(--nav-bg);
   backdrop-filter: blur(var(--glass-blur));
@@ -281,9 +323,9 @@ a:hover { color: var(--accent-2); }
 .sidebar::-webkit-scrollbar { display: none; }
 
 .sidebar__title {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 700;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--text-tertiary);
   padding: 0 0.75rem;
@@ -295,17 +337,17 @@ a:hover { color: var(--accent-2); }
 .sidebar__link {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0.6rem 0.75rem;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
   border-radius: var(--radius-sm);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 400;
   color: var(--text-secondary);
   transition: all 0.25s ease;
   cursor: pointer;
   text-decoration: none;
   position: relative;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .sidebar__link:hover {
@@ -326,21 +368,21 @@ a:hover { color: var(--accent-2); }
   top: 50%;
   transform: translateY(-50%);
   width: 3px;
-  height: 60%;
+  height: 55%;
   background: var(--accent-1);
   border-radius: 2px;
 }
 
 .sidebar__num {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--text-tertiary);
   min-width: 22px;
 }
 
 .content-area {
   padding: 3rem 4rem 6rem;
-  max-width: 920px;
+  max-width: 900px;
   min-width: 0;
 }
 
@@ -353,8 +395,8 @@ a:hover { color: var(--accent-2); }
   bottom: 1.5rem;
   left: 1.5rem;
   z-index: 200;
-  width: 52px;
-  height: 52px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   border: 1px solid var(--bg-glass-border);
   background: var(--bg-glass);
@@ -363,7 +405,7 @@ a:hover { color: var(--accent-2); }
   box-shadow: var(--shadow-glass);
   cursor: pointer;
   color: var(--text-primary);
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   align-items: center;
   justify-content: center;
   transition: transform 0.3s var(--ease-spring);
@@ -379,7 +421,7 @@ a:hover { color: var(--accent-2); }
   background: none;
   border: none;
   color: var(--text-secondary);
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   cursor: pointer;
   padding: 0.25rem;
 }
@@ -389,11 +431,11 @@ a:hover { color: var(--accent-2); }
    ═══════════════════════════════════════════════════════════════ */
 .theme-toggle {
   position: fixed;
-  top: 1.5rem;
-  right: 1.5rem;
+  top: 1.25rem;
+  right: 1.25rem;
   z-index: 200;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 1px solid var(--bg-glass-border);
   background: var(--bg-glass);
@@ -402,7 +444,7 @@ a:hover { color: var(--accent-2); }
   box-shadow: var(--shadow-glass);
   cursor: pointer;
   color: var(--text-primary);
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -428,7 +470,7 @@ a:hover { color: var(--accent-2); }
 }
 
 .glass-card:hover {
-  border-color: rgba(124,106,239,0.2);
+  border-color: rgba(59,139,255,0.22);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -437,18 +479,15 @@ a:hover { color: var(--accent-2); }
 .section {
   padding: 3rem 0;
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(28px);
   transition: opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo);
 }
 
-.section.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+.section.visible { opacity: 1; transform: translateY(0); }
 
 .section__number {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--accent-1);
   letter-spacing: 0.1em;
@@ -457,23 +496,23 @@ a:hover { color: var(--accent-2); }
 
 .section__title {
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-size: clamp(1.7rem, 3vw, 2.5rem);
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.15;
   margin-bottom: 1.5rem;
   color: var(--text-primary);
 }
 
 h3 {
   font-family: var(--font-body);
-  font-size: 1.35rem;
+  font-size: 1.3rem;
   font-weight: 700;
   margin: 2.5rem 0 1rem;
   color: var(--text-primary);
 }
 
 h4 {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   margin: 2rem 0 0.75rem;
   color: var(--text-primary);
@@ -482,22 +521,19 @@ h4 {
 p {
   color: var(--text-secondary);
   margin-bottom: 1.25rem;
-  font-size: 0.95rem;
+  font-size: 0.93rem;
   line-height: 1.8;
 }
 
 strong { color: var(--text-primary); font-weight: 600; }
 
-.highlight {
-  color: var(--accent-1);
-  font-weight: 600;
-}
+.highlight { color: var(--accent-1); font-weight: 600; }
 
 .equation {
   display: block;
   text-align: center;
   font-family: var(--font-mono);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   padding: 1.25rem;
   margin: 1.5rem 0;
   background: var(--code-bg);
@@ -509,7 +545,7 @@ strong { color: var(--text-primary); font-weight: 600; }
 
 code {
   font-family: var(--font-mono);
-  font-size: 0.85em;
+  font-size: 0.84em;
   background: var(--code-bg);
   padding: 2px 7px;
   border-radius: 6px;
@@ -542,15 +578,11 @@ code {
 
 .table-container__title {
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: var(--text-primary);
 }
 
-.table-controls {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
+.table-controls { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
 .table-btn {
   padding: 5px 14px;
@@ -559,7 +591,7 @@ code {
   background: var(--bg-glass);
   color: var(--text-secondary);
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: 0.73rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.25s ease;
@@ -571,15 +603,12 @@ code {
   border-color: var(--accent-1);
 }
 
-.table-scroll {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   min-width: 600px;
 }
 
@@ -588,7 +617,7 @@ thead th {
   padding: 0.85rem 1rem;
   text-align: left;
   font-weight: 600;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--text-primary);
   letter-spacing: 0.02em;
   white-space: nowrap;
@@ -598,13 +627,7 @@ thead th {
   transition: background 0.2s;
 }
 
-thead th:hover { background: rgba(124,106,239,0.2); }
-
-thead th .sort-icon {
-  margin-left: 4px;
-  opacity: 0.4;
-  font-size: 0.7rem;
-}
+thead th:hover { background: rgba(59,139,255,0.18); }
 
 tbody td {
   padding: 0.75rem 1rem;
@@ -631,22 +654,20 @@ tbody tr:hover { background: var(--bg-glass-hover); }
   font-weight: 600;
 }
 
-.cell-badge--green { background: rgba(92,224,216,0.15); color: var(--accent-2); }
-.cell-badge--purple { background: rgba(124,106,239,0.15); color: var(--accent-1); }
-.cell-badge--pink { background: rgba(239,106,154,0.15); color: var(--accent-3); }
-.cell-badge--yellow { background: rgba(239,192,106,0.15); color: var(--accent-4); }
+.cell-badge--green { background: rgba(96,212,255,0.12); color: var(--accent-2); }
+.cell-badge--purple { background: rgba(59,139,255,0.12); color: var(--accent-1); }
+.cell-badge--pink { background: rgba(255,107,138,0.12); color: var(--accent-3); }
+.cell-badge--yellow { background: rgba(255,184,77,0.12); color: var(--accent-4); }
 
 /* ═══════════════════════════════════════════════════════════════
    COMPARISON SLIDER
    ═══════════════════════════════════════════════════════════════ */
-.comparison-slider {
-  margin: 2rem 0;
-}
+.comparison-slider { margin: 2rem 0; }
 
 .comparison-slider__label {
   display: flex;
   justify-content: space-between;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-tertiary);
   margin-bottom: 0.5rem;
 }
@@ -654,7 +675,7 @@ tbody tr:hover { background: var(--bg-glass-hover); }
 .comparison-slider input[type="range"] {
   -webkit-appearance: none;
   width: 100%;
-  height: 6px;
+  height: 5px;
   border-radius: 3px;
   background: linear-gradient(to right, var(--accent-1), var(--accent-2));
   outline: none;
@@ -669,7 +690,10 @@ tbody tr:hover { background: var(--bg-glass-hover); }
   background: var(--text-primary);
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   cursor: pointer;
+  transition: transform 0.2s var(--ease-spring);
 }
+
+.comparison-slider input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 
 .comparison-slider input[type="range"]::-moz-range-thumb {
   width: 20px;
@@ -681,24 +705,15 @@ tbody tr:hover { background: var(--bg-glass-hover); }
   border: none;
 }
 
-.comparison-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
+.comparison-bars { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; }
 
-.comparison-bar {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
+.comparison-bar { display: flex; align-items: center; gap: 1rem; }
 
 .comparison-bar__label {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 500;
   color: var(--text-secondary);
-  min-width: 140px;
+  min-width: 130px;
   text-align: right;
 }
 
@@ -725,19 +740,19 @@ tbody tr:hover { background: var(--bg-glass-hover); }
   white-space: nowrap;
 }
 
-.comparison-bar__fill--a { background: linear-gradient(90deg, var(--accent-1), rgba(124,106,239,0.7)); }
-.comparison-bar__fill--b { background: linear-gradient(90deg, var(--accent-2), rgba(92,224,216,0.7)); }
-.comparison-bar__fill--c { background: linear-gradient(90deg, var(--accent-3), rgba(239,106,154,0.7)); }
+.comparison-bar__fill--a { background: linear-gradient(90deg, var(--accent-1), rgba(59,139,255,0.6)); }
+.comparison-bar__fill--b { background: linear-gradient(90deg, var(--accent-2), rgba(96,212,255,0.6)); }
+.comparison-bar__fill--c { background: linear-gradient(90deg, var(--accent-3), rgba(255,107,138,0.6)); }
 
 .comparison-bar__value {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   color: var(--text-tertiary);
   min-width: 60px;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   DIAGRAM CARDS (SVG inline)
+   DIAGRAM CARDS
    ═══════════════════════════════════════════════════════════════ */
 .diagram {
   margin: 2rem 0;
@@ -753,7 +768,7 @@ tbody tr:hover { background: var(--bg-glass-hover); }
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--bg-glass-border);
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: var(--text-primary);
 }
 
@@ -764,17 +779,14 @@ tbody tr:hover { background: var(--bg-glass-hover); }
   overflow-x: auto;
 }
 
-.diagram__body svg {
-  max-width: 100%;
-  height: auto;
-}
+.diagram__body svg { max-width: 100%; height: auto; }
 
 /* ═══════════════════════════════════════════════════════════════
    STAT CARDS
    ═══════════════════════════════════════════════════════════════ */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 1rem;
   margin: 2rem 0;
 }
@@ -783,30 +795,47 @@ tbody tr:hover { background: var(--bg-glass-hover); }
   background: var(--bg-glass);
   border: 1px solid var(--bg-glass-border);
   border-radius: var(--radius-md);
-  padding: 1.5rem;
+  padding: 1.4rem;
   backdrop-filter: blur(var(--glass-blur));
   box-shadow: var(--shadow-neo);
-  transition: transform 0.3s var(--ease-spring), box-shadow 0.3s ease;
+  transition: transform 0.3s var(--ease-spring), box-shadow 0.3s ease, border-color 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-hero);
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .stat-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-glass);
+  border-color: rgba(59,139,255,0.2);
 }
+
+.stat-card:hover::after { opacity: 1; }
 
 .stat-card__value {
   font-family: var(--font-mono);
-  font-size: 1.8rem;
+  font-size: 1.7rem;
   font-weight: 700;
   background: var(--gradient-hero);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.3rem;
 }
 
 .stat-card__label {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-tertiary);
   font-weight: 500;
 }
@@ -814,21 +843,23 @@ tbody tr:hover { background: var(--bg-glass-hover); }
 /* ═══════════════════════════════════════════════════════════════
    KEYWORD TAGS
    ═══════════════════════════════════════════════════════════════ */
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 1.5rem 0;
-}
+.tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.5rem 0; }
 
 .tag {
   padding: 4px 14px;
   border-radius: 100px;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 500;
   background: var(--badge-bg);
   color: var(--badge-text);
   border: 1px solid var(--bg-glass-border);
+  transition: transform 0.2s var(--ease-spring), background 0.2s;
+  cursor: default;
+}
+
+.tag:hover {
+  transform: scale(1.05);
+  background: rgba(59,139,255,0.18);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -868,10 +899,7 @@ tbody tr:hover { background: var(--bg-glass-hover); }
   border-radius: 2px;
 }
 
-.abstract-box p {
-  font-size: 0.92rem;
-  line-height: 1.85;
-}
+.abstract-box p { font-size: 0.91rem; line-height: 1.85; }
 
 /* ═══════════════════════════════════════════════════════════════
    BACK TO TOP
@@ -881,8 +909,8 @@ tbody tr:hover { background: var(--bg-glass-hover); }
   bottom: 1.5rem;
   right: 1.5rem;
   z-index: 150;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 1px solid var(--bg-glass-border);
   background: var(--bg-glass);
@@ -890,7 +918,7 @@ tbody tr:hover { background: var(--bg-glass-hover); }
   box-shadow: var(--shadow-glass);
   cursor: pointer;
   color: var(--text-primary);
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -905,9 +933,7 @@ tbody tr:hover { background: var(--bg-glass-hover); }
 /* ═══════════════════════════════════════════════════════════════
    REFERENCES
    ═══════════════════════════════════════════════════════════════ */
-.ref-search-box {
-  margin-bottom: 1.5rem;
-}
+.ref-search-box { margin-bottom: 1.5rem; }
 
 .ref-search-box input {
   width: 100%;
@@ -916,10 +942,9 @@ tbody tr:hover { background: var(--bg-glass-hover); }
   border: 1px solid var(--bg-glass-border);
   background: var(--bg-glass);
   backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
   color: var(--text-primary);
   font-family: var(--font-body);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   outline: none;
   transition: border-color 0.25s, box-shadow 0.25s;
 }
@@ -928,12 +953,11 @@ tbody tr:hover { background: var(--bg-glass-hover); }
 
 .ref-search-box input:focus {
   border-color: var(--accent-1);
-  box-shadow: 0 0 0 3px rgba(124,106,239,0.15);
+  box-shadow: 0 0 0 3px rgba(59,139,255,0.15);
 }
 
 .ref-list {
   list-style: none;
-  counter-reset: none;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -951,42 +975,91 @@ tbody tr:hover { background: var(--bg-glass-hover); }
 
 .ref-item:hover {
   background: var(--bg-glass-hover);
-  border-color: rgba(124,106,239,0.2);
+  border-color: rgba(59,139,255,0.2);
 }
 
-.ref-item.hidden {
-  display: none;
-}
+.ref-item.hidden { display: none; }
 
 .ref-num {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 600;
   color: var(--accent-1);
   min-width: 30px;
   padding-top: 1px;
 }
 
-.ref-body {
-  font-size: 0.88rem;
-  line-height: 1.6;
-  color: var(--text-secondary);
+.ref-body { font-size: 0.86rem; line-height: 1.6; color: var(--text-secondary); }
+.ref-authors { color: var(--text-primary); font-weight: 500; }
+.ref-title { font-style: italic; }
+.ref-body a { font-family: var(--font-mono); font-size: 0.78rem; word-break: break-all; }
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERACTIVE PIPELINE VISUALIZATION
+   ═══════════════════════════════════════════════════════════════ */
+.pipeline-viz {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  padding: 1.5rem 0;
+  margin: 1.5rem 0;
+  -webkit-overflow-scrolling: touch;
 }
 
-.ref-authors {
-  color: var(--text-primary);
-  font-weight: 500;
+.pipeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100px;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s var(--ease-spring);
 }
 
-.ref-title {
-  font-style: italic;
-}
+.pipeline-step:hover { transform: translateY(-4px); }
 
-.ref-body a {
+.pipeline-step__circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-mono);
-  font-size: 0.8rem;
-  word-break: break-all;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent-1);
+  box-shadow: 0 4px 16px rgba(59,139,255,0.3);
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s var(--ease-spring), box-shadow 0.3s;
 }
+
+.pipeline-step:hover .pipeline-step__circle {
+  transform: scale(1.12);
+  box-shadow: 0 6px 24px rgba(59,139,255,0.4);
+}
+
+.pipeline-step__label {
+  margin-top: 0.6rem;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  text-align: center;
+  max-width: 80px;
+}
+
+.pipeline-step__connector {
+  position: absolute;
+  top: 22px;
+  left: 72px;
+  width: 28px;
+  height: 2px;
+  background: var(--bg-glass-border);
+}
+
+.pipeline-step:last-child .pipeline-step__connector { display: none; }
 
 /* ═══════════════════════════════════════════════════════════════
    RESPONSIVE
@@ -996,49 +1069,38 @@ tbody tr:hover { background: var(--bg-glass-hover); }
 }
 
 @media (max-width: 768px) {
-  .main-wrapper {
-    grid-template-columns: 1fr;
-  }
+  .main-wrapper { grid-template-columns: 1fr; }
 
   .sidebar {
     position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 280px;
+    top: 0; left: 0; bottom: 0;
+    width: 270px;
     transform: translateX(-100%);
     z-index: 300;
     border-right: 1px solid var(--bg-glass-border);
   }
 
   .sidebar.open { transform: translateX(0); }
-
   .sidebar__close { display: block; }
-
   .mobile-nav-toggle { display: flex; }
-
-  .content-area {
-    padding: 1.5rem 1.25rem 4rem;
-  }
-
+  .content-area { padding: 1.5rem 1.25rem 4rem; }
   .glass-card { padding: 1.5rem; }
-
   .stats-grid { grid-template-columns: 1fr 1fr; }
-
-  .comparison-bar__label { min-width: 80px; font-size: 0.7rem; }
-
+  .comparison-bar__label { min-width: 75px; font-size: 0.7rem; }
   .table-container__header { padding: 0.75rem 1rem; }
-
-  table { font-size: 0.78rem; }
+  table { font-size: 0.76rem; }
   thead th, tbody td { padding: 0.6rem 0.75rem; }
+  .pipeline-step { min-width: 80px; }
+  .pipeline-step__circle { width: 38px; height: 38px; font-size: 0.66rem; }
 }
 
 @media (max-width: 480px) {
   .stats-grid { grid-template-columns: 1fr; }
   .cover__meta { flex-direction: column; gap: 0.75rem; }
+  .cover__pillars { gap: 0.5rem; }
+  .pillar-chip { font-size: 0.7rem; padding: 6px 14px; }
 }
 
-/* Overlay for mobile sidebar */
 .sidebar-overlay {
   display: none;
   position: fixed;
@@ -1049,9 +1111,21 @@ tbody tr:hover { background: var(--bg-glass-hover); }
   transition: opacity 0.3s;
 }
 
-.sidebar-overlay.show {
-  display: block;
-  opacity: 1;
+.sidebar-overlay.show { display: block; opacity: 1; }
+
+/* ═══════════════════════════════════════════════════════════════
+   NOISE TEXTURE OVERLAY (subtle grain)
+   ═══════════════════════════════════════════════════════════════ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px;
 }
 </style>
 </head>
@@ -1073,7 +1147,7 @@ tbody tr:hover { background: var(--bg-glass-hover); }
 <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
 
 <!-- ══════════════════════════════════════════════════════════
-     COVER PAGE
+     COVER / HERO
      ══════════════════════════════════════════════════════════ -->
 <section class="cover" id="cover">
   <div class="cover__bg"><canvas id="heroCanvas"></canvas></div>
@@ -1095,6 +1169,12 @@ tbody tr:hover { background: var(--bg-glass-hover); }
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         33 Pages
       </span>
+    </div>
+    <div class="cover__pillars">
+      <span class="pillar-chip pillar-chip--ssm">⚡ Mamba-3 SSM</span>
+      <span class="pillar-chip pillar-chip--moe">🧠 LatentMoE</span>
+      <span class="pillar-chip pillar-chip--rlm">🔄 Recursive LM</span>
+      <span class="pillar-chip pillar-chip--dense">🛡 Dense Verify</span>
     </div>
   </div>
   <div class="cover__scroll-cue">
@@ -1182,6 +1262,40 @@ tbody tr:hover { background: var(--bg-glass-hover); }
         </div>
       </div>
 
+      <!-- Interactive Pipeline -->
+      <h3>Processing Pipeline</h3>
+      <div class="pipeline-viz">
+        <div class="pipeline-step">
+          <div class="pipeline-step__circle" style="background:var(--pillar-ssm)">SSM</div>
+          <div class="pipeline-step__label">Sequence Scan</div>
+          <div class="pipeline-step__connector"></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-step__circle" style="background:var(--pillar-moe)">MoE</div>
+          <div class="pipeline-step__label">Expert Route</div>
+          <div class="pipeline-step__connector"></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-step__circle" style="background:var(--accent-1)">GEN</div>
+          <div class="pipeline-step__label">Draft Output</div>
+          <div class="pipeline-step__connector"></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-step__circle" style="background:var(--pillar-rlm)">RLM</div>
+          <div class="pipeline-step__label">Recursive Refine</div>
+          <div class="pipeline-step__connector"></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-step__circle" style="background:var(--pillar-dense)">DVL</div>
+          <div class="pipeline-step__label">Dense Verify</div>
+          <div class="pipeline-step__connector"></div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-step__circle" style="background:linear-gradient(135deg,var(--accent-1),var(--accent-2))">✓</div>
+          <div class="pipeline-step__label">Final Output</div>
+        </div>
+      </div>
+
       <p>These four pillars — <strong>State Space Models</strong> (replacing quadratic attention with linear-time recurrences), <strong>Mixture of Experts</strong> (decoupling capacity from compute via sparse activation), <strong>Reasoning methods</strong> (variable compute at inference time), and <strong>Recursive self-refinement</strong> (iterative improvement through feedback) — form the foundation analyzed in this paper.</p>
     </section>
 
@@ -1245,11 +1359,7 @@ tbody tr:hover { background: var(--bg-glass-hover); }
         <div class="table-scroll">
           <table>
             <thead>
-              <tr>
-                <th>Property</th>
-                <th>Dense MoE</th>
-                <th>LatentMoE</th>
-              </tr>
+              <tr><th>Property</th><th>Dense MoE</th><th>LatentMoE</th></tr>
             </thead>
             <tbody>
               <tr><td>Input Projection</td><td>Identity Matrix</td><td class="cell-highlight">Learnable Down-Projection</td></tr>
@@ -1285,11 +1395,7 @@ tbody tr:hover { background: var(--bg-glass-hover); }
         <div class="table-scroll">
           <table id="table2">
             <thead>
-              <tr>
-                <th>Model / Framework</th>
-                <th>OOLONG (131K)</th>
-                <th>BrowseComp+ (~5M)</th>
-              </tr>
+              <tr><th>Model / Framework</th><th>OOLONG (131K)</th><th>BrowseComp+ (~5M)</th></tr>
             </thead>
             <tbody>
               <tr data-cat="oolong browse"><td>GPT-5 Base (Dense)</td><td>30.2</td><td>~40%</td></tr>
@@ -1324,22 +1430,22 @@ tbody tr:hover { background: var(--bg-glass-hover); }
       <div class="diagram">
         <div class="diagram__header">Data Flow — Mamba3-MoE-RLM-Dense Architecture</div>
         <div class="diagram__body">
-          <svg viewBox="0 0 780 320" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Outfit', sans-serif;">
+          <svg viewBox="0 0 780 320" xmlns="http://www.w3.org/2000/svg" style="font-family: 'DM Sans', sans-serif;">
             <defs>
-              <linearGradient id="gPurple" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c6aef"/><stop offset="100%" stop-color="#5a44d6"/></linearGradient>
-              <linearGradient id="gTeal" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#5ce0d8"/><stop offset="100%" stop-color="#0ea89e"/></linearGradient>
-              <linearGradient id="gPink" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ef6a9a"/><stop offset="100%" stop-color="#d6448a"/></linearGradient>
-              <linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#efc06a"/><stop offset="100%" stop-color="#d6a024"/></linearGradient>
+              <linearGradient id="gBlue" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1e60d0"/><stop offset="100%" stop-color="#3b8bff"/></linearGradient>
+              <linearGradient id="gCyan" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0095c8"/><stop offset="100%" stop-color="#60d4ff"/></linearGradient>
+              <linearGradient id="gRose" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff6b8a"/><stop offset="100%" stop-color="#d03060"/></linearGradient>
+              <linearGradient id="gAmber" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffb84d"/><stop offset="100%" stop-color="#c88a20"/></linearGradient>
               <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             </defs>
             <!-- Input -->
-            <rect x="10" y="130" width="110" height="60" rx="14" fill="url(#gPurple)" opacity="0.9"/>
+            <rect x="10" y="130" width="110" height="60" rx="14" fill="url(#gBlue)" opacity="0.9"/>
             <text x="65" y="157" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">User Prompt</text>
             <text x="65" y="173" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">10M+ tokens</text>
             <!-- Arrow -->
             <line x1="120" y1="160" x2="155" y2="160" stroke="var(--text-tertiary)" stroke-width="1.5" marker-end="url(#arrowhead)"/>
             <!-- RLM -->
-            <rect x="155" y="110" width="120" height="100" rx="16" fill="none" stroke="url(#gTeal)" stroke-width="2" stroke-dasharray="6 3"/>
+            <rect x="155" y="110" width="120" height="100" rx="16" fill="none" stroke="url(#gCyan)" stroke-width="2" stroke-dasharray="6 3"/>
             <text x="215" y="138" text-anchor="middle" fill="var(--accent-2)" font-size="11" font-weight="700">RLM / REPL</text>
             <text x="215" y="157" text-anchor="middle" fill="var(--text-secondary)" font-size="9">Metadata only →</text>
             <text x="215" y="172" text-anchor="middle" fill="var(--text-secondary)" font-size="9">8K root context</text>
@@ -1347,11 +1453,11 @@ tbody tr:hover { background: var(--bg-glass-hover); }
             <!-- Arrow -->
             <line x1="275" y1="160" x2="310" y2="160" stroke="var(--text-tertiary)" stroke-width="1.5"/>
             <!-- Mamba-3 -->
-            <rect x="310" y="55" width="130" height="54" rx="14" fill="url(#gPurple)" opacity="0.85"/>
+            <rect x="310" y="55" width="130" height="54" rx="14" fill="url(#gBlue)" opacity="0.85"/>
             <text x="375" y="78" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Mamba-3 MIMO</text>
             <text x="375" y="95" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">×56 layers, O(n)</text>
             <!-- Attn-MoE -->
-            <rect x="310" y="125" width="130" height="54" rx="14" fill="url(#gTeal)" opacity="0.85"/>
+            <rect x="310" y="125" width="130" height="54" rx="14" fill="url(#gCyan)" opacity="0.85"/>
             <text x="375" y="148" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Attn + LatentMoE</text>
             <text x="375" y="165" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">×8 layers, sparse</text>
             <!-- Interleave bracket -->
@@ -1366,7 +1472,7 @@ tbody tr:hover { background: var(--bg-glass-hover); }
             <!-- Arrow -->
             <line x1="610" y1="207" x2="645" y2="207" stroke="var(--text-tertiary)" stroke-width="1.5"/>
             <!-- Dense Verify -->
-            <rect x="645" y="175" width="125" height="64" rx="14" fill="url(#gPink)" opacity="0.85"/>
+            <rect x="645" y="175" width="125" height="64" rx="14" fill="url(#gRose)" opacity="0.85"/>
             <text x="707" y="200" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Dense Verify</text>
             <text x="707" y="216" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Full-capacity pass</text>
             <text x="707" y="230" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="8">grounding + coherence</text>
@@ -1384,7 +1490,7 @@ tbody tr:hover { background: var(--bg-glass-hover); }
         </div>
       </div>
 
-      <!-- Table 3 — Comparative -->
+      <!-- Table 3 -->
       <div class="table-container">
         <div class="table-container__header">
           <span class="table-container__title">Table 3 — Comparative Architecture Performance</span>
@@ -1467,12 +1573,10 @@ tbody tr:hover { background: var(--bg-glass-hover); }
           </div>
           <input type="range" id="contextSlider" min="0" max="5" step="1" value="2">
         </div>
-        <div class="comparison-bars" id="kvBars">
-          <!-- Populated by JS -->
-        </div>
+        <div class="comparison-bars" id="kvBars"></div>
       </div>
 
-      <!-- Table 9 — KV Cache -->
+      <!-- Table 9 -->
       <div class="table-container">
         <div class="table-container__header">
           <span class="table-container__title">Table 9 — KV Cache at Increasing Context Lengths</span>
@@ -1608,220 +1712,49 @@ tbody tr:hover { background: var(--bg-glass-hover); }
       </div>
 
       <ol class="ref-list" id="refList">
-        <li class="ref-item" data-tags="transformer attention foundation">
-          <span class="ref-num">[1]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Vaswani, A. et al.</span> (2017). <span class="ref-title">Attention Is All You Need.</span> NeurIPS 2017. <a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">arXiv:1706.03762</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="ssm s4 state space structured">
-          <span class="ref-num">[2]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Gu, A., Goel, K., and Ré, C.</span> (2022). <span class="ref-title">Efficiently Modeling Long Sequences with Structured State Spaces.</span> ICLR 2022. <a href="https://arxiv.org/abs/2111.00396" target="_blank" rel="noopener">arXiv:2111.00396</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="mamba ssm selective state space">
-          <span class="ref-num">[3]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Gu, A. and Dao, T.</span> (2023). <span class="ref-title">Mamba: Linear-Time Sequence Modeling with Selective State Spaces.</span> COLM. <a href="https://arxiv.org/abs/2312.00752" target="_blank" rel="noopener">arXiv:2312.00752</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="mamba-2 ssm ssd duality transformer">
-          <span class="ref-num">[4]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Dao, T. and Gu, A.</span> (2024). <span class="ref-title">Transformers are SSMs: Generalized Models Through Structured State Space Duality.</span> ICML 2024. <a href="https://arxiv.org/abs/2405.21060" target="_blank" rel="noopener">arXiv:2405.21060</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="mamba-3 mimo complex-valued inference">
-          <span class="ref-num">[5]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Lahoti, P. et al.</span> (2026). <span class="ref-title">Mamba-3: Improved Sequence Modeling using State Space Principles.</span> ICLR 2026. <a href="https://arxiv.org/abs/2603.15569" target="_blank" rel="noopener">arXiv:2603.15569</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="moe mixture experts mixtral routing">
-          <span class="ref-num">[6]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Jiang, A. et al.</span> (2024). <span class="ref-title">Mixtral of Experts.</span> Mistral AI. <a href="https://arxiv.org/abs/2401.04088" target="_blank" rel="noopener">arXiv:2401.04088</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="deepseek moe scaling auxiliary loss">
-          <span class="ref-num">[7]</span>
-          <div class="ref-body">
-            <span class="ref-authors">DeepSeek-AI.</span> (2024). <span class="ref-title">DeepSeek-V3 Technical Report.</span> <a href="https://arxiv.org/abs/2412.19437" target="_blank" rel="noopener">arXiv:2412.19437</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="deepseek reasoning reinforcement learning grpo">
-          <span class="ref-num">[8]</span>
-          <div class="ref-body">
-            <span class="ref-authors">DeepSeek-AI.</span> (2025). <span class="ref-title">DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning.</span> Nature 2025. <a href="https://arxiv.org/abs/2501.12948" target="_blank" rel="noopener">arXiv:2501.12948</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="jamba hybrid transformer mamba moe ai21">
-          <span class="ref-num">[9]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Lieber, O. et al.</span> (2024). <span class="ref-title">Jamba: A Hybrid Transformer-Mamba Language Model.</span> AI21 Labs. ICLR 2025. <a href="https://arxiv.org/abs/2403.19887" target="_blank" rel="noopener">arXiv:2403.19887</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="nemotron nvidia hybrid mamba fp8">
-          <span class="ref-num">[10]</span>
-          <div class="ref-body">
-            <span class="ref-authors">NVIDIA.</span> (2025). <span class="ref-title">Nemotron-H: A Family of Accurate and Efficient Hybrid Mamba-Transformer Models.</span> <a href="https://arxiv.org/abs/2504.03624" target="_blank" rel="noopener">arXiv:2504.03624</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="hunyuan tencent mamba moe chain-of-thought">
-          <span class="ref-num">[11]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Tencent Hunyuan Team.</span> (2025). <span class="ref-title">Hunyuan-TurboS: Advancing LLMs through Mamba-Transformer Synergy and Adaptive Chain-of-Thought.</span> <a href="https://arxiv.org/abs/2505.15431" target="_blank" rel="noopener">arXiv:2505.15431</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="phi microsoft reasoning sambay">
-          <span class="ref-num">[12]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Microsoft.</span> (2025). <span class="ref-title">Phi-4-mini-flash-reasoning.</span> <a href="https://arxiv.org/abs/2507.06607" target="_blank" rel="noopener">arXiv:2507.06607</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="rlm recursive language model repl context">
-          <span class="ref-num">[13]</span>
-          <div class="ref-body">
-            <span class="ref-title">Recursive Language Models.</span> <a href="https://arxiv.org/abs/2512.24601" target="_blank" rel="noopener">arXiv:2512.24601</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="rlm prime intellect repl paradigm 2026">
-          <span class="ref-num">[14]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Prime Intellect.</span> (2026). <span class="ref-title">Recursive Language Models: the paradigm of 2026.</span> <a href="https://primeintellect.ai/blog/rlm" target="_blank" rel="noopener">primeintellect.ai/blog/rlm</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="mamba-3 tri dao blog inference">
-          <span class="ref-num">[15]</span>
-          <div class="ref-body">
-            <span class="ref-title">Mamba-3 Part 1 | Tri Dao.</span> <a href="https://tridao.me/blog/2026/mamba3-part1/" target="_blank" rel="noopener">tridao.me/blog/2026/mamba3-part1/</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="mamba-3 goomba methodology deep dive">
-          <span class="ref-num">[16]</span>
-          <div class="ref-body">
-            <span class="ref-title">Mamba-3 Part 2 — Methodological Deep Dive.</span> Goomba Lab. <a href="https://goombalab.github.io/blog/2026/mamba3-part2/" target="_blank" rel="noopener">goombalab.github.io</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="phased specialization training optimization hybrid">
-          <span class="ref-num">[17]</span>
-          <div class="ref-body">
-            <span class="ref-title">Phased Specialization: Unlocking Hybrid Sequence Models via Optimization-Aware Training.</span> <a href="https://medium.com/@mbonsign" target="_blank" rel="noopener">medium.com/@mbonsign</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="longr reinforcement learning dense utility reward context">
-          <span class="ref-num">[18]</span>
-          <div class="ref-body">
-            <span class="ref-title">LongR: Unleashing Long-Context Reasoning via Reinforcement Learning with Dense Utility Rewards.</span> <a href="https://arxiv.org/abs/2602.05758" target="_blank" rel="noopener">arXiv:2602.05758</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="llamba distillation recurrent scaling">
-          <span class="ref-num">[19]</span>
-          <div class="ref-body">
-            <span class="ref-title">Llamba: Scaling Distilled Recurrent Models for Efficient Language Processing.</span> <a href="https://arxiv.org/abs/2502.14458" target="_blank" rel="noopener">arXiv:2502.14458</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="oolong benchmark long context evaluation">
-          <span class="ref-num">[20]</span>
-          <div class="ref-body">
-            <span class="ref-title">Oolong: Evaluating Long Context Reasoning and Aggregation Capabilities.</span> <a href="https://openreview.net" target="_blank" rel="noopener">OpenReview</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="rlm overthinking recursive depth reproducing">
-          <span class="ref-num">[21]</span>
-          <div class="ref-body">
-            <span class="ref-title">Think, But Don't Overthink: Reproducing Recursive Language Models.</span> <a href="https://arxiv.org/abs/2603.02615" target="_blank" rel="noopener">arXiv:2603.02615</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="nemotron nano nvidia moe agentic hybrid">
-          <span class="ref-num">[22]</span>
-          <div class="ref-body">
-            <span class="ref-title">NVIDIA Nemotron 3 Super: Complete Guide To Hybrid MoE Agentic AI.</span> <a href="https://marketingagent.blog" target="_blank" rel="noopener">marketingagent.blog</a> (2026).
-          </div>
-        </li>
-        <li class="ref-item" data-tags="test-time compute scaling inference reasoning">
-          <span class="ref-num">[23]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Snell, C. et al.</span> (2024). <span class="ref-title">Scaling LLM Test-Time Compute Optimally.</span> <a href="https://arxiv.org/abs/2408.03314" target="_blank" rel="noopener">arXiv:2408.03314</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="process reward verification step-by-step">
-          <span class="ref-num">[24]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Lightman, H. et al.</span> (2023). <span class="ref-title">Let's Verify Step by Step.</span> ICLR 2024. <a href="https://arxiv.org/abs/2305.20050" target="_blank" rel="noopener">arXiv:2305.20050</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="self-refine iterative refinement feedback">
-          <span class="ref-num">[25]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Madaan, A. et al.</span> (2023). <span class="ref-title">Self-Refine: Iterative Refinement with Self-Feedback.</span> NeurIPS 2023. <a href="https://arxiv.org/abs/2303.17651" target="_blank" rel="noopener">arXiv:2303.17651</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="self-correct reasoning llm cannot">
-          <span class="ref-num">[26]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Huang, J. et al.</span> (2024). <span class="ref-title">Large Language Models Cannot Self-Correct Reasoning Yet.</span> ICLR 2024.
-          </div>
-        </li>
-        <li class="ref-item" data-tags="self-correct llm markov chain verification">
-          <span class="ref-num">[27]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Yang, Z. et al.</span> (2025). <span class="ref-title">Can LLMs Correct Themselves?</span> EMNLP 2025. <a href="https://arxiv.org/abs/2510.16062" target="_blank" rel="noopener">arXiv:2510.16062</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="chain-of-thought prompting reasoning cot">
-          <span class="ref-num">[28]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Wei, J. et al.</span> (2022). <span class="ref-title">Chain-of-Thought Prompting Elicits Reasoning in Large Language Models.</span> NeurIPS 2022. <a href="https://arxiv.org/abs/2201.11903" target="_blank" rel="noopener">arXiv:2201.11903</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="star bootstrapping reasoning self-taught">
-          <span class="ref-num">[29]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Zelikman, E. et al.</span> (2022). <span class="ref-title">STaR: Bootstrapping Reasoning With Reasoning.</span> NeurIPS 2022. <a href="https://arxiv.org/abs/2203.14465" target="_blank" rel="noopener">arXiv:2203.14465</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="constitutional ai harmlessness anthropic">
-          <span class="ref-num">[30]</span>
-          <div class="ref-body">
-            <span class="ref-authors">Bai, Y. et al.</span> (2022). <span class="ref-title">Constitutional AI: Harmlessness from AI Feedback.</span> Anthropic. <a href="https://arxiv.org/abs/2212.08073" target="_blank" rel="noopener">arXiv:2212.08073</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="nemotron nvidia super blog">
-          <span class="ref-num">[31]</span>
-          <div class="ref-body">
-            <span class="ref-authors">NVIDIA.</span> <span class="ref-title">Introducing Nemotron 3 Super.</span> <a href="https://developer.nvidia.com/blog" target="_blank" rel="noopener">developer.nvidia.com/blog</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="granite ibm hybrid enterprise">
-          <span class="ref-num">[32]</span>
-          <div class="ref-body">
-            <span class="ref-authors">IBM.</span> (2025). <span class="ref-title">Granite 4.0: Hyper-efficient, High Performance Hybrid Models for Enterprise.</span>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="ssm tensor parallelism scaling gpu">
-          <span class="ref-num">[33]</span>
-          <div class="ref-body">
-            <span class="ref-title">Scaling State-Space Models on Multiple GPUs with Tensor Parallelism.</span> <a href="https://arxiv.org/abs/2602.21144" target="_blank" rel="noopener">arXiv:2602.21144</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="safety multi-agent control verification">
-          <span class="ref-num">[34]</span>
-          <div class="ref-body">
-            <span class="ref-title">QuadSentinel: Sequent Safety for Machine-Checkable Control in Multi-agent Systems.</span> <a href="https://openreview.net" target="_blank" rel="noopener">OpenReview</a>
-          </div>
-        </li>
-        <li class="ref-item" data-tags="rlm mit infinite context solution">
-          <span class="ref-num">[35]</span>
-          <div class="ref-body">
-            <span class="ref-title">Recursive Language Models: MIT's Solution to Infinite Context.</span> <a href="https://medium.com/@reliabledataengineering" target="_blank" rel="noopener">medium.com/@reliabledataengineering</a> (2026).
-          </div>
-        </li>
+        <li class="ref-item" data-tags="transformer attention foundation"><span class="ref-num">[1]</span><div class="ref-body"><span class="ref-authors">Vaswani, A. et al.</span> (2017). <span class="ref-title">Attention Is All You Need.</span> NeurIPS 2017. <a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">arXiv:1706.03762</a></div></li>
+        <li class="ref-item" data-tags="ssm s4 state space structured"><span class="ref-num">[2]</span><div class="ref-body"><span class="ref-authors">Gu, A., Goel, K., and Ré, C.</span> (2022). <span class="ref-title">Efficiently Modeling Long Sequences with Structured State Spaces.</span> ICLR 2022. <a href="https://arxiv.org/abs/2111.00396" target="_blank" rel="noopener">arXiv:2111.00396</a></div></li>
+        <li class="ref-item" data-tags="mamba ssm selective state space"><span class="ref-num">[3]</span><div class="ref-body"><span class="ref-authors">Gu, A. and Dao, T.</span> (2023). <span class="ref-title">Mamba: Linear-Time Sequence Modeling with Selective State Spaces.</span> COLM. <a href="https://arxiv.org/abs/2312.00752" target="_blank" rel="noopener">arXiv:2312.00752</a></div></li>
+        <li class="ref-item" data-tags="mamba-2 ssm ssd duality transformer"><span class="ref-num">[4]</span><div class="ref-body"><span class="ref-authors">Dao, T. and Gu, A.</span> (2024). <span class="ref-title">Transformers are SSMs: Generalized Models Through Structured State Space Duality.</span> ICML 2024. <a href="https://arxiv.org/abs/2405.21060" target="_blank" rel="noopener">arXiv:2405.21060</a></div></li>
+        <li class="ref-item" data-tags="mamba-3 mimo complex-valued inference"><span class="ref-num">[5]</span><div class="ref-body"><span class="ref-authors">Lahoti, P. et al.</span> (2026). <span class="ref-title">Mamba-3: Improved Sequence Modeling using State Space Principles.</span> ICLR 2026. <a href="https://arxiv.org/abs/2603.15569" target="_blank" rel="noopener">arXiv:2603.15569</a></div></li>
+        <li class="ref-item" data-tags="moe mixture experts mixtral routing"><span class="ref-num">[6]</span><div class="ref-body"><span class="ref-authors">Jiang, A. et al.</span> (2024). <span class="ref-title">Mixtral of Experts.</span> Mistral AI. <a href="https://arxiv.org/abs/2401.04088" target="_blank" rel="noopener">arXiv:2401.04088</a></div></li>
+        <li class="ref-item" data-tags="deepseek moe scaling auxiliary loss"><span class="ref-num">[7]</span><div class="ref-body"><span class="ref-authors">DeepSeek-AI.</span> (2024). <span class="ref-title">DeepSeek-V3 Technical Report.</span> <a href="https://arxiv.org/abs/2412.19437" target="_blank" rel="noopener">arXiv:2412.19437</a></div></li>
+        <li class="ref-item" data-tags="deepseek reasoning reinforcement learning grpo"><span class="ref-num">[8]</span><div class="ref-body"><span class="ref-authors">DeepSeek-AI.</span> (2025). <span class="ref-title">DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning.</span> Nature 2025. <a href="https://arxiv.org/abs/2501.12948" target="_blank" rel="noopener">arXiv:2501.12948</a></div></li>
+        <li class="ref-item" data-tags="jamba hybrid transformer mamba moe ai21"><span class="ref-num">[9]</span><div class="ref-body"><span class="ref-authors">Lieber, O. et al.</span> (2024). <span class="ref-title">Jamba: A Hybrid Transformer-Mamba Language Model.</span> AI21 Labs. ICLR 2025. <a href="https://arxiv.org/abs/2403.19887" target="_blank" rel="noopener">arXiv:2403.19887</a></div></li>
+        <li class="ref-item" data-tags="nemotron nvidia hybrid mamba fp8"><span class="ref-num">[10]</span><div class="ref-body"><span class="ref-authors">NVIDIA.</span> (2025). <span class="ref-title">Nemotron-H: A Family of Accurate and Efficient Hybrid Mamba-Transformer Models.</span> <a href="https://arxiv.org/abs/2504.03624" target="_blank" rel="noopener">arXiv:2504.03624</a></div></li>
+        <li class="ref-item" data-tags="hunyuan tencent mamba moe chain-of-thought"><span class="ref-num">[11]</span><div class="ref-body"><span class="ref-authors">Tencent Hunyuan Team.</span> (2025). <span class="ref-title">Hunyuan-TurboS: Advancing LLMs through Mamba-Transformer Synergy and Adaptive Chain-of-Thought.</span> <a href="https://arxiv.org/abs/2505.15431" target="_blank" rel="noopener">arXiv:2505.15431</a></div></li>
+        <li class="ref-item" data-tags="phi microsoft reasoning sambay"><span class="ref-num">[12]</span><div class="ref-body"><span class="ref-authors">Microsoft.</span> (2025). <span class="ref-title">Phi-4-mini-flash-reasoning.</span> <a href="https://arxiv.org/abs/2507.06607" target="_blank" rel="noopener">arXiv:2507.06607</a></div></li>
+        <li class="ref-item" data-tags="rlm recursive language model repl context"><span class="ref-num">[13]</span><div class="ref-body"><span class="ref-title">Recursive Language Models.</span> <a href="https://arxiv.org/abs/2512.24601" target="_blank" rel="noopener">arXiv:2512.24601</a></div></li>
+        <li class="ref-item" data-tags="rlm prime intellect repl paradigm 2026"><span class="ref-num">[14]</span><div class="ref-body"><span class="ref-authors">Prime Intellect.</span> (2026). <span class="ref-title">Recursive Language Models: the paradigm of 2026.</span> <a href="https://primeintellect.ai/blog/rlm" target="_blank" rel="noopener">primeintellect.ai/blog/rlm</a></div></li>
+        <li class="ref-item" data-tags="mamba-3 tri dao blog inference"><span class="ref-num">[15]</span><div class="ref-body"><span class="ref-title">Mamba-3 Part 1 | Tri Dao.</span> <a href="https://tridao.me/blog/2026/mamba3-part1/" target="_blank" rel="noopener">tridao.me/blog/2026/mamba3-part1/</a></div></li>
+        <li class="ref-item" data-tags="mamba-3 goomba methodology deep dive"><span class="ref-num">[16]</span><div class="ref-body"><span class="ref-title">Mamba-3 Part 2 — Methodological Deep Dive.</span> Goomba Lab. <a href="https://goombalab.github.io/blog/2026/mamba3-part2/" target="_blank" rel="noopener">goombalab.github.io</a></div></li>
+        <li class="ref-item" data-tags="phased specialization training optimization hybrid"><span class="ref-num">[17]</span><div class="ref-body"><span class="ref-title">Phased Specialization: Unlocking Hybrid Sequence Models via Optimization-Aware Training.</span> <a href="https://medium.com/@mbonsign" target="_blank" rel="noopener">medium.com/@mbonsign</a></div></li>
+        <li class="ref-item" data-tags="longr reinforcement learning dense utility reward context"><span class="ref-num">[18]</span><div class="ref-body"><span class="ref-title">LongR: Unleashing Long-Context Reasoning via Reinforcement Learning with Dense Utility Rewards.</span> <a href="https://arxiv.org/abs/2602.05758" target="_blank" rel="noopener">arXiv:2602.05758</a></div></li>
+        <li class="ref-item" data-tags="llamba distillation recurrent scaling"><span class="ref-num">[19]</span><div class="ref-body"><span class="ref-title">Llamba: Scaling Distilled Recurrent Models for Efficient Language Processing.</span> <a href="https://arxiv.org/abs/2502.14458" target="_blank" rel="noopener">arXiv:2502.14458</a></div></li>
+        <li class="ref-item" data-tags="oolong benchmark long context evaluation"><span class="ref-num">[20]</span><div class="ref-body"><span class="ref-title">Oolong: Evaluating Long Context Reasoning and Aggregation Capabilities.</span> <a href="https://openreview.net" target="_blank" rel="noopener">OpenReview</a></div></li>
+        <li class="ref-item" data-tags="rlm overthinking recursive depth reproducing"><span class="ref-num">[21]</span><div class="ref-body"><span class="ref-title">Think, But Don't Overthink: Reproducing Recursive Language Models.</span> <a href="https://arxiv.org/abs/2603.02615" target="_blank" rel="noopener">arXiv:2603.02615</a></div></li>
+        <li class="ref-item" data-tags="nemotron nano nvidia moe agentic hybrid"><span class="ref-num">[22]</span><div class="ref-body"><span class="ref-title">NVIDIA Nemotron 3 Super: Complete Guide To Hybrid MoE Agentic AI.</span> <a href="https://marketingagent.blog" target="_blank" rel="noopener">marketingagent.blog</a> (2026).</div></li>
+        <li class="ref-item" data-tags="test-time compute scaling inference reasoning"><span class="ref-num">[23]</span><div class="ref-body"><span class="ref-authors">Snell, C. et al.</span> (2024). <span class="ref-title">Scaling LLM Test-Time Compute Optimally.</span> <a href="https://arxiv.org/abs/2408.03314" target="_blank" rel="noopener">arXiv:2408.03314</a></div></li>
+        <li class="ref-item" data-tags="process reward verification step-by-step"><span class="ref-num">[24]</span><div class="ref-body"><span class="ref-authors">Lightman, H. et al.</span> (2023). <span class="ref-title">Let's Verify Step by Step.</span> ICLR 2024. <a href="https://arxiv.org/abs/2305.20050" target="_blank" rel="noopener">arXiv:2305.20050</a></div></li>
+        <li class="ref-item" data-tags="self-refine iterative refinement feedback"><span class="ref-num">[25]</span><div class="ref-body"><span class="ref-authors">Madaan, A. et al.</span> (2023). <span class="ref-title">Self-Refine: Iterative Refinement with Self-Feedback.</span> NeurIPS 2023. <a href="https://arxiv.org/abs/2303.17651" target="_blank" rel="noopener">arXiv:2303.17651</a></div></li>
+        <li class="ref-item" data-tags="self-correct reasoning llm cannot"><span class="ref-num">[26]</span><div class="ref-body"><span class="ref-authors">Huang, J. et al.</span> (2024). <span class="ref-title">Large Language Models Cannot Self-Correct Reasoning Yet.</span> ICLR 2024.</div></li>
+        <li class="ref-item" data-tags="self-correct llm markov chain verification"><span class="ref-num">[27]</span><div class="ref-body"><span class="ref-authors">Yang, Z. et al.</span> (2025). <span class="ref-title">Can LLMs Correct Themselves?</span> EMNLP 2025. <a href="https://arxiv.org/abs/2510.16062" target="_blank" rel="noopener">arXiv:2510.16062</a></div></li>
+        <li class="ref-item" data-tags="chain-of-thought prompting reasoning cot"><span class="ref-num">[28]</span><div class="ref-body"><span class="ref-authors">Wei, J. et al.</span> (2022). <span class="ref-title">Chain-of-Thought Prompting Elicits Reasoning in Large Language Models.</span> NeurIPS 2022. <a href="https://arxiv.org/abs/2201.11903" target="_blank" rel="noopener">arXiv:2201.11903</a></div></li>
+        <li class="ref-item" data-tags="star bootstrapping reasoning self-taught"><span class="ref-num">[29]</span><div class="ref-body"><span class="ref-authors">Zelikman, E. et al.</span> (2022). <span class="ref-title">STaR: Bootstrapping Reasoning With Reasoning.</span> NeurIPS 2022. <a href="https://arxiv.org/abs/2203.14465" target="_blank" rel="noopener">arXiv:2203.14465</a></div></li>
+        <li class="ref-item" data-tags="constitutional ai harmlessness anthropic"><span class="ref-num">[30]</span><div class="ref-body"><span class="ref-authors">Bai, Y. et al.</span> (2022). <span class="ref-title">Constitutional AI: Harmlessness from AI Feedback.</span> Anthropic. <a href="https://arxiv.org/abs/2212.08073" target="_blank" rel="noopener">arXiv:2212.08073</a></div></li>
+        <li class="ref-item" data-tags="nemotron nvidia super blog"><span class="ref-num">[31]</span><div class="ref-body"><span class="ref-authors">NVIDIA.</span> <span class="ref-title">Introducing Nemotron 3 Super.</span> <a href="https://developer.nvidia.com/blog" target="_blank" rel="noopener">developer.nvidia.com/blog</a></div></li>
+        <li class="ref-item" data-tags="granite ibm hybrid enterprise"><span class="ref-num">[32]</span><div class="ref-body"><span class="ref-authors">IBM.</span> (2025). <span class="ref-title">Granite 4.0: Hyper-efficient, High Performance Hybrid Models for Enterprise.</span></div></li>
+        <li class="ref-item" data-tags="ssm tensor parallelism scaling gpu"><span class="ref-num">[33]</span><div class="ref-body"><span class="ref-title">Scaling State-Space Models on Multiple GPUs with Tensor Parallelism.</span> <a href="https://arxiv.org/abs/2602.21144" target="_blank" rel="noopener">arXiv:2602.21144</a></div></li>
+        <li class="ref-item" data-tags="safety multi-agent control verification"><span class="ref-num">[34]</span><div class="ref-body"><span class="ref-title">QuadSentinel: Sequent Safety for Machine-Checkable Control in Multi-agent Systems.</span> <a href="https://openreview.net" target="_blank" rel="noopener">OpenReview</a></div></li>
+        <li class="ref-item" data-tags="rlm mit infinite context solution"><span class="ref-num">[35]</span><div class="ref-body"><span class="ref-title">Recursive Language Models: MIT's Solution to Infinite Context.</span> <a href="https://medium.com/@reliabledataengineering" target="_blank" rel="noopener">medium.com/@reliabledataengineering</a> (2026).</div></li>
       </ol>
     </section>
 
   </main>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
      ══════════════════════════════════════════════════════════ -->
 <script>
 (function() {
@@ -1831,7 +1764,7 @@ tbody tr:hover { background: var(--bg-glass-hover); }
   const html = document.documentElement;
   const themeBtn = document.getElementById('themeToggle');
   const stored = localStorage.getItem('theme');
-  if (stored) { html.setAttribute('data-theme', stored); }
+  if (stored) html.setAttribute('data-theme', stored);
   updateThemeIcon();
 
   themeBtn.addEventListener('click', () => {
@@ -1858,7 +1791,6 @@ tbody tr:hover { background: var(--bg-glass-hover); }
   sidebarClose.addEventListener('click', closeSidebar);
   overlay.addEventListener('click', closeSidebar);
 
-  // Close sidebar on nav link click (mobile)
   sidebar.querySelectorAll('.sidebar__link').forEach(link => {
     link.addEventListener('click', () => {
       if (window.innerWidth <= 768) closeSidebar();
@@ -1871,16 +1803,12 @@ tbody tr:hover { background: var(--bg-glass-hover); }
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      // Fade-in animation
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-      }
+      if (entry.isIntersecting) entry.target.classList.add('visible');
     });
   }, { threshold: 0.08, rootMargin: '0px 0px -10% 0px' });
 
   sections.forEach(sec => observer.observe(sec));
 
-  // Active nav tracking via scroll
   function updateActiveNav() {
     let current = '';
     sections.forEach(sec => {
@@ -1894,26 +1822,20 @@ tbody tr:hover { background: var(--bg-glass-hover); }
 
   // ─── Reading Progress ────────────────────────────────────
   const progressBar = document.getElementById('readingProgress');
-
   function updateProgress() {
     const scrollTop = window.scrollY;
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-    progressBar.style.width = pct + '%';
+    progressBar.style.width = (docHeight > 0 ? (scrollTop / docHeight) * 100 : 0) + '%';
   }
 
   // ─── Back to Top ─────────────────────────────────────────
   const backBtn = document.getElementById('backToTop');
-
   function updateBackToTop() {
     backBtn.classList.toggle('show', window.scrollY > window.innerHeight);
   }
+  backBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-  backBtn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-
-  // Throttled scroll handler
+  // Throttled scroll
   let ticking = false;
   window.addEventListener('scroll', () => {
     if (!ticking) {
@@ -1927,7 +1849,7 @@ tbody tr:hover { background: var(--bg-glass-hover); }
     }
   });
 
-  // ─── Hero Canvas (Particle Network) ─────────────────────
+  // ─── Hero Canvas (Blue Constellation Network) ───────────
   const canvas = document.getElementById('heroCanvas');
   const ctx = canvas.getContext('2d');
   let particles = [];
@@ -1940,22 +1862,22 @@ tbody tr:hover { background: var(--bg-glass-hover); }
 
   function initParticles() {
     particles = [];
-    const count = Math.min(80, Math.floor((w * h) / 12000));
+    const count = Math.min(90, Math.floor((w * h) / 10000));
     for (let i = 0; i < count; i++) {
       particles.push({
         x: Math.random() * w,
         y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
         r: Math.random() * 2 + 1,
-        color: ['#7c6aef', '#5ce0d8', '#ef6a9a', '#efc06a'][Math.floor(Math.random() * 4)]
+        color: ['#3b8bff', '#60d4ff', '#1e60d0', '#90c8ff'][Math.floor(Math.random() * 4)]
       });
     }
   }
 
   function drawParticles() {
     ctx.clearRect(0, 0, w, h);
-    const maxDist = 120;
+    const maxDist = 130;
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
       p.x += p.vx; p.y += p.vy;
@@ -1965,7 +1887,7 @@ tbody tr:hover { background: var(--bg-glass-hover); }
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       ctx.fillStyle = p.color;
-      ctx.globalAlpha = 0.6;
+      ctx.globalAlpha = 0.55;
       ctx.fill();
 
       for (let j = i + 1; j < particles.length; j++) {
@@ -1977,8 +1899,8 @@ tbody tr:hover { background: var(--bg-glass-hover); }
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(q.x, q.y);
           ctx.strokeStyle = p.color;
-          ctx.globalAlpha = 0.08 * (1 - dist / maxDist);
-          ctx.lineWidth = 0.8;
+          ctx.globalAlpha = 0.06 * (1 - dist / maxDist);
+          ctx.lineWidth = 0.7;
           ctx.stroke();
         }
       }
@@ -1999,9 +1921,7 @@ tbody tr:hover { background: var(--bg-glass-hover); }
       const container = this.closest('.table-container');
       container.querySelectorAll('.table-btn').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
-
-      const rows = container.querySelectorAll('tbody tr');
-      rows.forEach(row => {
+      container.querySelectorAll('tbody tr').forEach(row => {
         if (filter === 'all') {
           row.style.display = '';
         } else {
@@ -2047,8 +1967,7 @@ tbody tr:hover { background: var(--bg-glass-hover); }
           <div class="comparison-bar__fill comparison-bar__fill--b" style="width:${hybridPct}%"></div>
         </div>
         <div class="comparison-bar__value">${d.hybridLabel}</div>
-      </div>
-    `;
+      </div>`;
   }
 
   slider.addEventListener('input', () => renderKVBars(parseInt(slider.value)));
@@ -2062,10 +1981,7 @@ tbody tr:hover { background: var(--bg-glass-hover); }
     refSearch.addEventListener('input', function() {
       const q = this.value.toLowerCase().trim();
       refItems.forEach(item => {
-        if (!q) {
-          item.classList.remove('hidden');
-          return;
-        }
+        if (!q) { item.classList.remove('hidden'); return; }
         const text = item.textContent.toLowerCase();
         const tags = (item.dataset.tags || '').toLowerCase();
         item.classList.toggle('hidden', !text.includes(q) && !tags.includes(q));
