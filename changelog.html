@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - SwiftLLM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --black: #000;
+            --white: #fff;
+            --gray-50: #f5f5f7;
+            --gray-100: #e8e8ed;
+            --gray-200: #d2d2d7;
+            --gray-300: #86868b;
+            --gray-400: #6e6e73;
+            --blue: #0071e3;
+            --blue-light: #f5f9ff;
+            --green: #34c759;
+            --orange: #ff9500;
+            --purple: #af52de;
+            --red: #ff3b30;
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font);
+            background: var(--gray-50);
+            color: var(--black);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255,255,255,0.72);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .nav-inner {
+            max-width: 980px;
+            margin: 0 auto;
+            height: 48px;
+            padding: 0 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--black); }
+
+        .nav-logo-icon {
+            width: 26px;
+            height: 26px;
+            background: var(--black);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            color: white;
+        }
+
+        .nav-logo-text { font-size: 14px; font-weight: 500; }
+
+        .nav-links { display: flex; align-items: center; gap: 2px; list-style: none; }
+
+        .nav-links a {
+            color: var(--gray-400);
+            text-decoration: none;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 400;
+            border-radius: 6px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover { color: var(--black); }
+        .nav-links a.active { color: var(--black); font-weight: 500; }
+
+        .nav-cta { background: var(--blue) !important; color: var(--white) !important; padding: 6px 14px !important; font-weight: 500 !important; }
+
+        .nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 8px; }
+        .nav-toggle span { display: block; width: 16px; height: 1.5px; background: var(--black); margin: 4px 0; border-radius: 1px; }
+
+        .main { max-width: 680px; margin: 0 auto; padding: 100px 24px 60px; }
+
+        .page-header { text-align: center; margin-bottom: 40px; }
+
+        .page-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--purple);
+            margin-bottom: 8px;
+        }
+
+        .page-header h1 {
+            font-size: clamp(36px, 5.5vw, 48px);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            font-size: 15px;
+            color: var(--gray-400);
+            max-width: 400px;
+            margin: 0 auto 16px;
+            line-height: 1.55;
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--white);
+            border-radius: 14px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--green);
+        }
+
+        .live-dot {
+            width: 5px;
+            height: 5px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        .filter-bar { display: flex; justify-content: center; gap: 6px; margin-bottom: 36px; }
+
+        .filter-btn {
+            padding: 6px 14px;
+            border-radius: 14px;
+            border: none;
+            background: var(--white);
+            color: var(--gray-400);
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover { background: var(--gray-100); }
+        .filter-btn.active { background: var(--black); color: var(--white); }
+
+        .timeline { position: relative; padding-left: 24px; }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 0;
+            bottom: 0;
+            width: 1.5px;
+            background: var(--gray-200);
+        }
+
+        .timeline-entry {
+            position: relative;
+            margin-bottom: 24px;
+            animation: fadeIn 0.4s ease backwards;
+        }
+
+        .timeline-entry:nth-child(1) { animation-delay: 0.1s; }
+        .timeline-entry:nth-child(2) { animation-delay: 0.15s; }
+        .timeline-entry:nth-child(3) { animation-delay: 0.2s; }
+        .timeline-entry:nth-child(4) { animation-delay: 0.25s; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-8px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -24px;
+            top: 20px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--gray-100);
+            border: 2px solid var(--gray-50);
+        }
+
+        .timeline-dot.blue { background: var(--blue); }
+        .timeline-dot.purple { background: var(--purple); }
+        .timeline-dot.green { background: var(--green); }
+
+        .timeline-entry.latest .timeline-dot {
+            width: 14px;
+            height: 14px;
+            left: -26px;
+            top: 18px;
+        }
+
+        .timeline-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            transition: box-shadow 0.25s;
+        }
+
+        .timeline-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
+
+        .entry-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .entry-version { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+
+        .entry-meta { display: flex; align-items: center; gap: 6px; }
+
+        .entry-tag {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .tag-latest { background: var(--blue-light); color: var(--blue); }
+        .tag-alpha { background: #f5f0ff; color: var(--purple); }
+        .tag-stable { background: #f0fdf4; color: var(--green); }
+
+        .entry-date { font-size: 11px; color: var(--gray-400); }
+
+        .entry-summary { font-size: 13px; color: var(--gray-400); line-height: 1.55; margin-bottom: 14px; }
+
+        .change-list { list-style: none; }
+
+        .change-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 0;
+            font-size: 13px;
+            border-bottom: 1px solid var(--gray-50);
+        }
+
+        .change-item:last-child { border-bottom: none; }
+
+        .change-badge {
+            min-width: 60px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            text-align: center;
+        }
+
+        .badge-added { background: #f0fdf4; color: var(--green); }
+        .badge-changed { background: var(--blue-light); color: var(--blue); }
+        .badge-fixed { background: #fff7ed; color: var(--orange); }
+        .badge-security { background: #f5f0ff; color: var(--purple); }
+
+        .change-item span:last-child { color: var(--gray-400); line-height: 1.5; }
+
+        .entry-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--gray-50);
+        }
+
+        .commit-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-family: 'SF Mono', monospace;
+            color: var(--gray-400);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .commit-link:hover { color: var(--blue); }
+
+        .contributors { display: flex; }
+
+        .contributor-avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: 700;
+            color: white;
+            margin-left: -4px;
+            border: 2px solid var(--white);
+        }
+
+        .contributor-avatar:first-child { margin-left: 0; }
+
+        .activity-section {
+            margin-top: 56px;
+            padding-top: 36px;
+            border-top: 1px solid var(--gray-100);
+        }
+
+        .activity-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+
+        .activity-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+        .activity-card {
+            padding: 14px 16px;
+            background: var(--white);
+            border-radius: 10px;
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: all 0.2s;
+        }
+
+        .activity-card:hover { border-color: var(--blue); }
+
+        .activity-type {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--gray-400);
+            margin-bottom: 4px;
+        }
+
+        .activity-title-text { font-size: 12px; font-weight: 500; margin-bottom: 3px; }
+
+        .activity-title-text a { color: var(--black); text-decoration: none; }
+        .activity-title-text a:hover { color: var(--blue); }
+
+        .activity-meta { font-size: 10px; color: var(--gray-400); }
+
+        .activity-loading { text-align: center; padding: 32px; color: var(--gray-400); font-size: 12px; grid-column: span 2; }
+
+        .footer {
+            border-top: 1px solid var(--gray-100);
+            padding: 32px 24px;
+            margin-top: 60px;
+        }
+
+        .footer-inner {
+            max-width: 980px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-left { display: flex; align-items: center; gap: 8px; }
+
+        .footer-logo {
+            width: 22px;
+            height: 22px;
+            background: var(--black);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .footer-copy { font-size: 11px; color: var(--gray-400); }
+
+        .footer-links { display: flex; gap: 16px; list-style: none; }
+
+        .footer-links a { color: var(--gray-400); text-decoration: none; font-size: 11px; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--black); }
+
+        @media (max-width: 734px) {
+            .nav-links { display: none; }
+            .nav-toggle { display: block; }
+            .nav-links.open {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--white);
+                border-bottom: 1px solid var(--gray-100);
+                padding: 10px 20px;
+            }
+
+            .timeline { padding-left: 20px; }
+            .timeline::before { left: 2px; }
+            .timeline-dot { left: -20px; }
+            .timeline-entry.latest .timeline-dot { left: -22px; }
+
+            .activity-grid { grid-template-columns: 1fr; }
+            .activity-loading { grid-column: span 1; }
+
+            .footer-inner { flex-direction: column; gap: 16px; text-align: center; }
+
+            .filter-bar { gap: 4px; flex-wrap: wrap; }
+            .filter-btn { padding: 5px 12px; font-size: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-logo">
+                <div class="nav-logo-icon">S</div>
+                <span class="nav-logo-text">SwiftLLM</span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#features">Features</a></li>
+                <li><a href="docs.html">Docs</a></li>
+                <li><a href="changelog.html" class="active">Changelog</a></li>
+                <li><a href="https://github.com/infrabrew/swiftllm" target="_blank" class="nav-cta">GitHub</a></li>
+            </ul>
+            <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <div class="main">
+        <div class="page-header">
+            <div class="page-label">Release History</div>
+            <h1>Changelog</h1>
+            <p>Track every update, feature, and fix as SwiftLLM evolves.</p>
+            <div class="live-indicator">
+                <div class="live-dot"></div>
+                Synced with GitHub
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="feature">Features</button>
+            <button class="filter-btn" data-filter="fix">Fixes</button>
+            <button class="filter-btn" data-filter="security">Security</button>
+        </div>
+
+        <div class="timeline" id="timeline">
+            <div class="timeline-entry latest" data-categories="feature,fix,security">
+                <div class="timeline-dot blue"></div>
+                <div class="timeline-card">
+                    <div class="entry-header">
+                        <div class="entry-version">v2.0.0-alpha.2</div>
+                        <div class="entry-meta">
+                            <span class="entry-tag tag-latest">Latest</span>
+                            <span class="entry-tag tag-alpha">Alpha</span>
+                            <span class="entry-date">2025</span>
+                        </div>
+                    </div>
+                    <p class="entry-summary">Security hardening, air-gapped deployment support, and critical bug fixes.</p>
+                    <ul class="change-list">
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Air-gapped / offline network installation support with portable bundles</span></li>
+                        <li class="change-item" data-type="security"><span class="change-badge badge-security">Security</span><span>Updated security hardening for API server (auth, input validation, headers)</span></li>
+                        <li class="change-item" data-type="fix"><span class="change-badge badge-fixed">Fixed</span><span>Resolved multiple bugs and stability issues</span></li>
+                        <li class="change-item" data-type="fix"><span class="change-badge badge-changed">Changed</span><span>Updated and resolved README documentation</span></li>
+                    </ul>
+                    <div class="entry-footer">
+                        <a href="https://github.com/infrabrew/swiftllm/commit/4b6d857" target="_blank" class="commit-link">&#128279; 4b6d857</a>
+                        <div class="contributors"><div class="contributor-avatar">IB</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-entry" data-categories="feature">
+                <div class="timeline-dot purple"></div>
+                <div class="timeline-card">
+                    <div class="entry-header">
+                        <div class="entry-version">v2.0.0-alpha.1</div>
+                        <div class="entry-meta"><span class="entry-tag tag-alpha">Alpha</span><span class="entry-date">2025</span></div>
+                    </div>
+                    <p class="entry-summary">Major feature improvements and the addition of the Muon optimizer for training workflows.</p>
+                    <ul class="change-list">
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Muon optimizer for large model training alongside AdamW and SGD</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-changed">Changed</span><span>Improved features and performance across inference and serving pipelines</span></li>
+                        <li class="change-item" data-type="fix"><span class="change-badge badge-fixed">Fixed</span><span>Removed build artifacts from tracking, added proper .gitignore</span></li>
+                    </ul>
+                    <div class="entry-footer">
+                        <a href="https://github.com/infrabrew/swiftllm/commit/f076846" target="_blank" class="commit-link">&#128279; f076846</a>
+                        <div class="contributors"><div class="contributor-avatar">IB</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-entry" data-categories="feature">
+                <div class="timeline-dot blue"></div>
+                <div class="timeline-card">
+                    <div class="entry-header">
+                        <div class="entry-version">v2.0.0-alpha</div>
+                        <div class="entry-meta"><span class="entry-tag tag-alpha">Alpha</span><span class="entry-date">2025</span></div>
+                    </div>
+                    <p class="entry-summary">Complete rewrite with Rust core, modular crate architecture, and Python bindings.</p>
+                    <ul class="change-list">
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Complete Rust rewrite with 5 modular crates (core, models, cuda, server, training)</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>PagedAttention for optimal KV cache management</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>OpenAI-compatible API server built with Axum</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>LoRA, QLoRA, and full fine-tuning support</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Multi-GPU tensor parallelism and pipeline parallelism</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Speculative decoding with draft model acceleration</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>CLI with 9 subcommands: serve, generate, chat, download, benchmark, convert, info, train, finetune</span></li>
+                    </ul>
+                    <div class="entry-footer">
+                        <a href="https://github.com/infrabrew/swiftllm/commit/4af1106" target="_blank" class="commit-link">&#128279; 4af1106</a>
+                        <div class="contributors"><div class="contributor-avatar">IB</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-entry" data-categories="feature">
+                <div class="timeline-dot green"></div>
+                <div class="timeline-card">
+                    <div class="entry-header">
+                        <div class="entry-version">v1.0.0</div>
+                        <div class="entry-meta"><span class="entry-tag tag-stable">Initial</span><span class="entry-date">2025</span></div>
+                    </div>
+                    <p class="entry-summary">Initial release with core inference capabilities and installation tooling.</p>
+                    <ul class="change-list">
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Core LLM inference engine</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Installation script with automatic dependency detection</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Initial model support and Python bindings</span></li>
+                    </ul>
+                    <div class="entry-footer">
+                        <a href="https://github.com/infrabrew/swiftllm/commit/04104da" target="_blank" class="commit-link">&#128279; 04104da</a>
+                        <div class="contributors"><div class="contributor-avatar">IB</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="activity-section">
+            <div class="activity-title">Latest GitHub Activity</div>
+            <div class="activity-grid" id="activityGrid">
+                <div class="activity-loading">Fetching from GitHub...</div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-left">
+                <div class="footer-logo">S</div>
+                <span class="footer-copy">SwiftLLM &copy; 2025. Apache 2.0 License.</span>
+            </div>
+            <ul class="footer-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="https://github.com/infrabrew/swiftllm" target="_blank">GitHub</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('navToggle').addEventListener('click', () => {
+            document.getElementById('navLinks').classList.toggle('open');
+        });
+
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const entries = document.querySelectorAll('.timeline-entry');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const filter = btn.dataset.filter;
+
+                entries.forEach(entry => {
+                    if (filter === 'all') { entry.style.display = ''; return; }
+                    const items = entry.querySelectorAll('.change-item');
+                    let hasMatch = false;
+                    items.forEach(item => {
+                        const type = item.dataset.type || '';
+                        if ((filter === 'feature' && (type === 'feature' || type === 'fix')) || (filter === 'fix' && type === 'fix') || (filter === 'security' && type === 'security')) {
+                            item.style.display = '';
+                            hasMatch = true;
+                        } else if (filter !== 'all') { item.style.display = 'none'; }
+                    });
+                    entry.style.display = hasMatch ? '' : 'none';
+                });
+            });
+        });
+
+        async function fetchGitHubActivity() {
+            const grid = document.getElementById('activityGrid');
+            try {
+                const res = await fetch('https://api.github.com/repos/infrabrew/swiftllm/commits?per_page=4');
+                if (!res.ok) throw new Error('Rate limited');
+                const commits = await res.json();
+                grid.innerHTML = '';
+                commits.forEach(commit => {
+                    const date = new Date(commit.commit.author.date);
+                    const timeAgo = getTimeAgo(date);
+                    const message = commit.commit.message.split('\n')[0];
+                    const sha = commit.sha.substring(0, 7);
+                    const card = document.createElement('div');
+                    card.className = 'activity-card';
+                    card.innerHTML = `<div class="activity-type">Commit</div><div class="activity-title-text"><a href="${commit.html_url}" target="_blank">${escapeHtml(message)}</a></div><div class="activity-meta">${sha} · ${timeAgo}</div>`;
+                    grid.appendChild(card);
+                });
+            } catch (err) {
+                grid.innerHTML = `<div class="activity-card"><div class="activity-type">Commit</div><div class="activity-title-text">Update security and bugs</div><div class="activity-meta">4b6d857 · Recent</div></div><div class="activity-card"><div class="activity-type">Commit</div><div class="activity-title-text">Resolve Readme</div><div class="activity-meta">05bca3b · Recent</div></div>`;
+            }
+        }
+
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            const intervals = [{ label: 'year', seconds: 31536000 }, { label: 'month', seconds: 2592000 }, { label: 'week', seconds: 604800 }, { label: 'day', seconds: 86400 }, { label: 'hour', seconds: 3600 }, { label: 'minute', seconds: 60 }];
+            for (const interval of intervals) {
+                const count = Math.floor(seconds / interval.seconds);
+                if (count >= 1) return `${count} ${interval.label}${count > 1 ? 's' : ''} ago`;
+            }
+            return 'just now';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        fetchGitHubActivity();
+    </script>
+</body>
+</html>

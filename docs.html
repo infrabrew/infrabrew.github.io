@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - SwiftLLM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --black: #000;
+            --white: #fff;
+            --gray-50: #f5f5f7;
+            --gray-100: #e8e8ed;
+            --gray-200: #d2d2d7;
+            --gray-300: #86868b;
+            --gray-400: #6e6e73;
+            --blue: #0071e3;
+            --blue-light: #f5f9ff;
+            --green: #34c759;
+            --orange: #ff9500;
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --sidebar-width: 220px;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font);
+            background: var(--white);
+            color: var(--black);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255,255,255,0.72);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .nav-inner {
+            max-width: 980px;
+            margin: 0 auto;
+            height: 48px;
+            padding: 0 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--black); }
+
+        .nav-logo-icon {
+            width: 26px;
+            height: 26px;
+            background: var(--black);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            color: white;
+        }
+
+        .nav-logo-text { font-size: 14px; font-weight: 500; }
+
+        .nav-links { display: flex; align-items: center; gap: 2px; list-style: none; }
+
+        .nav-links a {
+            color: var(--gray-400);
+            text-decoration: none;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 400;
+            border-radius: 6px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover { color: var(--black); }
+        .nav-links a.active { color: var(--black); font-weight: 500; }
+
+        .nav-cta { background: var(--blue) !important; color: var(--white) !important; padding: 6px 14px !important; font-weight: 500 !important; }
+
+        .nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 8px; }
+        .nav-toggle span { display: block; width: 16px; height: 1.5px; background: var(--black); margin: 4px 0; border-radius: 1px; }
+
+        .docs-layout { display: flex; padding-top: 48px; }
+
+        .sidebar {
+            position: fixed;
+            top: 48px;
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            padding: 20px 12px;
+            overflow-y: auto;
+            border-right: 1px solid var(--gray-100);
+            background: var(--white);
+        }
+
+        .sidebar-section { margin-bottom: 20px; }
+
+        .sidebar-label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gray-400);
+            margin-bottom: 6px;
+            padding: 0 10px;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            color: var(--gray-400);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.15s;
+            margin-bottom: 1px;
+        }
+
+        .sidebar-link:hover { color: var(--black); background: var(--gray-50); }
+        .sidebar-link.active { color: var(--blue); background: var(--blue-light); }
+
+        .sidebar-link-icon { font-size: 12px; opacity: 0.6; }
+
+        .sidebar-toggle { display: none; position: fixed; bottom: 20px; left: 20px; z-index: 200; width: 40px; height: 40px; border-radius: 50%; background: var(--black); border: none; color: white; font-size: 16px; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+
+        .docs-content { flex: 1; margin-left: var(--sidebar-width); padding: 0 56px 60px; max-width: calc(100% - var(--sidebar-width)); }
+
+        .docs-content-inner { max-width: 560px; }
+
+        .doc-hero { padding: 40px 0 32px; border-bottom: 1px solid var(--gray-100); margin-bottom: 36px; }
+
+        .doc-hero-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--blue); margin-bottom: 8px; }
+
+        .doc-hero h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.015em; margin-bottom: 8px; }
+
+        .doc-hero p { font-size: 14px; color: var(--gray-400); line-height: 1.6; }
+
+        .doc-section { margin-bottom: 40px; scroll-margin-top: 64px; }
+
+        .doc-section h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--gray-100); }
+
+        .doc-section h3 { font-size: 14px; font-weight: 600; margin-bottom: 8px; margin-top: 20px; }
+
+        .doc-section p { font-size: 13px; color: var(--gray-400); line-height: 1.65; margin-bottom: 10px; }
+
+        .doc-section ul, .doc-section ol { padding-left: 16px; margin-bottom: 10px; }
+
+        .doc-section li { font-size: 13px; color: var(--gray-400); line-height: 1.6; margin-bottom: 4px; }
+
+        .doc-section li strong { color: var(--black); }
+
+        .code-block {
+            padding: 14px 16px;
+            background: #1d1d1f;
+            border-radius: 10px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 11px;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin-bottom: 14px;
+            color: #e8e8ed;
+        }
+
+        .code-block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+
+        .code-block-lang { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-400); font-family: var(--font); }
+
+        .code-block-copy {
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: none;
+            background: rgba(255,255,255,0.08);
+            color: var(--gray-400);
+            font-size: 9px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: var(--font);
+        }
+
+        .code-block-copy:hover { background: rgba(255,255,255,0.12); color: var(--white); }
+
+        .kw { color: #c792ea; }
+        .str { color: #a6e22e; }
+        .fn { color: #61afef; }
+        .cm { color: #5c6370; }
+        .num { color: #d19a66; }
+
+        .doc-section code:not(.code-block code) { padding: 2px 5px; background: var(--gray-100); border-radius: 4px; font-family: 'SF Mono', monospace; font-size: 11px; color: var(--black); }
+
+        .callout { padding: 12px 14px; border-radius: 8px; margin-bottom: 14px; display: flex; gap: 10px; align-items: flex-start; }
+
+        .callout-icon { font-size: 14px; min-width: 16px; text-align: center; margin-top: 1px; }
+
+        .callout-info { background: var(--blue-light); border: 1px solid rgba(0,113,227,0.12); }
+        .callout-warn { background: #fff7ed; border: 1px solid rgba(255,149,0,0.12); }
+        .callout-tip { background: #f0fdf4; border: 1px solid rgba(52,199,89,0.12); }
+
+        .callout p { margin: 0; font-size: 12px; line-height: 1.55; }
+
+        .config-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 12px; }
+
+        .config-table th { text-align: left; padding: 8px 10px; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray-400); border-bottom: 1px solid var(--gray-100); }
+
+        .config-table td { padding: 8px 10px; border-bottom: 1px solid var(--gray-50); color: var(--gray-400); }
+
+        .config-table tr:last-child td { border-bottom: none; }
+
+        .config-table code { padding: 1px 4px; background: var(--gray-50); border-radius: 3px; font-size: 10px; color: var(--blue); font-family: 'SF Mono', monospace; }
+
+        .doc-features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+
+        .doc-feature { padding: 14px; background: var(--gray-50); border-radius: 8px; transition: background 0.15s; }
+
+        .doc-feature:hover { background: var(--gray-100); }
+
+        .doc-feature-icon { font-size: 16px; margin-bottom: 6px; }
+
+        .doc-feature h4 { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+
+        .doc-feature p { font-size: 11px; color: var(--gray-400); margin: 0; line-height: 1.5; }
+
+        .cli-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+
+        .cli-item { padding: 12px; background: var(--gray-50); border-radius: 8px; transition: background 0.15s; }
+
+        .cli-item:hover { background: var(--gray-100); }
+
+        .cli-item code { font-size: 11px; font-weight: 600; color: var(--blue); background: none !important; border: none !important; padding: 0 !important; }
+
+        .cli-item p { font-size: 10px; color: var(--gray-400); margin: 3px 0 0; }
+
+        .faq-item { margin-bottom: 8px; }
+
+        .faq-item h3 {
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 12px 14px;
+            background: var(--gray-50);
+            border-radius: 8px;
+            margin: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.15s;
+        }
+
+        .faq-item h3:hover { background: var(--gray-100); }
+
+        .faq-item h3 .icon { font-size: 16px; color: var(--gray-400); transition: transform 0.2s; }
+
+        .faq-answer { padding: 12px 14px; font-size: 12px; color: var(--gray-400); line-height: 1.6; display: none; }
+
+        .faq-answer p { margin: 0; }
+
+        .faq-item.open .faq-answer { display: block; }
+
+        .faq-item.open h3 .icon { transform: rotate(45deg); }
+
+        @media (max-width: 1024px) {
+            .doc-features { grid-template-columns: 1fr; }
+            .cli-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 734px) {
+            .nav-links { display: none; }
+            .nav-toggle { display: block; }
+            .nav-links.open {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--white);
+                border-bottom: 1px solid var(--gray-100);
+                padding: 10px 20px;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.25s;
+                z-index: 150;
+            }
+
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-toggle { display: flex; align-items: center; justify-content: center; }
+
+            .docs-content { margin-left: 0; max-width: 100%; padding: 0 20px 60px; }
+
+            .cli-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-logo">
+                <div class="nav-logo-icon">S</div>
+                <span class="nav-logo-text">SwiftLLM</span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#features">Features</a></li>
+                <li><a href="docs.html" class="active">Docs</a></li>
+                <li><a href="changelog.html">Changelog</a></li>
+                <li><a href="https://github.com/infrabrew/swiftllm" target="_blank" class="nav-cta">GitHub</a></li>
+            </ul>
+            <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <button class="sidebar-toggle" id="sidebarToggle">&#9776;</button>
+
+    <div class="docs-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-label">Getting Started</div>
+                <a href="#installation" class="sidebar-link active"><span class="sidebar-link-icon">&#128229;</span> Installation</a>
+                <a href="#quickstart" class="sidebar-link"><span class="sidebar-link-icon">&#9889;</span> Quick Start</a>
+                <a href="#airgap" class="sidebar-link"><span class="sidebar-link-icon">&#128274;</span> Air-Gap Install</a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-label">Features</div>
+                <a href="#features-overview" class="sidebar-link"><span class="sidebar-link-icon">&#10024;</span> Overview</a>
+                <a href="#inference" class="sidebar-link"><span class="sidebar-link-icon">&#128200;</span> Inference</a>
+                <a href="#serving" class="sidebar-link"><span class="sidebar-link-icon">&#127760;</span> API Server</a>
+                <a href="#training" class="sidebar-link"><span class="sidebar-link-icon">&#128218;</span> Training</a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-label">Reference</div>
+                <a href="#cli" class="sidebar-link"><span class="sidebar-link-icon">&#128187;</span> CLI Commands</a>
+                <a href="#python-api" class="sidebar-link"><span class="sidebar-link-icon">&#128013;</span> Python API</a>
+                <a href="#configuration" class="sidebar-link"><span class="sidebar-link-icon">&#9881;</span> Configuration</a>
+                <a href="#models" class="sidebar-link"><span class="sidebar-link-icon">&#129302;</span> Supported Models</a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-label">Help</div>
+                <a href="#support" class="sidebar-link"><span class="sidebar-link-icon">&#128172;</span> Support</a>
+                <a href="#faq" class="sidebar-link"><span class="sidebar-link-icon">&#10067;</span> FAQ</a>
+            </div>
+        </aside>
+
+        <main class="docs-content">
+            <div class="docs-content-inner">
+                <div class="doc-hero">
+                    <div class="doc-hero-label">Documentation</div>
+                    <h1>SwiftLLM Docs</h1>
+                    <p>Everything you need to install, configure, and run SwiftLLM for LLM inference, serving, and training.</p>
+                </div>
+
+                <section class="doc-section" id="installation">
+                    <h2>Installation</h2>
+                    <p>SwiftLLM provides a smart installer that auto-detects your system, installs dependencies, and builds the engine from source.</p>
+                    <h3>Prerequisites</h3>
+                    <ul>
+                        <li><strong>Python 3.8+</strong> (3.10+ recommended)</li>
+                        <li><strong>Git</strong></li>
+                        <li><strong>NVIDIA GPU</strong> with CUDA 11.8+ (optional for CPU-only mode)</li>
+                    </ul>
+                    <h3>Standard Install</h3>
+                    <div class="code-block">
+                        <div class="code-block-header"><span class="code-block-lang">Shell</span><button class="code-block-copy" onclick="copyBlock(this)">Copy</button></div>
+<span class="cm"># Clone the repository</span>
+git clone https://github.com/infrabrew/swiftllm.git
+cd swiftllm
+
+<span class="cm"># Run the installer</span>
+bash install.sh
+                    </div>
+                    <p>The installer will automatically detect NVIDIA GPU and CUDA toolkit, create a Python virtual environment, install Rust, build the native extension with maturin, and set up the model cache.</p>
+                    <h3>Install Options</h3>
+                    <table class="config-table">
+                        <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>--cpu</code></td><td>Force CPU-only build, skip CUDA detection</td></tr>
+                            <tr><td><code>--gpu</code></td><td>Force GPU/CUDA build</td></tr>
+                            <tr><td><code>--venv DIR</code></td><td>Custom virtual environment location</td></tr>
+                            <tr><td><code>--no-venv</code></td><td>Install into current Python environment</td></tr>
+                            <tr><td><code>--model-dir PATH</code></td><td>Set custom model cache directory</td></tr>
+                            <tr><td><code>--airgap</code></td><td>Install from pre-built offline bundle</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section class="doc-section" id="quickstart">
+                    <h2>Quick Start</h2>
+                    <h3>Basic Inference</h3>
+                    <div class="code-block">
+                        <div class="code-block-header"><span class="code-block-lang">Python</span><button class="code-block-copy" onclick="copyBlock(this)">Copy</button></div>
+<span class="kw">from</span> swiftllm <span class="kw">import</span> LLM, SamplingParams
+
+<span class="cm"># Initialize the model</span>
+llm = LLM(<span class="str">"meta-llama/Llama-3-8B"</span>)
+
+<span class="cm"># Set sampling parameters</span>
+params = SamplingParams(
+    temperature=<span class="num">0.7</span>,
+    top_p=<span class="num">0.9</span>,
+    max_tokens=<span class="num">256</span>
+)
+
+<span class="cm"># Generate text</span>
+outputs = llm.generate([<span class="str">"What is machine learning?"</span>], params)
+
+<span class="kw">for</span> output <span class="kw">in</span> outputs:
+    <span class="fn">print</span>(output.text)
+                    </div>
+                    <h3>Interactive Chat</h3>
+                    <div class="code-block">
+                        <div class="code-block-header"><span class="code-block-lang">Shell</span><button class="code-block-copy" onclick="copyBlock(this)">Copy</button></div>
+<span class="cm"># Start interactive chat mode</span>
+swiftllm chat --model meta-llama/Llama-3-8B
+                    </div>
+                    <h3>Start API Server</h3>
+                    <div class="code-block">
+                        <div class="code-block-header"><span class="code-block-lang">Shell</span><button class="code-block-copy" onclick="copyBlock(this)">Copy</button></div>
+<span class="cm"># Launch OpenAI-compatible server</span>
+swiftllm serve --model meta-llama/Llama-3-8B --port 8000
+
+<span class="cm"># Use with any OpenAI client</span>
+curl http://localhost:8000/v1/completions \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d <span class="str">'{"model": "llama-3-8b", "prompt": "Hello!", "max_tokens": 64}'</span>
+                    </div>
+                </section>
+
+                <section class="doc-section" id="airgap">
+                    <h2>Air-Gapped Installation</h2>
+                    <p>SwiftLLM supports deployment on isolated networks with no internet access. Create a portable bundle on a connected machine, then install offline.</p>
+                    <h3>Step 1: Create the Bundle</h3>
+                    <div class="code-block">
+                        <div class="code-block-header"><span class="code-block-lang">Shell</span><button class="code-block-copy" onclick="copyBlock(this)">Copy</button></div>
+<span class="cm"># On a machine with internet access</span>
+bash airgap-bundle.sh
+
+<span class="cm"># Optionally include a model</span>
+bash airgap-bundle.sh --model TheBloke/Llama-2-7B-GGUF:llama-2-7b.Q4_K_M.gguf
+                    </div>
+                    <h3>Step 2: Transfer & Install</h3>
+                    <div class="code-block">
+                        <div class="code-block-header"><span class="code-block-lang">Shell</span><button class="code-block-copy" onclick="copyBlock(this)">Copy</button></div>
+<span class="cm"># Transfer the archive to the target machine</span>
+scp swiftllm-airgap-*.tar.gz target-machine:~/
+
+<span class="cm"># On the target machine</span>
+tar xzf swiftllm-airgap-*.tar.gz
+cd swiftllm-airgap-*/
+bash install.sh --airgap
+                    </div>
+                    <div class="callout callout-info">
+                        <div class="callout-icon">&#8505;</div>
+                        <p>The bundle includes the source tree, Python wheels, Rust installer, and optionally pre-downloaded models. SHA256 checksums verify integrity.</p>
+                    </div>
+                </section>
+
+                <section class="doc-section" id="features-overview">
+                    <h2>Features Overview</h2>
+                    <div class="doc-features">
+                        <div class="doc-feature"><div class="doc-feature-icon">&#9889;</div><h4>High Throughput</h4><p>Continuous batching and efficient request scheduling for maximum tokens/second.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#128200;</div><h4>PagedAttention</h4><p>Optimal KV cache management with paged memory allocation for efficient VRAM usage.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#128338;</div><h4>Speculative Decoding</h4><p>Draft model acceleration using smaller models to speed up token generation.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#127912;</div><h4>Multi-GPU Scaling</h4><p>Tensor parallelism and pipeline parallelism across multiple NVIDIA GPUs.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#128279;</div><h4>OpenAI API</h4><p>Drop-in replacement with API key auth, input validation, and security headers.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#128295;</div><h4>Fine-Tuning</h4><p>LoRA, QLoRA, and full fine-tuning with Muon, AdamW, and SGD optimizers.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#128230;</div><h4>Multi-Format</h4><p>HuggingFace, GGUF quantized, and SafeTensors model loading with auto-detection.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#128274;</div><h4>Air-Gapped Deploy</h4><p>Create portable bundles for networks with no internet access.</p></div>
+                    </div>
+                </section>
+
+                <section class="doc-section" id="inference">
+                    <h2>Inference</h2>
+                    <p>SwiftLLM provides both synchronous and asynchronous inference APIs for generating text from large language models.</p>
+                    <h3>Synchronous Generation</h3>
+                    <div class="code-block">
+                        <div class="code-block-header"><span class="code-block-lang">Python</span><button class="code-block-copy" onclick="copyBlock(this)">Copy</button></div>
+<span class="kw">from</span> swiftllm <span class="kw">import</span> LLM, SamplingParams
+
+llm = LLM(<span class="str">"meta-llama/Llama-3-8B"</span>)
+params = SamplingParams(temperature=<span class="num">0.8</span>, max_tokens=<span class="num">512</span>)
+
+<span class="cm"># Batch generation</span>
+prompts = [<span class="str">"Explain gravity"</span>, <span class="str">"Write a haiku"</span>]
+results = llm.<span class="fn">generate</span>(prompts, params)
+                    </div>
+                    <h3>Async Generation</h3>
+                    <div class="code-block">
+                        <div class="code-block-header"><span class="code-block-lang">Python</span><button class="code-block-copy" onclick="copyBlock(this)">Copy</button></div>
+<span class="kw">from</span> swiftllm <span class="kw">import</span> AsyncLLM, SamplingParams
+
+llm = <span class="fn">AsyncLLM</span>(<span class="str">"meta-llama/Llama-3-8B"</span>)
+params = SamplingParams(temperature=<span class="num">0.7</span>)
+
+result = <span class="kw">await</span> llm.<span class="fn">generate</span>([<span class="str">"Hello!"</span>], params)
+                    </div>
+                    <h3>Sampling Parameters</h3>
+                    <table class="config-table">
+                        <thead><tr><th>Parameter</th><th>Default</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>temperature</code></td><td>1.0</td><td>Controls randomness. Lower = more deterministic</td></tr>
+                            <tr><td><code>top_p</code></td><td>1.0</td><td>Nucleus sampling threshold</td></tr>
+                            <tr><td><code>top_k</code></td><td>-1</td><td>Top-K sampling (-1 = disabled)</td></tr>
+                            <tr><td><code>max_tokens</code></td><td>256</td><td>Maximum tokens to generate</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section class="doc-section" id="serving">
+                    <h2>API Server</h2>
+                    <p>SwiftLLM includes an OpenAI-compatible HTTP server built with Axum, supporting streaming responses, API key authentication, and security hardening.</p>
+                    <div class="code-block">
+                        <div class="code-block-header"><span class="code-block-lang">Shell</span><button class="code-block-copy" onclick="copyBlock(this)">Copy</button></div>
+<span class="cm"># Start the server</span>
+swiftllm serve --model meta-llama/Llama-3-8B --port 8000 --host 0.0.0.0
+                    </div>
+                    <h3>Endpoints</h3>
+                    <ul>
+                        <li><code>POST /v1/completions</code> — Text completion</li>
+                        <li><code>POST /v1/chat/completions</code> — Chat completion</li>
+                        <li><code>GET /v1/models</code> — List loaded models</li>
+                        <li><code>GET /health</code> — Health check</li>
+                    </ul>
+                    <div class="callout callout-tip">
+                        <div class="callout-icon">&#128161;</div>
+                        <p>The server is a drop-in replacement for the OpenAI API. Any client library that works with OpenAI will work with SwiftLLM.</p>
+                    </div>
+                </section>
+
+                <section class="doc-section" id="training">
+                    <h2>Training & Fine-Tuning</h2>
+                    <p>SwiftLLM supports full training, LoRA, and QLoRA fine-tuning with multiple optimizer options.</p>
+                    <h3>LoRA Fine-Tuning</h3>
+                    <div class="code-block">
+                        <div class="code-block-header"><span class="code-block-lang">Python</span><button class="code-block-copy" onclick="copyBlock(this)">Copy</button></div>
+<span class="kw">from</span> swiftllm <span class="kw">import</span> fine_tune, LoRAConfig, TrainingConfig
+
+lora = <span class="fn">LoRAConfig</span>(r=<span class="num">16</span>, alpha=<span class="num">32</span>, dropout=<span class="num">0.05</span>)
+config = <span class="fn">TrainingConfig</span>(
+    learning_rate=<span class="num">2e-4</span>,
+    num_epochs=<span class="num">3</span>,
+    batch_size=<span class="num">4</span>,
+    optimizer=<span class="str">"adamw"</span>
+)
+
+<span class="fn">fine_tune</span>(model=<span class="str">"meta-llama/Llama-3-8B"</span>, dataset=<span class="str">"./my_data.jsonl"</span>, lora_config=lora, training_config=config, output_dir=<span class="str">"./output"</span>)
+                    </div>
+                    <h3>Optimizers</h3>
+                    <ul>
+                        <li><strong>AdamW</strong> — Standard adaptive optimizer with weight decay</li>
+                        <li><strong>Muon</strong> — Momentum-based optimizer for large models</li>
+                        <li><strong>SGD</strong> — Stochastic gradient descent with momentum</li>
+                    </ul>
+                </section>
+
+                <section class="doc-section" id="cli">
+                    <h2>CLI Commands</h2>
+                    <p>The <code>swiftllm</code> CLI provides nine subcommands covering inference, serving, training, and model management.</p>
+                    <div class="cli-grid">
+                        <div class="cli-item"><code>serve</code><p>Start OpenAI-compatible API server</p></div>
+                        <div class="cli-item"><code>generate</code><p>One-shot batch text generation</p></div>
+                        <div class="cli-item"><code>chat</code><p>Interactive chat mode</p></div>
+                        <div class="cli-item"><code>download</code><p>Download models from HuggingFace</p></div>
+                        <div class="cli-item"><code>benchmark</code><p>Performance benchmarking</p></div>
+                        <div class="cli-item"><code>convert</code><p>Model format conversion</p></div>
+                        <div class="cli-item"><code>info</code><p>Display model information</p></div>
+                        <div class="cli-item"><code>train</code><p>Full training or fine-tuning</p></div>
+                        <div class="cli-item"><code>finetune</code><p>LoRA fine-tuning convenience</p></div>
+                    </div>
+                </section>
+
+                <section class="doc-section" id="python-api">
+                    <h2>Python API</h2>
+                    <h3>Core Classes</h3>
+                    <table class="config-table">
+                        <thead><tr><th>Class</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>LLM</code></td><td>Synchronous inference engine</td></tr>
+                            <tr><td><code>AsyncLLM</code></td><td>Async inference engine with await support</td></tr>
+                            <tr><td><code>SamplingParams</code></td><td>Temperature, top_p, top_k, max_tokens</td></tr>
+                            <tr><td><code>EngineConfig</code></td><td>GPU memory utilization, dtype, quantization</td></tr>
+                            <tr><td><code>ServerConfig</code></td><td>Server host, port, and API settings</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section class="doc-section" id="configuration">
+                    <h2>Configuration</h2>
+                    <p>SwiftLLM can be configured via environment variables for GPU, scheduling, and model settings.</p>
+                    <h3>GPU & Memory</h3>
+                    <table class="config-table">
+                        <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>SWIFTLLM_GPU_MEMORY_UTILIZATION</code></td><td>0.90</td><td>Fraction of VRAM for model and cache</td></tr>
+                            <tr><td><code>SWIFTLLM_NUM_GPU_LAYERS</code></td><td>auto</td><td>Number of layers to offload to GPU</td></tr>
+                            <tr><td><code>SWIFTLLM_DTYPE</code></td><td>auto</td><td>Model dtype: float16, bfloat16, float32, int8, int4</td></tr>
+                        </tbody>
+                    </table>
+                    <h3>Scheduling</h3>
+                    <table class="config-table">
+                        <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>SWIFTLLM_MAX_NUM_SEQS</code></td><td>256</td><td>Max concurrent request sequences</td></tr>
+                            <tr><td><code>SWIFTLLM_MAX_NUM_BATCHED_TOKENS</code></td><td>8192</td><td>Peak tokens per scheduler step</td></tr>
+                            <tr><td><code>SWIFTLLM_SCHEDULER_POLICY</code></td><td>fcfs</td><td>Policy: fcfs, sjf, or priority</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section class="doc-section" id="models">
+                    <h2>Supported Models</h2>
+                    <p>SwiftLLM supports a wide range of open-source model architectures and formats.</p>
+                    <h3>Model Architectures</h3>
+                    <table class="config-table">
+                        <thead><tr><th>Family</th><th>Variants</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>LLaMA</strong></td><td>LLaMA, LLaMA 2, LLaMA 3, Code Llama</td></tr>
+                            <tr><td><strong>Mistral</strong></td><td>Mistral, Mixtral (MoE)</td></tr>
+                            <tr><td><strong>Qwen</strong></td><td>Qwen 1, Qwen 2, Qwen 3</td></tr>
+                            <tr><td><strong>Phi</strong></td><td>Phi-2, Phi-3</td></tr>
+                            <tr><td><strong>Falcon</strong></td><td>Falcon</td></tr>
+                            <tr><td><strong>Gemma</strong></td><td>Gemma</td></tr>
+                        </tbody>
+                    </table>
+                    <h3>Model Formats</h3>
+                    <ul>
+                        <li><strong>HuggingFace</strong> — Direct download from HuggingFace Hub</li>
+                        <li><strong>GGUF</strong> — Quantized models via llama-cpp-python integration</li>
+                        <li><strong>SafeTensors</strong> — Safe tensor serialization format</li>
+                    </ul>
+                </section>
+
+                <section class="doc-section" id="support">
+                    <h2>Support</h2>
+                    <div class="doc-features">
+                        <div class="doc-feature"><div class="doc-feature-icon">&#128172;</div><h4>GitHub Issues</h4><p>Report bugs and request features on the GitHub issue tracker.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#128214;</div><h4>Examples</h4><p>Check the /examples directory for working code samples.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#128736;</div><h4>Contributing</h4><p>Contributions welcome! Fork the repo, create a branch, and submit a PR.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#128220;</div><h4>License</h4><p>SwiftLLM is released under the Apache 2.0 License.</p></div>
+                    </div>
+                </section>
+
+                <section class="doc-section" id="faq">
+                    <h2>FAQ</h2>
+                    <div class="faq-item">
+                        <h3 onclick="toggleFaq(this)">Can I run SwiftLLM without a GPU?<span class="icon">+</span></h3>
+                        <div class="faq-answer"><p>Yes. Use the <code>--cpu</code> flag during installation to build without CUDA support. Performance will be slower, but all features remain available.</p></div>
+                    </div>
+                    <div class="faq-item">
+                        <h3 onclick="toggleFaq(this)">Which CUDA versions are supported?<span class="icon">+</span></h3>
+                        <div class="faq-answer"><p>SwiftLLM requires CUDA 11.8 or later. The installer automatically detects your CUDA toolkit version via <code>nvcc</code>.</p></div>
+                    </div>
+                    <div class="faq-item">
+                        <h3 onclick="toggleFaq(this)">How do I use SwiftLLM as a drop-in OpenAI replacement?<span class="icon">+</span></h3>
+                        <div class="faq-answer"><p>Start the server with <code>swiftllm serve</code>, then point your OpenAI client to <code>http://localhost:8000</code>.</p></div>
+                    </div>
+                    <div class="faq-item">
+                        <h3 onclick="toggleFaq(this)">Can I deploy to air-gapped environments?<span class="icon">+</span></h3>
+                        <div class="faq-answer"><p>Yes. Use <code>airgap-bundle.sh</code> on a connected machine to create a portable archive, then install with <code>bash install.sh --airgap</code> on the target machine.</p></div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('navToggle').addEventListener('click', () => document.getElementById('navLinks').classList.toggle('open'));
+        document.getElementById('sidebarToggle').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
+
+        const sections = document.querySelectorAll('.doc-section');
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+        const scrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    sidebarLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === '#' + id));
+                }
+            });
+        }, { rootMargin: '-64px 0px -70% 0px', threshold: 0 });
+
+        sections.forEach(section => scrollObserver.observe(section));
+
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', (e) => {
+                const target = document.querySelector(a.getAttribute('href'));
+                if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); document.getElementById('sidebar').classList.remove('open'); }
+            });
+        });
+
+        function copyBlock(btn) {
+            const block = btn.closest('.code-block');
+            const text = block.textContent.replace(block.querySelector('.code-block-header').textContent, '').trim();
+            navigator.clipboard.writeText(text).then(() => { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000); });
+        }
+
+        function toggleFaq(el) { el.closest('.faq-item').classList.toggle('open'); }
+    </script>
+</body>
+</html>
