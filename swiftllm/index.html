@@ -686,11 +686,11 @@ font-weight: 500;
     <section class="hero">
         <div class="hero-badge">
             <div class="hero-badge-dot"></div>
-            v2.0.0-alpha.2 — Now with Air-Gap Support
+            v2.0.1-beta &mdash; CPU &amp; ARM wheels, training UX fixes
         </div>
         <h1>SwiftLLM</h1>
         <p class="hero-subtitle">High-Performance LLM Inference Engine</p>
-        <p>A Rust-powered LLM inference, serving, and training engine. Blazing fast, memory efficient, and production ready.</p>
+        <p>A Rust-powered LLM inference, serving, and training engine. Blazing fast, memory efficient, production ready &mdash; now portable across CPU, CUDA, x86_64 and aarch64.</p>
         <div class="hero-actions">
             <a href="docs.html" class="btn btn-primary">Get Started</a>
             <a href="https://github.com/infrabrew/swiftllm" target="_blank" class="btn btn-secondary">View on GitHub</a>
@@ -703,7 +703,7 @@ font-weight: 500;
                 <div class="stat-item"><div class="stat-value">10+</div><div class="stat-label">Model Families</div></div>
                 <div class="stat-item"><div class="stat-value">5</div><div class="stat-label">Rust Crates</div></div>
                 <div class="stat-item"><div class="stat-value">9</div><div class="stat-label">CLI Commands</div></div>
-                <div class="stat-item"><div class="stat-value">3</div><div class="stat-label">Model Formats</div></div>
+                <div class="stat-item"><div class="stat-value">4</div><div class="stat-label">Wheel Targets</div></div>
             </div>
         </div>
     </section>
@@ -718,15 +718,15 @@ font-weight: 500;
                     <div class="highlights">
                         <div class="highlight-item">
                             <div class="highlight-icon">&#9889;</div>
-                            <div><h4>Rust + Python Hybrid</h4><p>Core engine in Rust, Python API for ease of use</p></div>
+                            <div><h4>Rust + Python Hybrid</h4><p>Rust core via PyO3 + maturin abi3 wheels for Python 3.8&ndash;3.12</p></div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="highlight-icon">&#128187;</div>
+                            <div><h4>CPU, CUDA, ARM</h4><p>CPU is default &mdash; CUDA opt-in with <code>--gpu</code>. Ships x86_64 and aarch64 wheels</p></div>
                         </div>
                         <div class="highlight-item">
                             <div class="highlight-icon">&#128274;</div>
-                            <div><h4>Air-Gapped Deployment</h4><p>Bundle and deploy on networks with no internet access</p></div>
-                        </div>
-                        <div class="highlight-item">
-                            <div class="highlight-icon">&#128640;</div>
-                            <div><h4>Speculative Decoding</h4><p>Draft model acceleration for faster token generation</p></div>
+                            <div><h4>Air-Gapped Deployment</h4><p>Bundle wheels, source, and models into a signed tarball for offline installs</p></div>
                         </div>
                     </div>
                 </div>
@@ -772,43 +772,43 @@ font-weight: 500;
                 </div>
                 <div class="feature-card fade-up">
                     <div class="feature-icon purple">&#128200;</div>
-                    <h3>Memory Efficient</h3>
-                    <p>PagedAttention provides optimal KV cache management with paged memory allocation.</p>
+                    <h3>PagedAttention</h3>
+                    <p>Block-allocator KV cache with copy-on-write delivers optimal VRAM utilization.</p>
                 </div>
                 <div class="feature-card fade-up">
                     <div class="feature-icon blue">&#128338;</div>
-                    <h3>Low Latency</h3>
-                    <p>Optimized CUDA kernels and speculative decoding deliver sub-second response times.</p>
+                    <h3>Speculative Decoding</h3>
+                    <p>Draft-model acceleration and O(n) quickselect sampling for sub-second latency.</p>
                 </div>
                 <div class="feature-card fade-up">
                     <div class="feature-icon pink">&#127912;</div>
-                    <h3>Multi-GPU Support</h3>
-                    <p>Tensor parallelism and pipeline parallelism scale seamlessly across GPUs.</p>
+                    <h3>Multi-GPU Scaling</h3>
+                    <p>Tensor parallelism and pipeline parallelism scale seamlessly across NVIDIA GPUs.</p>
                 </div>
                 <div class="feature-card fade-up">
                     <div class="feature-icon green">&#128279;</div>
                     <h3>OpenAI Compatible</h3>
-                    <p>Drop-in replacement with security hardening, API key auth, and input validation.</p>
+                    <p>Drop-in API server with key auth, input validation, CORS, TLS, and Prometheus metrics.</p>
                 </div>
                 <div class="feature-card fade-up">
                     <div class="feature-icon orange">&#128295;</div>
-                    <h3>Training & Fine-Tuning</h3>
-                    <p>LoRA, QLoRA, and full fine-tuning with Muon, AdamW, and SGD optimizers.</p>
+                    <h3>Training &amp; Fine-Tuning</h3>
+                    <p>LoRA, QLoRA, full fine-tuning with Muon, AdamW, and SGD optimizers.</p>
                 </div>
                 <div class="feature-card fade-up">
                     <div class="feature-icon blue">&#128230;</div>
-                    <h3>Multiple Formats</h3>
-                    <p>Load models from HuggingFace, GGUF quantized files, and SafeTensors.</p>
+                    <h3>Multi-Format Models</h3>
+                    <p>HuggingFace, GGUF, SafeTensors, and PyTorch formats with auto-detection.</p>
                 </div>
                 <div class="feature-card fade-up">
                     <div class="feature-icon purple">&#128274;</div>
                     <h3>Air-Gapped Install</h3>
-                    <p>Bundle everything for offline deployment on isolated networks.</p>
+                    <p>Portable bundles with SHA256 verification for fully offline deployment.</p>
                 </div>
                 <div class="feature-card fade-up">
                     <div class="feature-icon green">&#128187;</div>
-                    <h3>Python Friendly</h3>
-                    <p>Easy-to-use sync and async Python API, CLI with 9 subcommands.</p>
+                    <h3>CPU &amp; ARM Ready</h3>
+                    <p>Ships portable wheels for x86_64, aarch64, Apple Silicon, and Graviton &mdash; CUDA is opt-in.</p>
                 </div>
             </div>
         </div>
@@ -865,38 +865,79 @@ font-weight: 500;
         </div>
     </section>
 
+    <section class="section">
+        <div class="section-inner">
+            <div class="section-header fade-up">
+                <div class="section-label">Portability</div>
+                <h2 class="section-title">Supported Platforms</h2>
+                <p class="section-subtitle">Portable abi3 wheels for Python 3.8&ndash;3.12. CPU is the default; CUDA is opt-in.</p>
+            </div>
+            <div style="max-width: 680px; margin: 0 auto; background: var(--white); border-radius: 14px; padding: 8px; border: 1px solid rgba(0,0,0,0.06);">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--gray-100);">
+                            <th style="text-align: left; padding: 14px 16px; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-400);">Platform</th>
+                            <th style="text-align: left; padding: 14px 16px; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-400);">x86_64</th>
+                            <th style="text-align: left; padding: 14px 16px; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-400);">aarch64 / arm64</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid var(--gray-50);">
+                            <td style="padding: 12px 16px; font-weight: 500;">Linux</td>
+                            <td style="padding: 12px 16px; color: var(--gray-400); font-family: 'SF Mono', monospace; font-size: 11.5px;">manylinux2014_x86_64</td>
+                            <td style="padding: 12px 16px; color: var(--gray-400); font-family: 'SF Mono', monospace; font-size: 11.5px;">manylinux2014_aarch64</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px 16px; font-weight: 500;">macOS</td>
+                            <td style="padding: 12px 16px; color: var(--gray-400); font-family: 'SF Mono', monospace; font-size: 11.5px;">macosx_10_15_x86_64</td>
+                            <td style="padding: 12px 16px; color: var(--gray-400); font-family: 'SF Mono', monospace; font-size: 11.5px;">macosx_11_0_arm64 (M1+)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="text-align: center; font-size: 12px; color: var(--gray-400); margin-top: 16px; max-width: 540px; margin-left: auto; margin-right: auto;">Build on your dev laptop, ship to Graviton, Raspberry Pi, Jetson, or Apple Silicon. CUDA 11.8+ unlocks GPU inference; <code style="background: var(--gray-100); padding: 1px 5px; border-radius: 3px; font-size: 11px;">./install.sh --gpu</code> enables it.</p>
+        </div>
+    </section>
+
     <section class="section section-gray" id="quickstart">
         <div class="section-inner">
             <div class="section-header fade-up">
                 <div class="section-label">Get Started</div>
                 <h2 class="section-title">Up and Running in Minutes</h2>
-                <p class="section-subtitle">Three simple steps to start running LLMs locally.</p>
+                <p class="section-subtitle">Four simple steps to install, download a model, and start serving.</p>
             </div>
             <div class="steps-container">
                 <div class="steps-track" id="stepsTrack">
                     <div class="step-card fade-up">
                         <div class="step-num">1</div>
-                        <h3>Clone & Install</h3>
-                        <p>Clone the repo and run the installer. It handles Rust, Python, and CUDA setup automatically.</p>
-                        <div class="step-code" onclick="copyCode(this)">git clone https://github.com/infrabrew/swiftllm && cd swiftllm && bash install.sh</div>
+                        <h3>Clone &amp; Install</h3>
+                        <p>Installer auto-detects GPU, builds with Rust + maturin, installs <code>[serve]</code> extras for FastAPI/uvicorn.</p>
+                        <div class="step-code" onclick="copyCode(this)">git clone https://github.com/infrabrew/swiftllm && cd swiftllm && ./install.sh</div>
                     </div>
                     <div class="step-card fade-up">
                         <div class="step-num">2</div>
                         <h3>Download a Model</h3>
-                        <p>Use the CLI to download any supported model from HuggingFace Hub.</p>
-                        <div class="step-code" onclick="copyCode(this)">swiftllm download meta-llama/Llama-3-8B</div>
+                        <p>Pull any supported model from HuggingFace Hub, including GGUF quantized variants.</p>
+                        <div class="step-code" onclick="copyCode(this)">swiftllm download -m Qwen/Qwen2.5-7B-Instruct-GGUF:qwen2.5-7b-instruct-q4_k_m.gguf</div>
                     </div>
                     <div class="step-card fade-up">
                         <div class="step-num">3</div>
-                        <h3>Start Serving</h3>
-                        <p>Launch an OpenAI-compatible API server with a single command.</p>
-                        <div class="step-code" onclick="copyCode(this)">swiftllm serve --model meta-llama/Llama-3-8B --port 8000</div>
+                        <h3>Run Inference</h3>
+                        <p>Batch generate, chat interactively, or pipe prompts from a file.</p>
+                        <div class="step-code" onclick="copyCode(this)">swiftllm generate -m Qwen/Qwen2.5-7B-Instruct-GGUF -p "Say hi"</div>
+                    </div>
+                    <div class="step-card fade-up">
+                        <div class="step-num">4</div>
+                        <h3>Serve an API</h3>
+                        <p>OpenAI-compatible server with key auth, CORS, and /metrics endpoint.</p>
+                        <div class="step-code" onclick="copyCode(this)">swiftllm serve -m Qwen/Qwen2.5-7B-Instruct-GGUF --port 8000</div>
                     </div>
                 </div>
                 <div class="carousel-indicators">
                     <div class="carousel-dot active" data-index="0"></div>
                     <div class="carousel-dot" data-index="1"></div>
                     <div class="carousel-dot" data-index="2"></div>
+                    <div class="carousel-dot" data-index="3"></div>
                 </div>
             </div>
         </div>
@@ -917,7 +958,7 @@ font-weight: 500;
         <div class="footer-inner">
             <div class="footer-left">
                 <div class="footer-logo">S</div>
-                <span class="footer-copy">SwiftLLM &copy; 2025. Apache 2.0 License.</span>
+                <span class="footer-copy">SwiftLLM &copy; 2026. Apache 2.0 License.</span>
             </div>
             <ul class="footer-links">
                 <li><a href="docs.html">Documentation</a></li>

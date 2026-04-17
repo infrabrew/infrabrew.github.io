@@ -185,6 +185,7 @@
         .timeline-entry:nth-child(2) { animation-delay: 0.15s; }
         .timeline-entry:nth-child(3) { animation-delay: 0.2s; }
         .timeline-entry:nth-child(4) { animation-delay: 0.25s; }
+        .timeline-entry:nth-child(5) { animation-delay: 0.3s; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateX(-8px); }
@@ -465,26 +466,80 @@
         </div>
 
         <div class="timeline" id="timeline">
-            <div class="timeline-entry latest" data-categories="feature,fix,security">
+            <div class="timeline-entry latest" data-categories="fix">
                 <div class="timeline-dot blue"></div>
                 <div class="timeline-card">
                     <div class="entry-header">
-                        <div class="entry-version">v2.0.0-alpha.2</div>
+                        <div class="entry-version">v2.0.1-beta</div>
                         <div class="entry-meta">
                             <span class="entry-tag tag-latest">Latest</span>
-                            <span class="entry-tag tag-alpha">Alpha</span>
-                            <span class="entry-date">2025</span>
+                            <span class="entry-tag" style="background: #fef9c3; color: #a16207;">Beta</span>
+                            <span class="entry-date">2026</span>
                         </div>
                     </div>
-                    <p class="entry-summary">Security hardening, air-gapped deployment support, and critical bug fixes.</p>
+                    <p class="entry-summary">Training UX fixes &mdash; simulated-stub banner, train-data path validation, and full regression coverage.</p>
                     <ul class="change-list">
-                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Air-gapped / offline network installation support with portable bundles</span></li>
-                        <li class="change-item" data-type="security"><span class="change-badge badge-security">Security</span><span>Updated security hardening for API server (auth, input validation, headers)</span></li>
-                        <li class="change-item" data-type="fix"><span class="change-badge badge-fixed">Fixed</span><span>Resolved multiple bugs and stability issues</span></li>
-                        <li class="change-item" data-type="fix"><span class="change-badge badge-changed">Changed</span><span>Updated and resolved README documentation</span></li>
+                        <li class="change-item" data-type="fix"><span class="change-badge badge-fixed">Fixed</span><span><code>Trainer.train()</code> now prints a visible <code>[SIMULATED]</code> banner making it obvious the current loop is a stub (no weights, no gradients) rather than real training</span></li>
+                        <li class="change-item" data-type="fix"><span class="change-badge badge-fixed">Fixed</span><span><code>swiftllm train</code> and <code>swiftllm finetune</code> validate <code>--train-data</code> / <code>--eval-data</code> paths up front &mdash; missing, non-regular, or empty files now fail fast with clear errors</span></li>
+                        <li class="change-item" data-type="fix"><span class="change-badge badge-changed">Changed</span><span>Validation covers paths loaded from <code>--config</code> JSON so typos in saved configs surface immediately</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Full regression matrix: install &rarr; download &rarr; generate (18.61 tok/s) &rarr; finetune (LoRA) &rarr; train (LoRA / QLoRA / full) on Ubuntu 24.04 + CUDA 13.0</span></li>
                     </ul>
                     <div class="entry-footer">
-                        <a href="https://github.com/infrabrew/swiftllm/commit/4b6d857" target="_blank" class="commit-link">&#128279; 4b6d857</a>
+                        <a href="https://github.com/infrabrew/swiftllm/commit/962f6d8" target="_blank" class="commit-link">&#128279; 962f6d8</a>
+                        <div class="contributors"><div class="contributor-avatar">IB</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-entry" data-categories="feature,fix,security">
+                <div class="timeline-dot purple"></div>
+                <div class="timeline-card">
+                    <div class="entry-header">
+                        <div class="entry-version">v2.0.0.2-alpha</div>
+                        <div class="entry-meta"><span class="entry-tag tag-alpha">Alpha</span><span class="entry-date">2026</span></div>
+                    </div>
+                    <p class="entry-summary">CPU &amp; ARM wheel support, installer portability, and critical Rust-side safety fixes.</p>
+                    <ul class="change-list">
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>CPU-only build is now the default &mdash; <code>maturin build --release</code> produces a portable wheel with zero CUDA dependencies, buildable on Apple Silicon, Graviton, Raspberry Pi, Jetson, and Ampere ARM servers</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Top-level <code>swiftllm</code> crate exposes explicit <code>cpu</code> and <code>cuda</code> Cargo features; CUDA is opt-in via <code>./install.sh --gpu</code> or <code>cargo build --features cuda</code></span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span><code>airgap-bundle.sh --arch ARCH</code> flag (x86_64, aarch64, arm64) auto-maps to correct pip platform tags and rustup target triples for cross-architecture bundles</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span><code>[serve]</code> optional dependency in <code>pyproject.toml</code> (fastapi, uvicorn) wired into <code>install.sh</code> and the airgap bundle so <code>swiftllm serve</code> works out of the box</span></li>
+                        <li class="change-item" data-type="fix"><span class="change-badge badge-fixed">Fixed</span><span>PEP 668 handling &mdash; on Ubuntu 23.04+ / Debian 12+ externally-managed Python, installer auto-adds <code>--break-system-packages</code> with a warning recommending virtualenv</span></li>
+                        <li class="change-item" data-type="fix"><span class="change-badge badge-fixed">Fixed</span><span>Replaced non-portable <code>grep -oP</code> with portable <code>sed</code> for CUDA version detection (macOS / BSD compatible)</span></li>
+                        <li class="change-item" data-type="fix"><span class="change-badge badge-fixed">Fixed</span><span><code>airgap-bundle.sh</code> SHA256 verification prefers <code>sha256sum</code> (Linux coreutils) with <code>shasum</code> fallback (macOS)</span></li>
+                        <li class="change-item" data-type="fix"><span class="change-badge badge-fixed">Fixed</span><span>Argument guards on <code>--venv</code>, <code>--model-dir</code>, <code>--model</code>, <code>-o</code>, <code>--platform</code>, <code>--arch</code> &mdash; missing values no longer silently consume the next flag</span></li>
+                        <li class="change-item" data-type="security"><span class="change-badge badge-security">Security</span><span>Fixed 14 <code>partial_cmp().unwrap()</code> calls across sampling code &mdash; replaced with <code>unwrap_or(Ordering::Equal)</code> to prevent NaN panics on numerically unstable models</span></li>
+                        <li class="change-item" data-type="security"><span class="change-badge badge-security">Security</span><span>Added <code>checked_add</code> bounds validation in GGUF loader &mdash; malformed files can no longer cause slice panics on mmap'd data</span></li>
+                        <li class="change-item" data-type="security"><span class="change-badge badge-security">Security</span><span>Replaced <code>try_into().unwrap()</code> in SafeTensors header parser with proper <code>Result</code> propagation; added <code>// SAFETY:</code> comments to all unsafe mmap blocks</span></li>
+                    </ul>
+                    <div class="entry-footer">
+                        <a href="https://github.com/infrabrew/swiftllm/commit/ae87421" target="_blank" class="commit-link">&#128279; ae87421</a>
+                        <div class="contributors"><div class="contributor-avatar">IB</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-entry" data-categories="feature,security">
+                <div class="timeline-dot blue"></div>
+                <div class="timeline-card">
+                    <div class="entry-header">
+                        <div class="entry-version">v2.0.0.1-alpha</div>
+                        <div class="entry-meta"><span class="entry-tag tag-alpha">Alpha</span><span class="entry-date">2026</span></div>
+                    </div>
+                    <p class="entry-summary">Air-gapped installation and comprehensive security hardening.</p>
+                    <ul class="change-list">
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span><code>airgap-bundle.sh</code> script creates portable install archives on a connected machine (bundles source, pip wheels, rustup-init, optional models)</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span><code>install.sh --airgap</code> flag for fully offline installation from a bundle</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Runtime offline mode via <code>SWIFTLLM_OFFLINE=1</code> &mdash; disables all HuggingFace downloads and uses local cache only</span></li>
+                        <li class="change-item" data-type="security"><span class="change-badge badge-security">Security</span><span><strong>Critical:</strong> Fixed JSON injection in SSE streaming &mdash; replaced raw <code>format!()</code> with <code>serde_json::json!()</code></span></li>
+                        <li class="change-item" data-type="security"><span class="change-badge badge-security">Security</span><span><strong>Critical:</strong> Fixed shell injection in <code>airgap-bundle.sh</code> &mdash; model names now passed via <code>sys.argv</code> instead of string interpolation</span></li>
+                        <li class="change-item" data-type="security"><span class="change-badge badge-security">Security</span><span><strong>Critical:</strong> Added SHA256 checksum verification for downloaded <code>rustup-init</code> binary</span></li>
+                        <li class="change-item" data-type="security"><span class="change-badge badge-security">Security</span><span>Path validation in <code>Trainer.resume_from_checkpoint()</code> against directory traversal; symlink traversal protection in offline cache matching</span></li>
+                        <li class="change-item" data-type="security"><span class="change-badge badge-security">Security</span><span>Capped Muon Newton-Schulz iterations at 20; epsilon floor in AdamW bias correction; LoRA buffer size validation</span></li>
+                        <li class="change-item" data-type="fix"><span class="change-badge badge-fixed">Fixed</span><span>Use-after-move in <code>engine.rs</code> eos_token_id extraction; usize negation in <code>trainer.rs</code>; missing <code>mut</code> on <code>eval_data</code> parameter</span></li>
+                    </ul>
+                    <div class="entry-footer">
+                        <a href="https://github.com/infrabrew/swiftllm/commit/9ad73bb" target="_blank" class="commit-link">&#128279; 9ad73bb</a>
                         <div class="contributors"><div class="contributor-avatar">IB</div></div>
                     </div>
                 </div>
@@ -494,38 +549,20 @@
                 <div class="timeline-dot purple"></div>
                 <div class="timeline-card">
                     <div class="entry-header">
-                        <div class="entry-version">v2.0.0-alpha.1</div>
-                        <div class="entry-meta"><span class="entry-tag tag-alpha">Alpha</span><span class="entry-date">2025</span></div>
-                    </div>
-                    <p class="entry-summary">Major feature improvements and the addition of the Muon optimizer for training workflows.</p>
-                    <ul class="change-list">
-                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Muon optimizer for large model training alongside AdamW and SGD</span></li>
-                        <li class="change-item" data-type="feature"><span class="change-badge badge-changed">Changed</span><span>Improved features and performance across inference and serving pipelines</span></li>
-                        <li class="change-item" data-type="fix"><span class="change-badge badge-fixed">Fixed</span><span>Removed build artifacts from tracking, added proper .gitignore</span></li>
-                    </ul>
-                    <div class="entry-footer">
-                        <a href="https://github.com/infrabrew/swiftllm/commit/f076846" target="_blank" class="commit-link">&#128279; f076846</a>
-                        <div class="contributors"><div class="contributor-avatar">IB</div></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="timeline-entry" data-categories="feature">
-                <div class="timeline-dot blue"></div>
-                <div class="timeline-card">
-                    <div class="entry-header">
                         <div class="entry-version">v2.0.0-alpha</div>
-                        <div class="entry-meta"><span class="entry-tag tag-alpha">Alpha</span><span class="entry-date">2025</span></div>
+                        <div class="entry-meta"><span class="entry-tag tag-alpha">Alpha</span><span class="entry-date">2026</span></div>
                     </div>
-                    <p class="entry-summary">Complete rewrite with Rust core, modular crate architecture, and Python bindings.</p>
+                    <p class="entry-summary">Training &amp; fine-tuning infrastructure, engine optimization, and scheduler improvements.</p>
                     <ul class="change-list">
-                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Complete Rust rewrite with 5 modular crates (core, models, cuda, server, training)</span></li>
-                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>PagedAttention for optimal KV cache management</span></li>
-                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>OpenAI-compatible API server built with Axum</span></li>
-                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>LoRA, QLoRA, and full fine-tuning support</span></li>
-                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Multi-GPU tensor parallelism and pipeline parallelism</span></li>
-                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Speculative decoding with draft model acceleration</span></li>
-                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>CLI with 9 subcommands: serve, generate, chat, download, benchmark, convert, info, train, finetune</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span><code>swiftllm-training</code> Rust crate with full LoRA / QLoRA / full fine-tuning infrastructure</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span><strong>Muon optimizer</strong> with Newton-Schulz orthogonalization and AdamW fallback, plus AdamW and SGD with linear/cosine/constant LR schedulers</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Dataset loading (JSONL/CSV/text) with instruction templates; training metrics with rolling windows and perplexity</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Checkpoint save/load with <code>save_total_limit</code> rotation; Python <code>Trainer</code> class with callbacks and <code>EarlyStoppingConfig</code></span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>CLI: <code>swiftllm train</code> and <code>swiftllm finetune</code> subcommands</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>O(n) top-k / beam / logprobs selection via quickselect; <code>/metrics</code> endpoint (JSON and Prometheus text format)</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>API key authentication middleware with security headers; configurable EOS token ID per model</span></li>
+                        <li class="change-item" data-type="fix"><span class="change-badge badge-fixed">Fixed</span><span>Eliminated redundant read-then-write lock in sampling hot path; numerically stable log-softmax; BeamSearchSampler state maintenance</span></li>
+                        <li class="change-item" data-type="fix"><span class="change-badge badge-fixed">Fixed</span><span>O(n) victim selection for preemption scheduling; gradient clipping, LoRA scaling, AdamW bias correction for large steps</span></li>
                     </ul>
                     <div class="entry-footer">
                         <a href="https://github.com/infrabrew/swiftllm/commit/4af1106" target="_blank" class="commit-link">&#128279; 4af1106</a>
@@ -539,13 +576,19 @@
                 <div class="timeline-card">
                     <div class="entry-header">
                         <div class="entry-version">v1.0.0</div>
-                        <div class="entry-meta"><span class="entry-tag tag-stable">Initial</span><span class="entry-date">2025</span></div>
+                        <div class="entry-meta"><span class="entry-tag tag-stable">Initial</span><span class="entry-date">2026</span></div>
                     </div>
-                    <p class="entry-summary">Initial release with core inference capabilities and installation tooling.</p>
+                    <p class="entry-summary">Initial release &mdash; Rust core, PagedAttention, continuous batching, OpenAI API, Python SDK.</p>
                     <ul class="change-list">
-                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Core LLM inference engine</span></li>
-                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Installation script with automatic dependency detection</span></li>
-                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Initial model support and Python bindings</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Complete Rust rewrite with 5 modular crates (core, models, cuda, server, training)</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>PagedAttention memory management: block allocator with copy-on-write</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Continuous batching scheduler with preemption (swap / recompute)</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Token sampling: greedy, temperature, top-k, top-p, min-p, repetition penalty</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>OpenAI-compatible HTTP API (chat completions, completions, models) built with Axum</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Python SDK: <code>LLM</code>, <code>AsyncLLM</code>, <code>SamplingParams</code></span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>CLI subcommands: serve, generate, benchmark, convert, info, chat, download</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>HuggingFace model downloading and resolution; GGUF model support via llama-cpp-python</span></li>
+                        <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span>Speculative decoding with draft model acceleration; multi-GPU tensor and pipeline parallelism</span></li>
                     </ul>
                     <div class="entry-footer">
                         <a href="https://github.com/infrabrew/swiftllm/commit/04104da" target="_blank" class="commit-link">&#128279; 04104da</a>
@@ -567,7 +610,7 @@
         <div class="footer-inner">
             <div class="footer-left">
                 <div class="footer-logo">S</div>
-                <span class="footer-copy">SwiftLLM &copy; 2025. Apache 2.0 License.</span>
+                <span class="footer-copy">SwiftLLM &copy; 2026. Apache 2.0 License.</span>
             </div>
             <ul class="footer-links">
                 <li><a href="index.html">Home</a></li>
@@ -625,7 +668,7 @@
                     grid.appendChild(card);
                 });
             } catch (err) {
-                grid.innerHTML = `<div class="activity-card"><div class="activity-type">Commit</div><div class="activity-title-text">Update security and bugs</div><div class="activity-meta">4b6d857 · Recent</div></div><div class="activity-card"><div class="activity-type">Commit</div><div class="activity-title-text">Resolve Readme</div><div class="activity-meta">05bca3b · Recent</div></div>`;
+                grid.innerHTML = `<div class="activity-card"><div class="activity-type">Commit</div><div class="activity-title-text"><a href="https://github.com/infrabrew/swiftllm/commit/962f6d8" target="_blank">Bump version to v2.0.1-beta, document training UX fixes</a></div><div class="activity-meta">962f6d8 · Recent</div></div><div class="activity-card"><div class="activity-type">Commit</div><div class="activity-title-text"><a href="https://github.com/infrabrew/swiftllm/commit/5b8bc8a" target="_blank">Surface simulated-training stub and validate train-data path</a></div><div class="activity-meta">5b8bc8a · Recent</div></div><div class="activity-card"><div class="activity-type">Commit</div><div class="activity-title-text"><a href="https://github.com/infrabrew/swiftllm/commit/ae87421" target="_blank">Add CPU and ARM wheel support, fix installer portability</a></div><div class="activity-meta">ae87421 · Recent</div></div><div class="activity-card"><div class="activity-type">Commit</div><div class="activity-title-text"><a href="https://github.com/infrabrew/swiftllm/commit/9ad73bb" target="_blank">Add air-gapped / offline network installation support</a></div><div class="activity-meta">9ad73bb · Recent</div></div>`;
             }
         }
 

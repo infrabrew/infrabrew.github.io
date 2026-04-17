@@ -339,6 +339,7 @@
                 <a href="#installation" class="sidebar-link active"><span class="sidebar-link-icon">&#128229;</span> Installation</a>
                 <a href="#quickstart" class="sidebar-link"><span class="sidebar-link-icon">&#9889;</span> Quick Start</a>
                 <a href="#airgap" class="sidebar-link"><span class="sidebar-link-icon">&#128274;</span> Air-Gap Install</a>
+                <a href="#platforms" class="sidebar-link"><span class="sidebar-link-icon">&#128187;</span> Platforms</a>
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-label">Features</div>
@@ -364,19 +365,20 @@
         <main class="docs-content">
             <div class="docs-content-inner">
                 <div class="doc-hero">
-                    <div class="doc-hero-label">Documentation</div>
+                    <div class="doc-hero-label">Documentation &middot; v2.0.1-beta</div>
                     <h1>SwiftLLM Docs</h1>
-                    <p>Everything you need to install, configure, and run SwiftLLM for LLM inference, serving, and training.</p>
+                    <p>Everything you need to install, configure, and run SwiftLLM for LLM inference, serving, and training &mdash; on Linux, macOS, x86_64, or ARM64.</p>
                 </div>
 
                 <section class="doc-section" id="installation">
                     <h2>Installation</h2>
-                    <p>SwiftLLM provides a smart installer that auto-detects your system, installs dependencies, and builds the engine from source.</p>
+                    <p>SwiftLLM provides a smart installer that auto-detects your system, installs dependencies, and builds the engine from source. As of v2.0.1-beta it ships pre-built wheels for Linux (x86_64, aarch64) and macOS (x86_64, arm64).</p>
                     <h3>Prerequisites</h3>
                     <ul>
                         <li><strong>Python 3.8+</strong> (3.10+ recommended)</li>
-                        <li><strong>Git</strong></li>
-                        <li><strong>NVIDIA GPU</strong> with CUDA 11.8+ (optional for CPU-only mode)</li>
+                        <li><strong>Git</strong> and a C toolchain (cc/clang)</li>
+                        <li><strong>NVIDIA GPU</strong> with CUDA 11.8+ &mdash; optional; pass <code>--cpu</code> for CPU-only builds on any platform</li>
+                        <li><strong>Rust toolchain</strong> &mdash; installed automatically if missing</li>
                     </ul>
                     <h3>Standard Install</h3>
                     <div class="code-block">
@@ -385,22 +387,62 @@
 git clone https://github.com/infrabrew/swiftllm.git
 cd swiftllm
 
-<span class="cm"># Run the installer</span>
+<span class="cm"># Run the installer (auto-detects CUDA vs CPU)</span>
 bash install.sh
                     </div>
-                    <p>The installer will automatically detect NVIDIA GPU and CUDA toolkit, create a Python virtual environment, install Rust, build the native extension with maturin, and set up the model cache.</p>
+                    <p>The installer detects NVIDIA GPU and CUDA toolkit, creates a Python virtual environment, installs Rust via rustup, builds the native extension with maturin, and sets up the model cache.</p>
                     <h3>Install Options</h3>
                     <table class="config-table">
                         <thead><tr><th>Flag</th><th>Description</th></tr></thead>
                         <tbody>
-                            <tr><td><code>--cpu</code></td><td>Force CPU-only build, skip CUDA detection</td></tr>
-                            <tr><td><code>--gpu</code></td><td>Force GPU/CUDA build</td></tr>
-                            <tr><td><code>--venv DIR</code></td><td>Custom virtual environment location</td></tr>
-                            <tr><td><code>--no-venv</code></td><td>Install into current Python environment</td></tr>
+                            <tr><td><code>--cpu</code></td><td>Force CPU-only build, skip CUDA detection (works on ARM, Apple Silicon, and older x86_64)</td></tr>
+                            <tr><td><code>--gpu</code></td><td>Force GPU/CUDA build, fail fast if CUDA is missing</td></tr>
+                            <tr><td><code>--venv DIR</code></td><td>Custom virtual environment location (default: <code>./venv</code>)</td></tr>
+                            <tr><td><code>--no-venv</code></td><td>Install into the current Python environment</td></tr>
                             <tr><td><code>--model-dir PATH</code></td><td>Set custom model cache directory</td></tr>
-                            <tr><td><code>--airgap</code></td><td>Install from pre-built offline bundle</td></tr>
+                            <tr><td><code>--airgap</code></td><td>Install from a pre-built offline bundle (see Air-Gap section)</td></tr>
+                            <tr><td><code>--skip-rust</code></td><td>Skip Rust installation (assume already present)</td></tr>
+                            <tr><td><code>--dev</code></td><td>Install developer extras (pytest, ruff, maturin in dev mode)</td></tr>
                         </tbody>
                     </table>
+                    <h3>Optional Extras</h3>
+                    <p>Install optional dependency groups via pip extras:</p>
+                    <div class="code-block">
+                        <div class="code-block-header"><span class="code-block-lang">Shell</span><button class="code-block-copy" onclick="copyBlock(this)">Copy</button></div>
+pip install <span class="str">"swiftllm[serve]"</span>    <span class="cm"># FastAPI/uvicorn server deps</span>
+pip install <span class="str">"swiftllm[train]"</span>    <span class="cm"># peft, bitsandbytes, trl</span>
+pip install <span class="str">"swiftllm[gguf]"</span>     <span class="cm"># llama-cpp-python for GGUF loading</span>
+pip install <span class="str">"swiftllm[all]"</span>      <span class="cm"># everything</span>
+                    </div>
+                    <div class="callout callout-warn">
+                        <div class="callout-icon">&#9888;</div>
+                        <p><strong>PEP 668 / externally-managed environments:</strong> On Debian 12+, Ubuntu 23.04+, and recent macOS systems, the installer will refuse to pip-install into the system Python. Either let <code>install.sh</code> create a venv (the default), pass <code>--venv ~/.swiftllm</code>, or use <code>--no-venv</code> only if you have already activated an environment you control.</p>
+                    </div>
+                    <h3>Verify the Install</h3>
+                    <div class="code-block">
+                        <div class="code-block-header"><span class="code-block-lang">Shell</span><button class="code-block-copy" onclick="copyBlock(this)">Copy</button></div>
+swiftllm --version
+swiftllm info --system      <span class="cm"># prints CPU, GPU, CUDA, wheel target</span>
+                    </div>
+                </section>
+
+                <section class="doc-section" id="platforms">
+                    <h2>Supported Platforms</h2>
+                    <p>SwiftLLM v2.0.1-beta publishes wheels across four targets. All targets share the same Python and Rust codebase; GPU acceleration is opt-in per platform.</p>
+                    <table class="config-table">
+                        <thead><tr><th>OS</th><th>Architecture</th><th>GPU</th><th>Status</th></tr></thead>
+                        <tbody>
+                            <tr><td>Linux</td><td>x86_64</td><td>CUDA 11.8+ / CPU</td><td>Tier&nbsp;1 &mdash; primary target</td></tr>
+                            <tr><td>Linux</td><td>aarch64 (ARM64)</td><td>CPU (CUDA on Jetson/Grace)</td><td>Tier&nbsp;1 &mdash; wheels published</td></tr>
+                            <tr><td>macOS</td><td>x86_64 (Intel)</td><td>CPU (Metal planned)</td><td>Tier&nbsp;2 &mdash; wheels published</td></tr>
+                            <tr><td>macOS</td><td>arm64 (Apple Silicon)</td><td>CPU (Metal planned)</td><td>Tier&nbsp;2 &mdash; wheels published</td></tr>
+                            <tr><td>Windows</td><td>x86_64</td><td>CUDA via WSL2</td><td>WSL2 only</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="callout callout-info">
+                        <div class="callout-icon">&#8505;</div>
+                        <p>Tier 1 runs the full regression matrix (install, download, generate, finetune, train) on every release. Tier 2 runs the smoke subset. Training on CPU/ARM currently executes the simulated stub &mdash; see the Training section.</p>
+                    </div>
                 </section>
 
                 <section class="doc-section" id="quickstart">
@@ -478,13 +520,14 @@ bash install.sh --airgap
                     <h2>Features Overview</h2>
                     <div class="doc-features">
                         <div class="doc-feature"><div class="doc-feature-icon">&#9889;</div><h4>High Throughput</h4><p>Continuous batching and efficient request scheduling for maximum tokens/second.</p></div>
-                        <div class="doc-feature"><div class="doc-feature-icon">&#128200;</div><h4>PagedAttention</h4><p>Optimal KV cache management with paged memory allocation for efficient VRAM usage.</p></div>
-                        <div class="doc-feature"><div class="doc-feature-icon">&#128338;</div><h4>Speculative Decoding</h4><p>Draft model acceleration using smaller models to speed up token generation.</p></div>
-                        <div class="doc-feature"><div class="doc-feature-icon">&#127912;</div><h4>Multi-GPU Scaling</h4><p>Tensor parallelism and pipeline parallelism across multiple NVIDIA GPUs.</p></div>
-                        <div class="doc-feature"><div class="doc-feature-icon">&#128279;</div><h4>OpenAI API</h4><p>Drop-in replacement with API key auth, input validation, and security headers.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#128200;</div><h4>PagedAttention</h4><p>Paged KV cache with block-level allocation and copy-on-write for branching requests.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#128338;</div><h4>Speculative Decoding</h4><p>Draft-model acceleration with configurable lookahead and rejection sampling.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#127912;</div><h4>Multi-GPU Scaling</h4><p>Tensor and pipeline parallelism across multiple NVIDIA GPUs with NCCL.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#128279;</div><h4>OpenAI API</h4><p>Drop-in <code>/v1/completions</code> and <code>/v1/chat/completions</code> with streaming, API keys, and rate limits.</p></div>
                         <div class="doc-feature"><div class="doc-feature-icon">&#128295;</div><h4>Fine-Tuning</h4><p>LoRA, QLoRA, and full fine-tuning with Muon, AdamW, and SGD optimizers.</p></div>
-                        <div class="doc-feature"><div class="doc-feature-icon">&#128230;</div><h4>Multi-Format</h4><p>HuggingFace, GGUF quantized, and SafeTensors model loading with auto-detection.</p></div>
-                        <div class="doc-feature"><div class="doc-feature-icon">&#128274;</div><h4>Air-Gapped Deploy</h4><p>Create portable bundles for networks with no internet access.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#128230;</div><h4>Multi-Format</h4><p>HuggingFace, GGUF quantized, and SafeTensors with auto-detection by extension.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#128274;</div><h4>Air-Gapped Deploy</h4><p>Portable bundles with source, wheels, Rust installer, and optional models.</p></div>
+                        <div class="doc-feature"><div class="doc-feature-icon">&#128187;</div><h4>CPU &amp; ARM Ready</h4><p>Wheels for Linux x86_64/aarch64 and macOS Intel/Apple Silicon &mdash; no GPU required to get started.</p></div>
                     </div>
                 </section>
 
@@ -548,8 +591,14 @@ swiftllm serve --model meta-llama/Llama-3-8B --port 8000 --host 0.0.0.0
 
                 <section class="doc-section" id="training">
                     <h2>Training & Fine-Tuning</h2>
-                    <p>SwiftLLM supports full training, LoRA, and QLoRA fine-tuning with multiple optimizer options.</p>
-                    <h3>LoRA Fine-Tuning</h3>
+                    <p>SwiftLLM supports full training, LoRA, and QLoRA fine-tuning with multiple optimizer options. The CLI exposes two subcommands: <code>swiftllm train</code> (full or method-flagged) and <code>swiftllm finetune</code> (LoRA convenience).</p>
+
+                    <div class="callout callout-warn">
+                        <div class="callout-icon">&#9888;</div>
+                        <p><strong>Simulated backend notice (v2.0.1-beta):</strong> the CUDA training kernels are not yet wired up. Every training run prints a visible <code>[SIMULATED]</code> banner and executes a fixed 100-step loop with synthetic loss curves. Config, logging, and checkpoint plumbing are exercised end-to-end; no gradient updates are performed. Real gradient training ships in a later beta.</p>
+                    </div>
+
+                    <h3>LoRA Fine-Tuning (Python)</h3>
                     <div class="code-block">
                         <div class="code-block-header"><span class="code-block-lang">Python</span><button class="code-block-copy" onclick="copyBlock(this)">Copy</button></div>
 <span class="kw">from</span> swiftllm <span class="kw">import</span> fine_tune, LoRAConfig, TrainingConfig
@@ -559,69 +608,225 @@ config = <span class="fn">TrainingConfig</span>(
     learning_rate=<span class="num">2e-4</span>,
     num_epochs=<span class="num">3</span>,
     batch_size=<span class="num">4</span>,
-    optimizer=<span class="str">"adamw"</span>
+    optimizer=<span class="str">"adamw"</span>,
+    mixed_precision=<span class="str">"bf16"</span>,
+    save_steps=<span class="num">500</span>,
 )
 
-<span class="fn">fine_tune</span>(model=<span class="str">"meta-llama/Llama-3-8B"</span>, dataset=<span class="str">"./my_data.jsonl"</span>, lora_config=lora, training_config=config, output_dir=<span class="str">"./output"</span>)
+<span class="fn">fine_tune</span>(
+    model=<span class="str">"meta-llama/Llama-3-8B"</span>,
+    dataset=<span class="str">"./my_data.jsonl"</span>,
+    lora_config=lora,
+    training_config=config,
+    output_dir=<span class="str">"./output"</span>,
+)
                     </div>
+
+                    <h3>CLI Fine-Tuning</h3>
+                    <div class="code-block">
+                        <div class="code-block-header"><span class="code-block-lang">Shell</span><button class="code-block-copy" onclick="copyBlock(this)">Copy</button></div>
+<span class="cm"># LoRA fine-tune via the convenience command</span>
+swiftllm finetune \
+  --model meta-llama/Llama-3-8B \
+  --train-data ./my_data.jsonl \
+  --eval-data ./eval.jsonl \
+  --output-dir ./output \
+  --lora-r 16 --lora-alpha 32 \
+  --learning-rate 2e-4 \
+  --num-epochs 3 \
+  --batch-size 4
+
+<span class="cm"># Full training (or QLoRA / LoRA via --method)</span>
+swiftllm train \
+  --model meta-llama/Llama-3-8B \
+  --method qlora \
+  --train-data ./my_data.jsonl \
+  --output-dir ./output \
+  --optimizer muon \
+  --mixed-precision bf16 \
+  --lr-scheduler cosine \
+  --save-steps 500
+                    </div>
+
+                    <h3>Training Arguments</h3>
+                    <table class="config-table">
+                        <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>--method</code></td><td><code>full</code>, <code>lora</code>, or <code>qlora</code> (default: <code>lora</code> for <code>finetune</code>)</td></tr>
+                            <tr><td><code>--train-data</code></td><td>Path to a JSONL/CSV/text file. Validated up-front — missing, non-regular, or empty files fail fast.</td></tr>
+                            <tr><td><code>--eval-data</code></td><td>Optional eval dataset, same validation rules.</td></tr>
+                            <tr><td><code>--config</code></td><td>JSON config file; <code>train_data</code>/<code>eval_data</code> inside are validated the same way.</td></tr>
+                            <tr><td><code>--lora-r</code>, <code>--lora-alpha</code>, <code>--lora-dropout</code></td><td>LoRA rank, alpha, and dropout.</td></tr>
+                            <tr><td><code>--optimizer</code></td><td><code>adamw</code>, <code>muon</code>, or <code>sgd</code></td></tr>
+                            <tr><td><code>--lr-scheduler</code></td><td><code>cosine</code>, <code>linear</code>, <code>constant</code>, or <code>warmup</code></td></tr>
+                            <tr><td><code>--mixed-precision</code></td><td><code>fp32</code>, <code>fp16</code>, or <code>bf16</code></td></tr>
+                            <tr><td><code>--save-steps</code></td><td>Checkpoint every N steps (default: end of run only)</td></tr>
+                            <tr><td><code>--gradient-accumulation</code></td><td>Micro-batches per optimizer step</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Path Validation (new in v2.0.1-beta)</h3>
+                    <p>Before v2.0.1-beta, a bogus <code>--train-data</code> path would silently "succeed" — the simulated loop ran anyway and wrote a final checkpoint. That foot-gun is fixed: both <code>cmd_train</code> and <code>cmd_finetune</code> now call <code>_validate_train_data()</code> which raises:</p>
+                    <ul>
+                        <li><code>FileNotFoundError</code> — missing path or non-regular file (e.g. a directory)</li>
+                        <li><code>ValueError</code> — zero-byte / empty file</li>
+                    </ul>
+                    <p>The validator runs before any model loading or checkpoint creation, so failed runs produce no side effects.</p>
+
                     <h3>Optimizers</h3>
                     <ul>
-                        <li><strong>AdamW</strong> — Standard adaptive optimizer with weight decay</li>
-                        <li><strong>Muon</strong> — Momentum-based optimizer for large models</li>
-                        <li><strong>SGD</strong> — Stochastic gradient descent with momentum</li>
+                        <li><strong>AdamW</strong> — Standard adaptive optimizer with decoupled weight decay. Safe default.</li>
+                        <li><strong>Muon</strong> — Momentum-based orthogonalized optimizer designed for large transformer layers; pairs well with <code>bf16</code>.</li>
+                        <li><strong>SGD</strong> — Classic SGD with momentum for full-parameter training on smaller models.</li>
                     </ul>
                 </section>
 
                 <section class="doc-section" id="cli">
                     <h2>CLI Commands</h2>
-                    <p>The <code>swiftllm</code> CLI provides nine subcommands covering inference, serving, training, and model management.</p>
+                    <p>The <code>swiftllm</code> CLI provides nine subcommands covering inference, serving, training, and model management. Run any subcommand with <code>-h</code> for full help.</p>
                     <div class="cli-grid">
-                        <div class="cli-item"><code>serve</code><p>Start OpenAI-compatible API server</p></div>
-                        <div class="cli-item"><code>generate</code><p>One-shot batch text generation</p></div>
-                        <div class="cli-item"><code>chat</code><p>Interactive chat mode</p></div>
-                        <div class="cli-item"><code>download</code><p>Download models from HuggingFace</p></div>
-                        <div class="cli-item"><code>benchmark</code><p>Performance benchmarking</p></div>
-                        <div class="cli-item"><code>convert</code><p>Model format conversion</p></div>
-                        <div class="cli-item"><code>info</code><p>Display model information</p></div>
-                        <div class="cli-item"><code>train</code><p>Full training or fine-tuning</p></div>
-                        <div class="cli-item"><code>finetune</code><p>LoRA fine-tuning convenience</p></div>
+                        <div class="cli-item"><code>serve</code><p>OpenAI-compatible API server (<code>--model</code>, <code>--port</code>, <code>--host</code>, <code>--api-key</code>)</p></div>
+                        <div class="cli-item"><code>generate</code><p>Batch generation (<code>--prompt</code>, <code>--prompts-file</code>, <code>--max-tokens</code>)</p></div>
+                        <div class="cli-item"><code>chat</code><p>Interactive REPL with history and <code>/reset</code>, <code>/system</code> slash commands</p></div>
+                        <div class="cli-item"><code>download</code><p>Pull models from HF Hub (<code>--revision</code>, <code>--include-gguf</code>)</p></div>
+                        <div class="cli-item"><code>benchmark</code><p>Throughput and TTFT benchmarks (<code>--concurrency</code>, <code>--num-requests</code>)</p></div>
+                        <div class="cli-item"><code>convert</code><p>HF ↔ SafeTensors ↔ GGUF conversion with quantization levels</p></div>
+                        <div class="cli-item"><code>info</code><p>Model and system info (<code>--system</code> prints GPU/CPU/wheel target)</p></div>
+                        <div class="cli-item"><code>train</code><p>Full/LoRA/QLoRA training (<code>--method</code>, <code>--optimizer</code>, <code>--config</code>)</p></div>
+                        <div class="cli-item"><code>finetune</code><p>LoRA convenience with friendly defaults</p></div>
                     </div>
+                    <h3>Global Flags</h3>
+                    <table class="config-table">
+                        <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>--model</code></td><td>HF repo id, local path, or GGUF file</td></tr>
+                            <tr><td><code>--dtype</code></td><td><code>auto</code>, <code>float16</code>, <code>bfloat16</code>, <code>float32</code>, <code>int8</code>, <code>int4</code></td></tr>
+                            <tr><td><code>--quantization</code></td><td><code>awq</code>, <code>gptq</code>, <code>bnb4</code>, or <code>none</code></td></tr>
+                            <tr><td><code>--tensor-parallel</code></td><td>Number of GPUs for tensor parallelism</td></tr>
+                            <tr><td><code>--max-model-len</code></td><td>Override the model's context length</td></tr>
+                            <tr><td><code>--trust-remote-code</code></td><td>Allow HF custom modeling code (off by default)</td></tr>
+                            <tr><td><code>--log-level</code></td><td><code>debug</code>, <code>info</code>, <code>warn</code>, <code>error</code></td></tr>
+                        </tbody>
+                    </table>
                 </section>
 
                 <section class="doc-section" id="python-api">
                     <h2>Python API</h2>
-                    <h3>Core Classes</h3>
+                    <p>Everything exported from the top-level <code>swiftllm</code> package:</p>
+                    <h3>Inference</h3>
                     <table class="config-table">
-                        <thead><tr><th>Class</th><th>Description</th></tr></thead>
+                        <thead><tr><th>Export</th><th>Description</th></tr></thead>
                         <tbody>
-                            <tr><td><code>LLM</code></td><td>Synchronous inference engine</td></tr>
-                            <tr><td><code>AsyncLLM</code></td><td>Async inference engine with await support</td></tr>
-                            <tr><td><code>SamplingParams</code></td><td>Temperature, top_p, top_k, max_tokens</td></tr>
-                            <tr><td><code>EngineConfig</code></td><td>GPU memory utilization, dtype, quantization</td></tr>
-                            <tr><td><code>ServerConfig</code></td><td>Server host, port, and API settings</td></tr>
+                            <tr><td><code>LLM</code></td><td>Synchronous inference engine. Accepts a model id/path and engine config.</td></tr>
+                            <tr><td><code>AsyncLLM</code></td><td>Async engine with <code>await llm.generate(...)</code> and streaming iterators.</td></tr>
+                            <tr><td><code>LLMEngine</code></td><td>Low-level engine wrapping the Rust scheduler. Used for custom runners.</td></tr>
+                            <tr><td><code>SamplingParams</code></td><td>temperature, top_p, top_k, max_tokens, presence/frequency penalties, stop strings, seed, logit bias.</td></tr>
+                            <tr><td><code>RequestOutput</code></td><td>Per-request result wrapper holding prompt, outputs, and finish reason.</td></tr>
+                            <tr><td><code>CompletionOutput</code></td><td>Generated text + token ids + logprobs for one sample.</td></tr>
+                            <tr><td><code>EngineConfig</code></td><td>gpu_memory_utilization, dtype, quantization, max_model_len, tensor_parallel_size.</td></tr>
                         </tbody>
                     </table>
+                    <h3>Serving</h3>
+                    <table class="config-table">
+                        <thead><tr><th>Export</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>ServerConfig</code></td><td>host, port, api_keys, max_concurrent_requests, request_timeout, cors_origins.</td></tr>
+                            <tr><td><code>LoRARequest</code></td><td>Attach a LoRA adapter to a single request without reloading the base model.</td></tr>
+                        </tbody>
+                    </table>
+                    <h3>Training</h3>
+                    <table class="config-table">
+                        <thead><tr><th>Export</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>Trainer</code></td><td>High-level loop. Prints the <code>[SIMULATED]</code> banner on v2.0.1-beta.</td></tr>
+                            <tr><td><code>TrainingConfig</code></td><td>learning_rate, num_epochs, batch_size, optimizer, lr_scheduler, mixed_precision, save_steps, gradient_accumulation.</td></tr>
+                            <tr><td><code>LoRAConfig</code></td><td>r, alpha, dropout, target_modules, bias.</td></tr>
+                            <tr><td><code>fine_tune</code></td><td>One-call LoRA convenience wrapping <code>Trainer</code> with sane defaults.</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="callout callout-tip">
+                        <div class="callout-icon">&#128161;</div>
+                        <p>All public symbols are re-exported from <code>swiftllm/__init__.py</code>. Sub-module imports (e.g. <code>from swiftllm.training import Trainer</code>) also work and are stable across v2.0.x.</p>
+                    </div>
                 </section>
 
                 <section class="doc-section" id="configuration">
                     <h2>Configuration</h2>
-                    <p>SwiftLLM can be configured via environment variables for GPU, scheduling, and model settings.</p>
+                    <p>SwiftLLM is configured via environment variables. All variables are prefixed <code>SWIFTLLM_</code> and override built-in defaults. CLI flags take highest precedence.</p>
+
                     <h3>GPU & Memory</h3>
                     <table class="config-table">
                         <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
                         <tbody>
-                            <tr><td><code>SWIFTLLM_GPU_MEMORY_UTILIZATION</code></td><td>0.90</td><td>Fraction of VRAM for model and cache</td></tr>
-                            <tr><td><code>SWIFTLLM_NUM_GPU_LAYERS</code></td><td>auto</td><td>Number of layers to offload to GPU</td></tr>
-                            <tr><td><code>SWIFTLLM_DTYPE</code></td><td>auto</td><td>Model dtype: float16, bfloat16, float32, int8, int4</td></tr>
+                            <tr><td><code>SWIFTLLM_GPU_MEMORY_UTILIZATION</code></td><td>0.90</td><td>Fraction of VRAM reserved for model + KV cache</td></tr>
+                            <tr><td><code>SWIFTLLM_NUM_GPU_LAYERS</code></td><td>auto</td><td>Layers offloaded to GPU (rest stays on CPU)</td></tr>
+                            <tr><td><code>SWIFTLLM_DTYPE</code></td><td>auto</td><td><code>float16</code>, <code>bfloat16</code>, <code>float32</code>, <code>int8</code>, <code>int4</code></td></tr>
+                            <tr><td><code>SWIFTLLM_QUANTIZATION</code></td><td>none</td><td><code>awq</code>, <code>gptq</code>, <code>bnb4</code>, or <code>none</code></td></tr>
+                            <tr><td><code>SWIFTLLM_KV_CACHE_DTYPE</code></td><td>auto</td><td>Separate dtype for the KV cache (<code>fp8</code> supported on H100+)</td></tr>
+                            <tr><td><code>SWIFTLLM_TENSOR_PARALLEL_SIZE</code></td><td>1</td><td>Number of GPUs for tensor parallelism</td></tr>
+                            <tr><td><code>SWIFTLLM_PIPELINE_PARALLEL_SIZE</code></td><td>1</td><td>Pipeline parallelism degree</td></tr>
+                            <tr><td><code>SWIFTLLM_CPU_OFFLOAD_GB</code></td><td>0</td><td>GB of weights to offload to CPU RAM</td></tr>
                         </tbody>
                     </table>
+
                     <h3>Scheduling</h3>
                     <table class="config-table">
                         <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
                         <tbody>
                             <tr><td><code>SWIFTLLM_MAX_NUM_SEQS</code></td><td>256</td><td>Max concurrent request sequences</td></tr>
                             <tr><td><code>SWIFTLLM_MAX_NUM_BATCHED_TOKENS</code></td><td>8192</td><td>Peak tokens per scheduler step</td></tr>
-                            <tr><td><code>SWIFTLLM_SCHEDULER_POLICY</code></td><td>fcfs</td><td>Policy: fcfs, sjf, or priority</td></tr>
+                            <tr><td><code>SWIFTLLM_SCHEDULER_POLICY</code></td><td>fcfs</td><td><code>fcfs</code>, <code>sjf</code>, or <code>priority</code></td></tr>
+                            <tr><td><code>SWIFTLLM_BLOCK_SIZE</code></td><td>16</td><td>KV cache block size in tokens</td></tr>
+                            <tr><td><code>SWIFTLLM_PREEMPTION_MODE</code></td><td>recompute</td><td><code>recompute</code> or <code>swap</code></td></tr>
+                            <tr><td><code>SWIFTLLM_ENABLE_CHUNKED_PREFILL</code></td><td>true</td><td>Split long prefills across scheduler steps</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Server</h3>
+                    <table class="config-table">
+                        <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>SWIFTLLM_HOST</code></td><td>0.0.0.0</td><td>Bind address for the HTTP server</td></tr>
+                            <tr><td><code>SWIFTLLM_PORT</code></td><td>8000</td><td>Listen port</td></tr>
+                            <tr><td><code>SWIFTLLM_API_KEYS</code></td><td>&lt;unset&gt;</td><td>Comma-separated API keys; empty = auth disabled</td></tr>
+                            <tr><td><code>SWIFTLLM_REQUEST_TIMEOUT</code></td><td>300</td><td>Per-request timeout in seconds</td></tr>
+                            <tr><td><code>SWIFTLLM_MAX_CONCURRENT</code></td><td>256</td><td>Simultaneous in-flight requests</td></tr>
+                            <tr><td><code>SWIFTLLM_CORS_ORIGINS</code></td><td>*</td><td>Allowed CORS origins (comma-separated)</td></tr>
+                            <tr><td><code>SWIFTLLM_METRICS_ENABLED</code></td><td>true</td><td>Expose Prometheus metrics at <code>/metrics</code></td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Storage & Cache</h3>
+                    <table class="config-table">
+                        <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>SWIFTLLM_MODEL_DIR</code></td><td>~/.cache/swiftllm/models</td><td>Local model cache</td></tr>
+                            <tr><td><code>SWIFTLLM_CONFIG_DIR</code></td><td>~/.config/swiftllm</td><td>Config search path</td></tr>
+                            <tr><td><code>SWIFTLLM_HF_HUB_CACHE</code></td><td>~/.cache/huggingface</td><td>HuggingFace download cache</td></tr>
+                            <tr><td><code>SWIFTLLM_OFFLINE</code></td><td>false</td><td>Forbid any network calls (air-gap mode)</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Training & LoRA</h3>
+                    <table class="config-table">
+                        <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>SWIFTLLM_TRAIN_OUTPUT_DIR</code></td><td>./runs</td><td>Default training output root</td></tr>
+                            <tr><td><code>SWIFTLLM_LORA_DEFAULT_R</code></td><td>16</td><td>LoRA rank default</td></tr>
+                            <tr><td><code>SWIFTLLM_LORA_DEFAULT_ALPHA</code></td><td>32</td><td>LoRA alpha default</td></tr>
+                            <tr><td><code>SWIFTLLM_MIXED_PRECISION</code></td><td>bf16</td><td>Training dtype (<code>fp32</code>, <code>fp16</code>, <code>bf16</code>)</td></tr>
+                            <tr><td><code>SWIFTLLM_SAVE_STEPS</code></td><td>0</td><td>Checkpoint cadence (0 = end only)</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Build & Diagnostics</h3>
+                    <table class="config-table">
+                        <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>SWIFTLLM_LOG_LEVEL</code></td><td>info</td><td><code>debug</code>, <code>info</code>, <code>warn</code>, <code>error</code></td></tr>
+                            <tr><td><code>SWIFTLLM_FORCE_CPU</code></td><td>false</td><td>Disable CUDA even if present (useful for ARM/CPU testing)</td></tr>
+                            <tr><td><code>SWIFTLLM_BUILD_TARGET</code></td><td>auto</td><td>Override wheel target (<code>cuda</code>, <code>cpu</code>, <code>macos</code>)</td></tr>
+                            <tr><td><code>SWIFTLLM_DISABLE_TELEMETRY</code></td><td>false</td><td>Opt out of anonymous build pings</td></tr>
                         </tbody>
                     </table>
                 </section>
@@ -663,19 +868,39 @@ config = <span class="fn">TrainingConfig</span>(
                     <h2>FAQ</h2>
                     <div class="faq-item">
                         <h3 onclick="toggleFaq(this)">Can I run SwiftLLM without a GPU?<span class="icon">+</span></h3>
-                        <div class="faq-answer"><p>Yes. Use the <code>--cpu</code> flag during installation to build without CUDA support. Performance will be slower, but all features remain available.</p></div>
+                        <div class="faq-answer"><p>Yes. Pass <code>--cpu</code> to <code>install.sh</code> or set <code>SWIFTLLM_FORCE_CPU=1</code>. Inference and the serving stack run on pure CPU with no CUDA runtime. Tokens/sec will be lower than on GPU, but functionality is identical.</p></div>
+                    </div>
+                    <div class="faq-item">
+                        <h3 onclick="toggleFaq(this)">Does SwiftLLM work on ARM / Apple Silicon?<span class="icon">+</span></h3>
+                        <div class="faq-answer"><p>Yes. v2.0.1-beta ships wheels for Linux aarch64 and macOS arm64 (and x86_64). These are CPU-only today; a Metal backend for Apple Silicon is on the roadmap. ARM Jetson devices with CUDA work with the standard CUDA build.</p></div>
                     </div>
                     <div class="faq-item">
                         <h3 onclick="toggleFaq(this)">Which CUDA versions are supported?<span class="icon">+</span></h3>
-                        <div class="faq-answer"><p>SwiftLLM requires CUDA 11.8 or later. The installer automatically detects your CUDA toolkit version via <code>nvcc</code>.</p></div>
+                        <div class="faq-answer"><p>CUDA 11.8 or later. The installer auto-detects via <code>nvcc</code>; you can override with <code>SWIFTLLM_BUILD_TARGET=cuda</code> or pass <code>--gpu</code> to fail fast if CUDA is missing.</p></div>
+                    </div>
+                    <div class="faq-item">
+                        <h3 onclick="toggleFaq(this)">pip says "externally-managed-environment" — what do I do?<span class="icon">+</span></h3>
+                        <div class="faq-answer"><p>That's PEP 668 kicking in on Debian 12+, Ubuntu 23.04+, and recent macOS. SwiftLLM's <code>install.sh</code> creates a venv by default to avoid this. If you're running <code>pip install</code> manually, either activate a venv first, use <code>pipx</code>, or pass <code>--break-system-packages</code> at your own risk. Don't do the last one on production systems.</p></div>
+                    </div>
+                    <div class="faq-item">
+                        <h3 onclick="toggleFaq(this)">Is training really working? I see a <code>[SIMULATED]</code> banner.<span class="icon">+</span></h3>
+                        <div class="faq-answer"><p>Honest answer: the CUDA training backend is not wired up in v2.0.1-beta. Training runs the config/logging/checkpoint plumbing end-to-end but executes a fixed 100-step synthetic loss curve instead of real gradient updates. That's why the banner prints at the top of every run. Real training lands in a later beta; we chose to be loud about it rather than produce misleading metrics.</p></div>
+                    </div>
+                    <div class="faq-item">
+                        <h3 onclick="toggleFaq(this)">My <code>--train-data</code> path is wrong and training used to "succeed" anyway. Is that fixed?<span class="icon">+</span></h3>
+                        <div class="faq-answer"><p>Yes, fixed in v2.0.1-beta. Both <code>swiftllm train</code> and <code>swiftllm finetune</code> validate the path before doing anything else. Missing files raise <code>FileNotFoundError</code>, empty files raise <code>ValueError</code>, and directories or sockets are rejected. Same checks apply to <code>eval_data</code> and to paths pulled from <code>--config</code> JSON.</p></div>
                     </div>
                     <div class="faq-item">
                         <h3 onclick="toggleFaq(this)">How do I use SwiftLLM as a drop-in OpenAI replacement?<span class="icon">+</span></h3>
-                        <div class="faq-answer"><p>Start the server with <code>swiftllm serve</code>, then point your OpenAI client to <code>http://localhost:8000</code>.</p></div>
+                        <div class="faq-answer"><p>Start the server with <code>swiftllm serve --model &lt;id&gt; --port 8000</code>, then set your OpenAI client's <code>base_url</code> to <code>http://localhost:8000/v1</code>. All standard endpoints work: <code>/v1/completions</code>, <code>/v1/chat/completions</code>, <code>/v1/models</code>, plus <code>/health</code> and <code>/metrics</code>.</p></div>
                     </div>
                     <div class="faq-item">
                         <h3 onclick="toggleFaq(this)">Can I deploy to air-gapped environments?<span class="icon">+</span></h3>
-                        <div class="faq-answer"><p>Yes. Use <code>airgap-bundle.sh</code> on a connected machine to create a portable archive, then install with <code>bash install.sh --airgap</code> on the target machine.</p></div>
+                        <div class="faq-answer"><p>Yes. Run <code>bash airgap-bundle.sh</code> on a connected machine (optionally with <code>--model</code> to bake in weights). Transfer the resulting <code>.tar.gz</code> to the target, extract, and run <code>bash install.sh --airgap</code>. Set <code>SWIFTLLM_OFFLINE=1</code> at runtime to forbid any network calls.</p></div>
+                    </div>
+                    <div class="faq-item">
+                        <h3 onclick="toggleFaq(this)">Where do I report bugs or ask for help?<span class="icon">+</span></h3>
+                        <div class="faq-answer"><p>File an issue at <a href="https://github.com/infrabrew/swiftllm/issues" target="_blank">github.com/infrabrew/swiftllm/issues</a>. Include the output of <code>swiftllm info --system</code>, your install flags, and the full traceback.</p></div>
                     </div>
                 </section>
             </div>
