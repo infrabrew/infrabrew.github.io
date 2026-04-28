@@ -1,1 +1,2933 @@
-./ui/site/docs.html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs — SwiftLLM</title>
+  <link rel="stylesheet" href="./colors_and_type.css">
+  <link rel="icon" href="./assets/logo-mark.png" type="image/png">
+  <style>
+    html,
+    body {
+      background: var(--bg-primary);
+      color: var(--fg-primary);
+    }
+
+    body {
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+
+    /* ---------- GLASS NAV (shared) ---------- */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: var(--glass-nav);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .nav-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      height: 52px;
+      padding: 0 var(--s-6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: var(--s-2);
+      color: var(--fg-primary);
+    }
+
+    .nav-logo-mark {
+      width: 28px;
+      height: 28px;
+    }
+
+    .nav-logo-text {
+      font-size: 15px;
+      font-weight: var(--w-semibold);
+      letter-spacing: -0.01em;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--fg-secondary);
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: var(--w-medium);
+      border-radius: var(--r-8);
+      transition: all var(--d-fast) var(--ease-standard);
+    }
+
+    .nav-links a:hover {
+      color: var(--fg-primary);
+      background: var(--gray-50);
+    }
+
+    .nav-links a.active {
+      color: var(--fg-primary);
+    }
+
+    .nav-cta {
+      background: var(--fg-primary) !important;
+      color: var(--bg-primary) !important;
+      padding: 7px 16px !important;
+      border-radius: var(--r-full) !important;
+    }
+
+    /* ---------- DOCS HEADER ---------- */
+    .docs-header {
+      padding: 120px var(--s-6) var(--s-10);
+      background: linear-gradient(180deg, var(--gray-50) 0%, var(--white) 100%);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .docs-header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(800px 300px at 50% 0%, rgba(0, 113, 227, 0.05), transparent 70%);
+    }
+
+    .docs-header>* {
+      position: relative;
+    }
+
+    .docs-eyebrow {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: var(--w-semibold);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 10px;
+    }
+
+    .docs-header h1 {
+      font-size: var(--text-h1);
+      font-weight: var(--w-heavy);
+      letter-spacing: var(--tr-snug);
+      line-height: 1.05;
+      margin-bottom: 12px;
+    }
+
+    .docs-header p {
+      font-size: 16px;
+      color: var(--fg-tertiary);
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* Search bar */
+    .search-wrap {
+      max-width: 520px;
+      margin: var(--s-8) auto 0;
+      position: relative;
+    }
+
+    .search {
+      width: 100%;
+      padding: 14px 18px 14px 46px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--r-full);
+      font-size: 14px;
+      font-family: var(--font-sans);
+      box-shadow: var(--shadow-1);
+      transition: all var(--d-base) var(--ease-standard);
+    }
+
+    .search:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: var(--shadow-focus);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--fg-tertiary);
+    }
+
+    .search-kbd {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 3px 7px;
+      background: var(--gray-100);
+      color: var(--fg-tertiary);
+      border-radius: 5px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      pointer-events: none;
+      transition: opacity var(--d-fast);
+    }
+
+    .search-wrap.is-open .search-kbd {
+      opacity: 0;
+    }
+
+    /* Search results dropdown */
+    .search-results {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border: 1px solid var(--gray-100);
+      border-radius: var(--r-12);
+      box-shadow: var(--shadow-3);
+      max-height: 420px;
+      overflow-y: auto;
+      z-index: 50;
+      display: none;
+      padding: 6px;
+    }
+
+    .search-wrap.is-open .search-results {
+      display: block;
+    }
+
+    .search-results::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .search-results::-webkit-scrollbar-thumb {
+      background: var(--gray-200);
+      border-radius: 99px;
+    }
+
+    .sr-group-label {
+      font-size: 10px;
+      font-weight: var(--w-semibold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--fg-tertiary);
+      padding: 10px 12px 6px;
+    }
+
+    .sr-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 10px 12px;
+      border-radius: var(--r-8);
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      transition: background var(--d-fast);
+    }
+
+    .sr-item:hover,
+    .sr-item.active {
+      background: var(--blue-wash);
+    }
+
+    .sr-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--r-8);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      background: var(--gray-50);
+      color: var(--fg-tertiary);
+    }
+
+    .sr-item.active .sr-icon,
+    .sr-item:hover .sr-icon {
+      background: var(--blue);
+      color: var(--white);
+    }
+
+    .sr-icon i {
+      width: 14px;
+      height: 14px;
+      display: inline-flex;
+    }
+
+    .sr-icon svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .sr-body {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .sr-title {
+      font-size: 13px;
+      font-weight: var(--w-semibold);
+      color: var(--fg-primary);
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sr-snippet {
+      font-size: 12px;
+      color: var(--fg-tertiary);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .sr-snippet mark,
+    .sr-title mark {
+      background: rgba(255, 204, 0, 0.35);
+      color: inherit;
+      padding: 0 1px;
+      border-radius: 2px;
+      font-weight: 600;
+    }
+
+    .sr-tag {
+      font-size: 10px;
+      font-weight: var(--w-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 2px 7px;
+      border-radius: var(--r-full);
+      background: var(--gray-100);
+      color: var(--fg-tertiary);
+      align-self: flex-start;
+      margin-top: 2px;
+      white-space: nowrap;
+    }
+
+    .sr-item.active .sr-tag,
+    .sr-item:hover .sr-tag {
+      background: rgba(0, 113, 227, 0.16);
+      color: var(--blue);
+    }
+
+    .sr-empty {
+      padding: 28px 16px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--fg-tertiary);
+    }
+
+    .sr-empty strong {
+      color: var(--fg-primary);
+    }
+
+    .sr-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      border-top: 1px solid var(--gray-100);
+      font-size: 11px;
+      color: var(--fg-tertiary);
+    }
+
+    .sr-foot kbd {
+      padding: 1px 5px;
+      background: var(--gray-100);
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--fg-secondary);
+      margin: 0 2px;
+    }
+
+    /* ---------- TAB BAR ---------- */
+    .tabs-wrap {
+      position: sticky;
+      top: 52px;
+      z-index: 20;
+      background: var(--glass-nav);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .tabs {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 0 var(--s-6);
+      display: flex;
+      gap: 4px;
+      list-style: none;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab {
+      padding: 14px 4px;
+      font-size: 13px;
+      font-weight: var(--w-medium);
+      color: var(--fg-tertiary);
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color var(--d-fast) var(--ease-standard);
+      margin-right: var(--s-6);
+      white-space: nowrap;
+    }
+
+    .tab:hover {
+      color: var(--fg-primary);
+    }
+
+    .tab.active {
+      color: var(--fg-primary);
+      border-bottom-color: var(--blue);
+    }
+
+    .tab .icon {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ---------- CONTENT LAYOUT ---------- */
+    .docs-layout {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--s-10) var(--s-6);
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: var(--s-12);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 120px;
+      align-self: start;
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+      padding-right: var(--s-4);
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--gray-200);
+      border-radius: 99px;
+    }
+
+    .sb-section {
+      margin-bottom: var(--s-6);
+    }
+
+    .sb-label {
+      font-size: 10px;
+      font-weight: var(--w-semibold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--fg-tertiary);
+      margin-bottom: 8px;
+      padding: 0 10px;
+    }
+
+    .sb-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      color: var(--fg-secondary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: var(--w-medium);
+      border-radius: var(--r-6);
+      margin-bottom: 1px;
+      transition: all var(--d-fast) var(--ease-standard);
+    }
+
+    .sb-link:hover {
+      color: var(--fg-primary);
+      background: var(--gray-50);
+    }
+
+    .sb-link.active {
+      color: var(--blue);
+      background: var(--blue-wash);
+    }
+
+    .sb-link .icon {
+      width: 14px;
+      height: 14px;
+      opacity: 0.7;
+    }
+
+    .sb-link.active .icon {
+      opacity: 1;
+    }
+
+    .content {
+      max-width: var(--container-article);
+      min-width: 0;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn 0.35s var(--ease-standard);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ---------- ARTICLE ---------- */
+    .doc-section {
+      margin-bottom: var(--s-12);
+      scroll-margin-top: 140px;
+    }
+
+    .doc-section h2 {
+      font-size: 26px;
+      font-weight: var(--w-bold);
+      letter-spacing: var(--tr-snug);
+      margin-bottom: var(--s-3);
+      padding-bottom: var(--s-3);
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .doc-section h3 {
+      font-size: 16px;
+      font-weight: var(--w-semibold);
+      margin: var(--s-6) 0 var(--s-3);
+    }
+
+    .doc-section p {
+      font-size: 14px;
+      color: var(--fg-tertiary);
+      line-height: 1.7;
+      margin-bottom: var(--s-3);
+    }
+
+    .doc-section ul,
+    .doc-section ol {
+      padding-left: 20px;
+      margin-bottom: var(--s-3);
+    }
+
+    .doc-section li {
+      font-size: 14px;
+      color: var(--fg-tertiary);
+      line-height: 1.65;
+      margin-bottom: 4px;
+    }
+
+    .doc-section li strong {
+      color: var(--fg-primary);
+      font-weight: var(--w-semibold);
+    }
+
+    .doc-section code:not(.code-block code) {
+      padding: 2px 6px;
+      background: var(--gray-100);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--fg-primary);
+    }
+
+    /* Code blocks */
+    .code-block {
+      padding: 16px 18px;
+      background: #0f0f10;
+      border-radius: var(--r-10);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.65;
+      overflow-x: auto;
+      margin-bottom: var(--s-4);
+      color: #e8e8ed;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .code-block-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .code-lang {
+      font-size: 10px;
+      font-weight: var(--w-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray-400);
+      font-family: var(--font-sans);
+    }
+
+    .code-copy {
+      padding: 4px 10px;
+      border-radius: var(--r-6);
+      border: none;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--gray-100);
+      font-size: 10px;
+      font-weight: var(--w-medium);
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: background var(--d-fast);
+    }
+
+    .code-copy:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .kw {
+      color: #ff7b72;
+    }
+
+    .str {
+      color: #a5d6ff;
+    }
+
+    .fn {
+      color: #d2a8ff;
+    }
+
+    .cm {
+      color: #6e7681;
+      font-style: italic;
+    }
+
+    .num {
+      color: #79c0ff;
+    }
+
+    .cls {
+      color: #ffa657;
+    }
+
+    /* Callouts */
+    .callout {
+      padding: 14px 16px;
+      border-radius: var(--r-10);
+      margin-bottom: var(--s-4);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      border: 1px solid transparent;
+    }
+
+    .callout .icon {
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .callout-info {
+      background: var(--blue-wash);
+      border-color: rgba(0, 113, 227, 0.18);
+      color: var(--blue);
+    }
+
+    .callout-warn {
+      background: var(--orange-wash);
+      border-color: rgba(255, 149, 0, 0.2);
+      color: #b45309;
+    }
+
+    .callout-tip {
+      background: var(--green-wash);
+      border-color: rgba(52, 199, 89, 0.22);
+      color: #15803d;
+    }
+
+    .callout p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.55;
+      color: inherit;
+    }
+
+    .callout p strong {
+      color: inherit;
+      font-weight: var(--w-semibold);
+    }
+
+    /* Tables */
+    .config-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: var(--s-4);
+      font-size: 13px;
+      border: 1px solid var(--gray-100);
+      border-radius: var(--r-10);
+      overflow: hidden;
+    }
+
+    .config-table th {
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: var(--w-semibold);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-tertiary);
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .config-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--gray-50);
+      color: var(--fg-tertiary);
+    }
+
+    .config-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .config-table td code {
+      padding: 1px 6px;
+      background: var(--gray-50);
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--blue);
+      font-family: var(--font-mono);
+    }
+
+    /* Guide cards */
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--s-3);
+      margin-bottom: var(--s-8);
+    }
+
+    .guide-card {
+      padding: var(--s-5);
+      background: var(--white);
+      border-radius: var(--r-14);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      cursor: pointer;
+      transition: all var(--d-base) var(--ease-standard);
+      text-decoration: none;
+      display: block;
+    }
+
+    .guide-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-3);
+      border-color: rgba(0, 113, 227, 0.18);
+    }
+
+    .guide-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--r-10);
+      display: grid;
+      place-items: center;
+      margin-bottom: var(--s-3);
+    }
+
+    .guide-icon .icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .guide-card h4 {
+      font-size: 14px;
+      font-weight: var(--w-semibold);
+      margin-bottom: 4px;
+      color: var(--fg-primary);
+    }
+
+    .guide-card p {
+      font-size: 12.5px;
+      color: var(--fg-tertiary);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* CLI grid */
+    .cli-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--s-2);
+      margin-bottom: var(--s-4);
+    }
+
+    .cli-item {
+      padding: var(--s-3);
+      background: var(--gray-50);
+      border-radius: var(--r-8);
+      transition: background var(--d-fast);
+    }
+
+    .cli-item:hover {
+      background: var(--gray-100);
+    }
+
+    .cli-item code {
+      font-size: 12px;
+      font-weight: var(--w-semibold);
+      color: var(--blue);
+      background: none !important;
+      padding: 0 !important;
+    }
+
+    .cli-item p {
+      font-size: 11px;
+      color: var(--fg-tertiary);
+      margin: 4px 0 0;
+      line-height: 1.4;
+    }
+
+    /* FAQ */
+    .faq-item {
+      border: 1px solid var(--gray-100);
+      border-radius: var(--r-10);
+      margin-bottom: var(--s-2);
+      overflow: hidden;
+      transition: border-color var(--d-fast);
+    }
+
+    .faq-item.open {
+      border-color: var(--gray-200);
+    }
+
+    .faq-q {
+      padding: 14px 16px;
+      font-size: 14px;
+      font-weight: var(--w-semibold);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background var(--d-fast);
+    }
+
+    .faq-q:hover {
+      background: var(--gray-50);
+    }
+
+    .faq-q .icon {
+      color: var(--fg-tertiary);
+      transition: transform var(--d-base) var(--ease-standard);
+    }
+
+    .faq-item.open .faq-q .icon {
+      transform: rotate(45deg);
+    }
+
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height var(--d-slow) var(--ease-standard);
+    }
+
+    .faq-item.open .faq-a {
+      max-height: 400px;
+    }
+
+    .faq-a-inner {
+      padding: 0 16px 16px;
+      font-size: 13px;
+      color: var(--fg-tertiary);
+      line-height: 1.6;
+    }
+
+    /* Support options grid */
+    .support-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--s-3);
+      margin-bottom: var(--s-8);
+    }
+
+    .support-card {
+      padding: var(--s-6);
+      background: var(--white);
+      border-radius: var(--r-16);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      transition: all var(--d-base) var(--ease-standard);
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .support-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-3);
+      border-color: rgba(0, 113, 227, 0.18);
+    }
+
+    .support-card .icon-tile {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--r-12);
+      display: grid;
+      place-items: center;
+      margin-bottom: var(--s-4);
+    }
+
+    .support-card .icon-tile .icon {
+      width: 22px;
+      height: 22px;
+    }
+
+    .support-card h4 {
+      font-size: 15px;
+      font-weight: var(--w-semibold);
+      margin-bottom: 6px;
+      color: var(--fg-primary);
+    }
+
+    .support-card p {
+      font-size: 13px;
+      color: var(--fg-tertiary);
+      line-height: 1.5;
+      margin-bottom: var(--s-3);
+    }
+
+    .support-card .link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: var(--w-medium);
+    }
+
+    .support-card:hover .link .icon {
+      transform: translateX(3px);
+    }
+
+    .support-card .link .icon {
+      width: 12px;
+      height: 12px;
+      transition: transform var(--d-base) var(--ease-standard);
+    }
+
+    /* Changelog timeline */
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: var(--s-8);
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 7px 14px;
+      border-radius: var(--r-full);
+      border: 1px solid var(--gray-100);
+      background: var(--white);
+      color: var(--fg-secondary);
+      font-size: 12px;
+      font-weight: var(--w-medium);
+      cursor: pointer;
+      transition: all var(--d-fast) var(--ease-standard);
+    }
+
+    .filter-btn:hover {
+      background: var(--gray-50);
+      color: var(--fg-primary);
+    }
+
+    .filter-btn.active {
+      background: var(--fg-primary);
+      color: var(--bg-primary);
+      border-color: var(--fg-primary);
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 28px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: linear-gradient(180deg, var(--gray-200), transparent);
+    }
+
+    .tl-entry {
+      position: relative;
+      margin-bottom: var(--s-6);
+    }
+
+    .tl-dot {
+      position: absolute;
+      left: -28px;
+      top: 18px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--gray-200);
+      border: 3px solid var(--white);
+      box-shadow: 0 0 0 1px var(--gray-200);
+    }
+
+    .tl-entry.latest .tl-dot {
+      background: var(--blue);
+      box-shadow: 0 0 0 1px var(--blue), 0 0 0 6px rgba(0, 113, 227, 0.14);
+    }
+
+    .tl-entry.alpha .tl-dot {
+      background: var(--purple);
+      box-shadow: 0 0 0 1px var(--purple);
+    }
+
+    .tl-entry.stable .tl-dot {
+      background: var(--green);
+      box-shadow: 0 0 0 1px var(--green);
+    }
+
+    .tl-card {
+      background: var(--white);
+      border-radius: var(--r-14);
+      padding: var(--s-5) var(--s-6);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      transition: all var(--d-base) var(--ease-standard);
+    }
+
+    .tl-card:hover {
+      box-shadow: var(--shadow-3);
+      transform: translateY(-1px);
+    }
+
+    .tl-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tl-ver {
+      font-size: 18px;
+      font-weight: var(--w-bold);
+      letter-spacing: -0.01em;
+      font-family: var(--font-mono);
+    }
+
+    .tl-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tl-tag {
+      padding: 3px 9px;
+      border-radius: var(--r-6);
+      font-size: 9px;
+      font-weight: var(--w-bold);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .tag-latest {
+      background: var(--blue-wash);
+      color: var(--blue);
+    }
+
+    .tag-alpha {
+      background: var(--purple-wash);
+      color: var(--purple);
+    }
+
+    .tag-beta {
+      background: var(--yellow-wash);
+      color: #a16207;
+    }
+
+    .tag-stable {
+      background: var(--green-wash);
+      color: #15803d;
+    }
+
+    .tl-date {
+      font-size: 11px;
+      color: var(--fg-tertiary);
+    }
+
+    .tl-sum {
+      font-size: 13px;
+      color: var(--fg-tertiary);
+      line-height: 1.55;
+      margin-bottom: var(--s-4);
+    }
+
+    .change-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .change-item {
+      display: flex;
+      gap: 10px;
+      padding: 8px 0;
+      font-size: 13px;
+      border-bottom: 1px solid var(--gray-50);
+      align-items: flex-start;
+    }
+
+    .change-item:last-child {
+      border-bottom: none;
+    }
+
+    .change-item code {
+      padding: 1px 5px;
+      background: var(--gray-50);
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--fg-primary);
+    }
+
+    .change-badge {
+      min-width: 68px;
+      padding: 3px 8px;
+      border-radius: var(--r-6);
+      font-size: 9px;
+      font-weight: var(--w-bold);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .badge-added {
+      background: var(--green-wash);
+      color: #15803d;
+    }
+
+    .badge-changed {
+      background: var(--blue-wash);
+      color: var(--blue);
+    }
+
+    .badge-fixed {
+      background: var(--orange-wash);
+      color: #b45309;
+    }
+
+    .badge-security {
+      background: var(--purple-wash);
+      color: var(--purple);
+    }
+
+    .change-text {
+      color: var(--fg-tertiary);
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .tl-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--s-3);
+      padding-top: var(--s-3);
+      border-top: 1px solid var(--gray-50);
+    }
+
+    .commit-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--fg-tertiary);
+      text-decoration: none;
+    }
+
+    .commit-link:hover {
+      color: var(--blue);
+    }
+
+    .commit-link .icon {
+      width: 12px;
+      height: 12px;
+    }
+
+    .avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      display: grid;
+      place-items: center;
+      font-size: 9px;
+      font-weight: var(--w-bold);
+      color: white;
+      border: 2px solid var(--white);
+    }
+
+    /* ---------- FOOTER ---------- */
+    .footer {
+      border-top: 1px solid var(--gray-100);
+      padding: var(--s-8) var(--s-6);
+      margin-top: var(--s-20);
+    }
+
+    .footer-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--s-6);
+      flex-wrap: wrap;
+    }
+
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: var(--s-3);
+    }
+
+    .footer-copy {
+      font-size: 12px;
+      color: var(--fg-tertiary);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: var(--s-6);
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--fg-tertiary);
+      font-size: 12px;
+    }
+
+    .footer-links a:hover {
+      color: var(--fg-primary);
+    }
+
+    /* ---------- MOBILE MENU + SIDEBAR DRAWER ---------- */
+    .nav-toggle {
+      display: none;
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: none;
+      border-radius: var(--r-8);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg-primary);
+      margin-right: -8px;
+    }
+
+    .nav-toggle:hover {
+      background: var(--gray-100);
+    }
+
+    .nav-toggle .bars {
+      position: relative;
+      width: 18px;
+      height: 12px;
+    }
+
+    .nav-toggle .bars::before,
+    .nav-toggle .bars::after,
+    .nav-toggle .bars span {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+      transition: transform var(--d-base) var(--ease-standard), opacity var(--d-base);
+    }
+
+    .nav-toggle .bars::before {
+      top: 0;
+    }
+
+    .nav-toggle .bars span {
+      top: 5px;
+    }
+
+    .nav-toggle .bars::after {
+      top: 10px;
+    }
+
+    body.menu-open .nav-toggle .bars::before {
+      transform: translateY(5px) rotate(45deg);
+    }
+
+    body.menu-open .nav-toggle .bars span {
+      opacity: 0;
+    }
+
+    body.menu-open .nav-toggle .bars::after {
+      transform: translateY(-5px) rotate(-45deg);
+    }
+
+    .mobile-menu {
+      position: fixed;
+      inset: 52px 0 0 0;
+      z-index: 49;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      display: none;
+      flex-direction: column;
+      padding: var(--s-6) var(--s-6) var(--s-10);
+      overflow-y: auto;
+    }
+
+    body.menu-open .mobile-menu {
+      display: flex;
+    }
+
+    .mobile-menu a {
+      display: flex;
+      align-items: center;
+      padding: 14px 4px;
+      font-size: 18px;
+      font-weight: var(--w-medium);
+      color: var(--fg-primary);
+      border-bottom: 1px solid var(--gray-100);
+      text-decoration: none;
+    }
+
+    .mobile-menu a.cta {
+      margin-top: var(--s-4);
+      justify-content: center;
+      background: var(--ink);
+      color: var(--white);
+      border: none;
+      border-radius: var(--r-full);
+      padding: 14px 20px;
+      font-weight: var(--w-semibold);
+    }
+
+    /* In-page table-of-contents trigger (mobile only) */
+    .toc-trigger {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 12px 14px;
+      margin-bottom: var(--s-4);
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--r-12);
+      font-size: 13px;
+      font-weight: var(--w-semibold);
+      color: var(--fg-primary);
+      cursor: pointer;
+      gap: 8px;
+    }
+
+    .toc-trigger .toc-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toc-trigger:hover {
+      background: var(--gray-50);
+    }
+
+    .toc-drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      display: none;
+    }
+
+    body.toc-open .toc-drawer-backdrop {
+      display: block;
+    }
+
+    .toc-drawer {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: min(320px, 84vw);
+      z-index: 61;
+      background: var(--white);
+      transform: translateX(-100%);
+      transition: transform 0.3s var(--ease-standard);
+      overflow-y: auto;
+      padding: var(--s-6) var(--s-5) var(--s-10);
+      box-shadow: var(--shadow-3);
+      display: none;
+    }
+
+    body.toc-open .toc-drawer {
+      transform: translateX(0);
+      display: block;
+    }
+
+    .toc-drawer-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--s-4);
+      padding-bottom: var(--s-3);
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .toc-drawer-head .label {
+      font-size: 11px;
+      font-weight: var(--w-semibold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--fg-tertiary);
+    }
+
+    .toc-drawer-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      color: var(--fg-tertiary);
+      border-radius: var(--r-6);
+    }
+
+    .toc-drawer-close:hover {
+      background: var(--gray-100);
+      color: var(--fg-primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .docs-layout {
+        grid-template-columns: 1fr;
+        gap: var(--s-6);
+        padding: var(--s-6) var(--s-5);
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .guide-grid,
+      .support-grid,
+      .cli-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .toc-trigger {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .nav-links {
+        display: none;
+      }
+
+      .nav-toggle {
+        display: inline-flex;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .docs-header {
+        padding: var(--s-12) var(--s-5) var(--s-8);
+      }
+
+      .docs-header h1 {
+        font-size: clamp(34px, 9vw, 48px) !important;
+        line-height: 1.1;
+      }
+
+      .docs-header p {
+        font-size: 14px;
+      }
+
+      .search-wrap {
+        margin-top: var(--s-6);
+      }
+
+      .search {
+        font-size: 16px;
+        padding: 12px 16px 12px 42px;
+      }
+
+      .search-icon {
+        left: 14px;
+      }
+
+      .search-kbd {
+        display: none;
+      }
+
+      .search-results {
+        max-height: 60vh;
+      }
+
+      .tabs {
+        padding: 0 var(--s-5);
+      }
+
+      .tab {
+        font-size: 12px;
+        margin-right: var(--s-4);
+        padding: 12px 2px;
+      }
+
+      .doc-section h2 {
+        font-size: 22px;
+      }
+
+      .doc-section h3 {
+        font-size: 15px;
+      }
+
+      .doc-section p,
+      .doc-section li {
+        font-size: 13.5px;
+      }
+
+      .code-block {
+        font-size: 11.5px;
+        padding: 14px;
+        border-radius: var(--r-8);
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--s-3);
+      }
+
+      .footer-links {
+        flex-wrap: wrap;
+        gap: var(--s-3) !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ========== NAV ========== -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="./assets/logo-mark.png" alt="SwiftLLM" class="nav-logo-mark">
+        <span class="nav-logo-text">SwiftLLM</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="index.html#features">Features</a></li>
+        <li><a href="docs.html" class="active">Docs</a></li>
+        <li><a href="#changelog">Changelog</a></li>
+        <li><a href="https://github.com/infrabrew/swiftllm" target="_blank" class="nav-cta">GitHub</a></li>
+      </ul>
+      <button class="nav-toggle" aria-label="Open menu" onclick="document.body.classList.toggle('menu-open')">
+        <span class="bars"><span></span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile menu sits OUTSIDE the nav so its position:fixed escapes the nav's backdrop-filter containing block -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="index.html#features">Features</a>
+    <a href="docs.html">Docs</a>
+    <a href="#changelog">Changelog</a>
+    <a href="https://github.com/infrabrew/swiftllm" target="_blank" class="cta">View on GitHub →</a>
+  </div>
+
+  <!-- ========== HEADER ========== -->
+  <section class="docs-header">
+    <div class="docs-eyebrow">Documentation · v2.0.1-beta</div>
+    <h1>Everything you need to ship.</h1>
+    <p>Install, configure, and run SwiftLLM for LLM inference, serving, and training — on Linux, macOS, x86_64, or
+      ARM64.</p>
+    <div class="search-wrap" id="searchWrap">
+      <span class="search-icon"><i data-icon="search" data-size="16"></i></span>
+      <input class="search" id="searchInput" placeholder="Search documentation, guides, APIs…" autocomplete="off" />
+      <span class="search-kbd">⌘K</span>
+      <div class="search-results" id="searchResults" role="listbox"></div>
+    </div>
+  </section>
+
+  <!-- ========== TABS ========== -->
+  <div class="tabs-wrap">
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-tab="guides"><i data-icon="book-open"></i> Guides</button>
+      <button class="tab" data-tab="api"><i data-icon="terminal"></i> API Reference</button>
+      <button class="tab" data-tab="support"><i data-icon="life-buoy"></i> Support</button>
+      <button class="tab" data-tab="changelog"><i data-icon="git-branch"></i> Changelog</button>
+    </div>
+  </div>
+
+  <!-- ========== CONTENT ========== -->
+  <div class="docs-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <!-- Guides sidebar -->
+      <div class="sb-panel" data-panel="guides">
+        <div class="sb-section">
+          <div class="sb-label">Getting Started</div>
+          <a href="#installation" class="sb-link active"><i data-icon="download"></i> Installation</a>
+          <a href="#quickstart" class="sb-link"><i data-icon="zap"></i> Quick Start</a>
+          <a href="#airgap" class="sb-link"><i data-icon="lock"></i> Air-Gap Install</a>
+          <a href="#platforms" class="sb-link"><i data-icon="server"></i> Platforms</a>
+        </div>
+        <div class="sb-section">
+          <div class="sb-label">Features</div>
+          <a href="#inference" class="sb-link"><i data-icon="trending-up"></i> Inference</a>
+          <a href="#serving" class="sb-link"><i data-icon="globe"></i> API Server</a>
+          <a href="#training" class="sb-link"><i data-icon="book"></i> Training</a>
+        </div>
+      </div>
+      <!-- API sidebar -->
+      <div class="sb-panel" data-panel="api" style="display:none">
+        <div class="sb-section">
+          <div class="sb-label">Reference</div>
+          <a href="#cli" class="sb-link active"><i data-icon="terminal"></i> CLI Commands</a>
+          <a href="#python-api" class="sb-link"><i data-icon="book"></i> Python API</a>
+          <a href="#configuration" class="sb-link"><i data-icon="cog"></i> Configuration</a>
+          <a href="#models" class="sb-link"><i data-icon="brain"></i> Models</a>
+        </div>
+      </div>
+      <!-- Support sidebar -->
+      <div class="sb-panel" data-panel="support" style="display:none">
+        <div class="sb-section">
+          <div class="sb-label">Help</div>
+          <a href="#channels" class="sb-link active"><i data-icon="message-square"></i> Channels</a>
+          <a href="#faq" class="sb-link"><i data-icon="help-circle"></i> FAQ</a>
+          <a href="#troubleshoot" class="sb-link"><i data-icon="wrench"></i> Troubleshooting</a>
+        </div>
+      </div>
+      <!-- Changelog sidebar -->
+      <div class="sb-panel" data-panel="changelog" style="display:none">
+        <div class="sb-section">
+          <div class="sb-label">Releases</div>
+          <a href="#v201" class="sb-link active"><i data-icon="sparkles"></i> v2.0.1-beta</a>
+          <a href="#v2002" class="sb-link"><i data-icon="git-branch"></i> v2.0.0.2-alpha</a>
+          <a href="#v2001" class="sb-link"><i data-icon="git-branch"></i> v2.0.0.1-alpha</a>
+          <a href="#v200" class="sb-link"><i data-icon="git-branch"></i> v2.0.0-alpha</a>
+          <a href="#v100" class="sb-link"><i data-icon="check"></i> v1.0.0</a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+
+      <!-- TOC trigger (mobile only) -->
+      <button class="toc-trigger" id="tocTrigger" aria-label="Open contents">
+        <span class="toc-icon"><i data-icon="menu" data-size="14"></i> On this page</span>
+        <i data-icon="chevron-right" data-size="14"></i>
+      </button>
+
+      <!-- ============ GUIDES TAB ============ -->
+      <div class="tab-panel active" data-panel="guides">
+
+        <!-- Quick nav cards -->
+        <div class="guide-grid">
+          <a class="guide-card" href="#installation">
+            <div class="guide-icon" style="background:var(--blue-wash);color:var(--blue)"><i data-icon="download"></i>
+            </div>
+            <h4>Installation</h4>
+            <p>Auto-detect GPU, install Rust, build from source.</p>
+          </a>
+          <a class="guide-card" href="#quickstart">
+            <div class="guide-icon" style="background:var(--green-wash);color:var(--green)"><i data-icon="zap"></i>
+            </div>
+            <h4>Quick Start</h4>
+            <p>Your first generation in under five minutes.</p>
+          </a>
+          <a class="guide-card" href="#serving">
+            <div class="guide-icon" style="background:var(--purple-wash);color:var(--purple)"><i data-icon="globe"></i>
+            </div>
+            <h4>API Server</h4>
+            <p>OpenAI-compatible endpoints with auth and metrics.</p>
+          </a>
+          <a class="guide-card" href="#training">
+            <div class="guide-icon" style="background:var(--orange-wash);color:var(--orange)"><i data-icon="wrench"></i>
+            </div>
+            <h4>Training &amp; Fine-Tuning</h4>
+            <p>LoRA, QLoRA, and full fine-tuning with Muon / AdamW.</p>
+          </a>
+        </div>
+
+        <section class="doc-section" id="installation">
+          <h2>Installation</h2>
+          <p>SwiftLLM provides a smart installer that auto-detects your system, installs dependencies, and builds the
+            engine from source. As of v2.0.1-beta it ships pre-built wheels for Linux (x86_64, aarch64) and macOS
+            (x86_64, arm64).</p>
+          <h3>Prerequisites</h3>
+          <ul>
+            <li><strong>Python 3.8+</strong> (3.10+ recommended)</li>
+            <li><strong>Git</strong> and a C toolchain (cc/clang)</li>
+            <li><strong>NVIDIA GPU</strong> with CUDA 11.8+ — optional; pass <code>--cpu</code> for CPU-only builds</li>
+            <li><strong>Rust toolchain</strong> — installed automatically if missing</li>
+          </ul>
+
+          <div class="code-block">
+            <div class="code-block-header">
+              <span class="code-lang">Shell</span>
+              <button class="code-copy" onclick="copyBlock(this)">Copy</button>
+            </div>
+            <pre style="margin:0; font-family:inherit;"><span class="cm"># Clone the repository</span>
+git clone https://github.com/infrabrew/swiftllm.git
+cd swiftllm
+
+<span class="cm"># Run the installer (auto-detects CUDA vs CPU)</span>
+bash install.sh</pre>
+          </div>
+
+          <h3>Install Options</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Flag</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>--cpu</code></td>
+                <td>Force CPU-only build, skip CUDA detection</td>
+              </tr>
+              <tr>
+                <td><code>--gpu</code></td>
+                <td>Force GPU/CUDA build, fail fast if CUDA is missing</td>
+              </tr>
+              <tr>
+                <td><code>--venv DIR</code></td>
+                <td>Custom virtual environment location</td>
+              </tr>
+              <tr>
+                <td><code>--airgap</code></td>
+                <td>Install from a pre-built offline bundle</td>
+              </tr>
+              <tr>
+                <td><code>--dev</code></td>
+                <td>Install developer extras</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout callout-warn">
+            <i data-icon="help-circle" data-size="16"></i>
+            <p><strong>PEP 668 / externally-managed environments:</strong> On Debian 12+ and recent macOS, the installer
+              will refuse to pip-install into the system Python. Let <code>install.sh</code> create a venv, or pass
+              <code>--venv</code>.
+            </p>
+          </div>
+        </section>
+
+        <section class="doc-section" id="platforms">
+          <h2>Platforms</h2>
+          <p>SwiftLLM ships pre-built wheels for the matrix below. Other platforms fall back to a source build, which
+            the installer handles automatically.</p>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>OS</th>
+                <th>Architecture</th>
+                <th>Acceleration</th>
+                <th>Wheel</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Linux</td>
+                <td>x86_64</td>
+                <td>CUDA 11.8+ / CPU</td>
+                <td>✓ pre-built</td>
+              </tr>
+              <tr>
+                <td>Linux</td>
+                <td>aarch64</td>
+                <td>CPU (CUDA via source)</td>
+                <td>✓ pre-built</td>
+              </tr>
+              <tr>
+                <td>macOS</td>
+                <td>x86_64</td>
+                <td>CPU</td>
+                <td>✓ pre-built</td>
+              </tr>
+              <tr>
+                <td>macOS</td>
+                <td>arm64 (Apple Silicon)</td>
+                <td>CPU + Metal (experimental)</td>
+                <td>✓ pre-built</td>
+              </tr>
+              <tr>
+                <td>Windows</td>
+                <td>x86_64</td>
+                <td>CUDA / CPU</td>
+                <td>WSL2 recommended</td>
+              </tr>
+            </tbody>
+          </table>
+          <h3>GPU requirements</h3>
+          <ul>
+            <li><strong>NVIDIA:</strong> Compute Capability 7.0+ (Volta and later). Tested on A100, H100, L4, RTX 4090,
+              RTX 3090.</li>
+            <li><strong>VRAM:</strong> 16 GB minimum for 7B models in fp16; 24 GB+ recommended for serving with KV-cache
+              headroom.</li>
+            <li><strong>Drivers:</strong> NVIDIA driver 525+ for CUDA 12, 470+ for CUDA 11.8.</li>
+          </ul>
+          <div class="callout">
+            <i data-icon="info" data-size="16"></i>
+            <p>Apple Silicon Metal acceleration is in preview. CPU-only mode is the default on macOS — opt-in with
+              <code>SWIFTLLM_BACKEND=metal</code>.
+            </p>
+          </div>
+        </section>
+
+        <section class="doc-section" id="quickstart">
+          <h2>Quick Start</h2>
+          <h3>Basic Inference</h3>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">Python</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="kw">from</span> swiftllm <span class="kw">import</span> LLM, SamplingParams
+
+llm = <span class="cls">LLM</span>(<span class="str">"meta-llama/Llama-3-8B"</span>)
+params = <span class="cls">SamplingParams</span>(temperature=<span class="num">0.7</span>, max_tokens=<span class="num">256</span>)
+
+outputs = llm.<span class="fn">generate</span>([<span class="str">"What is machine learning?"</span>], params)
+<span class="kw">for</span> output <span class="kw">in</span> outputs:
+    <span class="fn">print</span>(output.text)</pre>
+          </div>
+
+          <h3>Start an API Server</h3>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">Shell</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre
+              style="margin:0; font-family:inherit;">swiftllm serve --model meta-llama/Llama-3-8B --port <span class="num">8000</span></pre>
+          </div>
+        </section>
+
+        <section class="doc-section" id="airgap">
+          <h2>Air-Gapped Installation</h2>
+          <p>SwiftLLM supports deployment on isolated networks with no internet access. Create a portable bundle on a
+            connected machine, then install offline.</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">Shell</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="cm"># On a connected machine</span>
+bash airgap-bundle.sh --model TheBloke/Llama-2-7B-GGUF
+
+<span class="cm"># On the air-gapped target</span>
+tar xzf swiftllm-airgap-*.tar.gz
+cd swiftllm-airgap-*/ && bash install.sh --airgap</pre>
+          </div>
+          <div class="callout callout-info"><i data-icon="help-circle" data-size="16"></i>
+            <p>The bundle includes source, Python wheels, Rust installer, and optionally pre-downloaded models. SHA256
+              checksums verify integrity.</p>
+          </div>
+        </section>
+
+        <section class="doc-section" id="inference">
+          <h2>Inference</h2>
+          <p>SwiftLLM's inference engine is built on PagedAttention with continuous batching, FlashAttention-2, and
+            KV-cache reuse — designed to serve dozens of concurrent requests on a single GPU without head-of-line
+            blocking.</p>
+          <h3>Sync, async, and streaming</h3>
+          <ul>
+            <li><strong><code>LLM</code></strong> — synchronous engine for single-shot generation. Best for scripts and
+              notebooks.</li>
+            <li><strong><code>AsyncLLM</code></strong> — async engine with <code>async for</code> token streaming. Best
+              for serving and concurrent workloads.</li>
+            <li><strong>OpenAI-compatible HTTP</strong> — <code>swiftllm serve</code> exposes
+              <code>/v1/completions</code> and <code>/v1/chat/completions</code> with SSE streaming.
+            </li>
+          </ul>
+
+          <h3>Sampling parameters</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>temperature</code></td>
+                <td>0 = greedy. Higher = more random. Default 1.0.</td>
+              </tr>
+              <tr>
+                <td><code>top_p</code></td>
+                <td>Nucleus sampling. Default 1.0 (off).</td>
+              </tr>
+              <tr>
+                <td><code>top_k</code></td>
+                <td>Top-K sampling. Default 0 (off).</td>
+              </tr>
+              <tr>
+                <td><code>max_tokens</code></td>
+                <td>Cap on generated tokens. Required.</td>
+              </tr>
+              <tr>
+                <td><code>stop</code></td>
+                <td>List of strings to halt generation.</td>
+              </tr>
+              <tr>
+                <td><code>presence_penalty</code> / <code>frequency_penalty</code></td>
+                <td>Discourage repetition. Default 0.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Streaming example</h3>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">Python</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="kw">from</span> swiftllm <span class="kw">import</span> AsyncLLM, SamplingParams
+
+llm = <span class="cls">AsyncLLM</span>(<span class="str">"meta-llama/Llama-3-8B"</span>)
+params = <span class="cls">SamplingParams</span>(temperature=<span class="num">0.7</span>, max_tokens=<span class="num">256</span>)
+
+<span class="kw">async for</span> token <span class="kw">in</span> llm.<span class="fn">stream</span>(<span class="str">"Explain PagedAttention in one paragraph."</span>, params):
+    <span class="fn">print</span>(token, end=<span class="str">""</span>, flush=<span class="kw">True</span>)</pre>
+          </div>
+
+          <div class="callout callout-tip">
+            <i data-icon="sparkles" data-size="16"></i>
+            <p>Continuous batching means a long-running request never blocks short ones — new requests slot into the
+              next decoder step.</p>
+          </div>
+        </section>
+
+        <section class="doc-section" id="serving">
+          <h2>API Server</h2>
+          <p>SwiftLLM includes an OpenAI-compatible HTTP server built with Axum, supporting streaming, API key
+            authentication, and security hardening.</p>
+          <h3>Endpoints</h3>
+          <ul>
+            <li><code>POST /v1/completions</code> — Text completion</li>
+            <li><code>POST /v1/chat/completions</code> — Chat completion</li>
+            <li><code>GET /v1/models</code> — List loaded models</li>
+            <li><code>GET /health</code> — Health check</li>
+            <li><code>GET /metrics</code> — Prometheus metrics</li>
+          </ul>
+          <div class="callout callout-tip"><i data-icon="sparkles" data-size="16"></i>
+            <p>The server is a drop-in replacement for the OpenAI API. Any client library that works with OpenAI will
+              work with SwiftLLM.</p>
+          </div>
+        </section>
+
+        <section class="doc-section" id="training">
+          <h2>Training &amp; Fine-Tuning</h2>
+          <p>SwiftLLM supports full training, LoRA, and QLoRA fine-tuning with multiple optimizer options. The CLI
+            exposes two subcommands: <code>swiftllm train</code> and <code>swiftllm finetune</code>.</p>
+          <div class="callout callout-warn"><i data-icon="help-circle" data-size="16"></i>
+            <p><strong>Simulated backend (v2.0.1-beta):</strong> CUDA training kernels are not yet wired up. Every
+              training run prints a visible <code>[SIMULATED]</code> banner. Real gradient training ships in a later
+              beta.</p>
+          </div>
+          <h3>LoRA Fine-Tuning</h3>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">Python</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="kw">from</span> swiftllm <span class="kw">import</span> fine_tune, LoRAConfig, TrainingConfig
+
+lora = <span class="cls">LoRAConfig</span>(r=<span class="num">16</span>, alpha=<span class="num">32</span>, dropout=<span class="num">0.05</span>)
+config = <span class="cls">TrainingConfig</span>(learning_rate=<span class="num">2e-4</span>, num_epochs=<span class="num">3</span>,
+                        batch_size=<span class="num">4</span>, optimizer=<span class="str">"adamw"</span>)
+
+<span class="fn">fine_tune</span>(model=<span class="str">"meta-llama/Llama-3-8B"</span>,
+          dataset=<span class="str">"./my_data.jsonl"</span>,
+          lora_config=lora, training_config=config,
+          output_dir=<span class="str">"./output"</span>)</pre>
+          </div>
+        </section>
+      </div>
+
+      <!-- ============ API TAB ============ -->
+      <div class="tab-panel" data-panel="api">
+        <section class="doc-section" id="cli">
+          <h2>CLI Commands</h2>
+          <p>The <code>swiftllm</code> CLI provides nine subcommands covering inference, serving, training, and model
+            management.</p>
+          <div class="cli-grid">
+            <div class="cli-item"><code>serve</code>
+              <p>OpenAI-compatible API server</p>
+            </div>
+            <div class="cli-item"><code>generate</code>
+              <p>Batch text generation</p>
+            </div>
+            <div class="cli-item"><code>chat</code>
+              <p>Interactive REPL</p>
+            </div>
+            <div class="cli-item"><code>download</code>
+              <p>Pull models from HF Hub</p>
+            </div>
+            <div class="cli-item"><code>benchmark</code>
+              <p>Throughput &amp; TTFT tests</p>
+            </div>
+            <div class="cli-item"><code>convert</code>
+              <p>HF ↔ SafeTensors ↔ GGUF</p>
+            </div>
+            <div class="cli-item"><code>info</code>
+              <p>Model and system info</p>
+            </div>
+            <div class="cli-item"><code>train</code>
+              <p>Full / LoRA / QLoRA training</p>
+            </div>
+            <div class="cli-item"><code>finetune</code>
+              <p>LoRA convenience command</p>
+            </div>
+          </div>
+
+          <h3>Global Flags</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Flag</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>--model</code></td>
+                <td>HF repo id, local path, or GGUF file</td>
+              </tr>
+              <tr>
+                <td><code>--dtype</code></td>
+                <td><code>auto</code>, <code>float16</code>, <code>bfloat16</code>, <code>float32</code>,
+                  <code>int8</code>, <code>int4</code>
+                </td>
+              </tr>
+              <tr>
+                <td><code>--quantization</code></td>
+                <td><code>awq</code>, <code>gptq</code>, <code>bnb4</code>, or <code>none</code></td>
+              </tr>
+              <tr>
+                <td><code>--tensor-parallel</code></td>
+                <td>Number of GPUs for tensor parallelism</td>
+              </tr>
+              <tr>
+                <td><code>--max-model-len</code></td>
+                <td>Override the model's context length</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="doc-section" id="python-api">
+          <h2>Python API</h2>
+          <h3>Inference</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Export</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>LLM</code></td>
+                <td>Synchronous inference engine</td>
+              </tr>
+              <tr>
+                <td><code>AsyncLLM</code></td>
+                <td>Async engine with streaming iterators</td>
+              </tr>
+              <tr>
+                <td><code>SamplingParams</code></td>
+                <td>temperature, top_p, top_k, max_tokens, stop strings</td>
+              </tr>
+              <tr>
+                <td><code>RequestOutput</code></td>
+                <td>Per-request result wrapper</td>
+              </tr>
+              <tr>
+                <td><code>EngineConfig</code></td>
+                <td>gpu_memory_utilization, dtype, quantization, max_model_len</td>
+              </tr>
+            </tbody>
+          </table>
+          <h3>Training</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Export</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Trainer</code></td>
+                <td>High-level training loop</td>
+              </tr>
+              <tr>
+                <td><code>TrainingConfig</code></td>
+                <td>learning_rate, num_epochs, batch_size, optimizer, lr_scheduler</td>
+              </tr>
+              <tr>
+                <td><code>LoRAConfig</code></td>
+                <td>r, alpha, dropout, target_modules, bias</td>
+              </tr>
+              <tr>
+                <td><code>fine_tune</code></td>
+                <td>One-call LoRA convenience</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="doc-section" id="configuration">
+          <h2>Configuration</h2>
+          <p>SwiftLLM is configured via environment variables prefixed <code>SWIFTLLM_</code>. CLI flags take highest
+            precedence.</p>
+          <h3>GPU &amp; Memory</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>SWIFTLLM_GPU_MEMORY_UTILIZATION</code></td>
+                <td>0.90</td>
+                <td>VRAM fraction for model + KV cache</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_DTYPE</code></td>
+                <td>auto</td>
+                <td>float16, bfloat16, float32, int8, int4</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_TENSOR_PARALLEL_SIZE</code></td>
+                <td>1</td>
+                <td>GPUs for tensor parallelism</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_CPU_OFFLOAD_GB</code></td>
+                <td>0</td>
+                <td>GB of weights to offload to CPU RAM</td>
+              </tr>
+            </tbody>
+          </table>
+          <h3>Server</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>SWIFTLLM_HOST</code></td>
+                <td>0.0.0.0</td>
+                <td>HTTP bind address</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_PORT</code></td>
+                <td>8000</td>
+                <td>Listen port</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_API_KEYS</code></td>
+                <td>—</td>
+                <td>Comma-separated API keys</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_METRICS_ENABLED</code></td>
+                <td>true</td>
+                <td>Expose Prometheus <code>/metrics</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="doc-section" id="models">
+          <h2>Supported Models</h2>
+          <p>Ten model families supported out of the box, with auto-detection for HuggingFace, GGUF, SafeTensors, and
+            PyTorch formats.</p>
+          <ul>
+            <li><strong>LLaMA 3 / 2</strong> — Meta's flagship families</li>
+            <li><strong>Code Llama</strong> — Specialized for code generation</li>
+            <li><strong>Mistral / Mixtral</strong> — Dense and MoE variants</li>
+            <li><strong>Qwen 1 / 2 / 3</strong> — Alibaba multilingual models</li>
+            <li><strong>Phi-2 / Phi-3</strong> — Microsoft small models</li>
+            <li><strong>Falcon</strong> — TII open models</li>
+            <li><strong>Gemma</strong> — Google open models</li>
+          </ul>
+        </section>
+      </div>
+
+      <!-- ============ SUPPORT TAB ============ -->
+      <div class="tab-panel" data-panel="support">
+        <section class="doc-section" id="channels">
+          <h2>Get help</h2>
+          <p>Three channels, tuned to different needs. Community-first, paid support available for production
+            deployments.</p>
+          <div class="support-grid">
+            <a class="support-card" href="https://github.com/infrabrew/swiftllm/discussions" target="_blank">
+              <div class="icon-tile" style="background:var(--blue-wash);color:var(--blue)"><i
+                  data-icon="message-square"></i></div>
+              <h4>GitHub Discussions</h4>
+              <p>Ask questions, share benchmarks, and trade tips with the community.</p>
+              <span class="link">Open forum <i data-icon="arrow-up-right"></i></span>
+            </a>
+            <a class="support-card" href="https://github.com/infrabrew/swiftllm/issues" target="_blank">
+              <div class="icon-tile" style="background:var(--orange-wash);color:var(--orange)"><i
+                  data-icon="wrench"></i></div>
+              <h4>Issue Tracker</h4>
+              <p>Found a bug or want to request a feature? Open an issue with a minimal repro.</p>
+              <span class="link">Report an issue <i data-icon="arrow-up-right"></i></span>
+            </a>
+            <a class="support-card" href="/cdn-cgi/l/email-protection#d1a2a4a1a1bea3a591a2a6b8b7a5bdbdbcffb5b4a7">
+              <div class="icon-tile" style="background:var(--purple-wash);color:var(--purple)"><i
+                  data-icon="shield"></i></div>
+              <h4>Enterprise Support</h4>
+              <p>SLAs, private deployments, and architecture reviews for production workloads.</p>
+              <span class="link">Contact us <i data-icon="arrow-right"></i></span>
+            </a>
+          </div>
+        </section>
+
+        <section class="doc-section" id="faq">
+          <h2>Frequently asked questions</h2>
+
+          <div class="faq-item">
+            <div class="faq-q">Do I need a GPU to run SwiftLLM? <i data-icon="plus" data-size="18"></i></div>
+            <div class="faq-a">
+              <div class="faq-a-inner">No. As of v2.0.0.2-alpha, CPU is the default build target. The installer only
+                pulls CUDA libraries if you pass <code>--gpu</code> or run on a machine with <code>nvidia-smi</code>
+                detected. CPU wheels ship for x86_64 and aarch64 on both Linux and macOS.</div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Which model formats are supported? <i data-icon="plus" data-size="18"></i></div>
+            <div class="faq-a">
+              <div class="faq-a-inner">HuggingFace (SafeTensors and PyTorch), GGUF (via llama-cpp-python), and raw
+                SafeTensors files. Format is auto-detected by file extension. Use <code>swiftllm convert</code> to move
+                between formats.</div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Is training production-ready yet? <i data-icon="plus" data-size="18"></i></div>
+            <div class="faq-a">
+              <div class="faq-a-inner">Not in v2.0.1-beta. The training pipeline, CLI, config parsing, checkpointing,
+                and dataset loading are all wired up, but the actual CUDA gradient kernels are stubbed. Runs print a
+                <code>[SIMULATED]</code> banner. Real gradient training lands in a later beta — follow the <a
+                  href="#changelog">changelog</a> for dates.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Can I deploy on air-gapped networks? <i data-icon="plus" data-size="18"></i></div>
+            <div class="faq-a">
+              <div class="faq-a-inner">Yes. Run <code>airgap-bundle.sh</code> on a connected machine to build a portable
+                tarball with source, Python wheels, the Rust installer, and optional pre-downloaded models. SHA256
+                checksums verify integrity on the target.</div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">How does throughput compare to vLLM? <i data-icon="plus" data-size="18"></i></div>
+            <div class="faq-a">
+              <div class="faq-a-inner">Run the included benchmark suite on your own hardware —
+                <code>swiftllm benchmark --concurrency 32 --num-requests 1000</code>. We consistently see competitive
+                tokens/sec on LLaMA-3-8B with PagedAttention + continuous batching enabled. See the changelog for tested
+                throughput per release.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Is the OpenAI API really a drop-in replacement? <i data-icon="plus" data-size="18"></i>
+            </div>
+            <div class="faq-a">
+              <div class="faq-a-inner">Yes for <code>/v1/completions</code> and <code>/v1/chat/completions</code>
+                including streaming via SSE. Point any OpenAI client (Python, Node, curl) at
+                <code>http://localhost:8000/v1</code> and it just works. API key auth, CORS, and Prometheus metrics are
+                built in.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="doc-section" id="troubleshoot">
+          <h2>Troubleshooting</h2>
+          <h3>Installer fails with "externally-managed environment"</h3>
+          <p>You're on Debian 12+, Ubuntu 23.04+, or recent macOS. Let the installer create a venv (the default), pass
+            <code>--venv ~/.swiftllm</code>, or activate your own environment before running.
+          </p>
+
+          <h3><code>nvidia-smi</code> detected but CUDA build fails</h3>
+          <p>Ensure <code>nvcc</code> is on your PATH (<code>which nvcc</code>). Driver version must be compatible with
+            CUDA 11.8+. On Ubuntu, the <code>nvidia-cuda-toolkit</code> package is often too old — install CUDA directly
+            from NVIDIA.</p>
+
+          <h3>Training shows <code>[SIMULATED]</code></h3>
+          <p>This is expected on v2.0.1-beta — the stub is intentional. See the <a href="#training">Training
+              section</a>.</p>
+
+          <h3>Model downloads hang</h3>
+          <p>Set <code>HF_HUB_ENABLE_HF_TRANSFER=1</code> for the accelerated downloader, or pass
+            <code>--revision main</code> to pin the reference. For air-gapped installs, set
+            <code>SWIFTLLM_OFFLINE=1</code> and pre-populate the cache.
+          </p>
+        </section>
+      </div>
+
+      <!-- ============ CHANGELOG TAB ============ -->
+      <div class="tab-panel" data-panel="changelog" id="changelog">
+        <section class="doc-section">
+          <h2>Release history</h2>
+          <p>Track every update, feature, and fix as SwiftLLM evolves.</p>
+
+          <div class="filter-bar">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="feature">Features</button>
+            <button class="filter-btn" data-filter="fixed">Fixes</button>
+            <button class="filter-btn" data-filter="security">Security</button>
+          </div>
+
+          <div class="timeline">
+            <!-- v2.0.1-beta -->
+            <div class="tl-entry latest" id="v201" data-cats="fixed,feature">
+              <div class="tl-dot"></div>
+              <div class="tl-card">
+                <div class="tl-head">
+                  <div class="tl-ver">v2.0.1-beta</div>
+                  <div class="tl-meta">
+                    <span class="tl-tag tag-latest">Latest</span>
+                    <span class="tl-tag tag-beta">Beta</span>
+                    <span class="tl-date">2026</span>
+                  </div>
+                </div>
+                <p class="tl-sum">Training UX fixes — simulated-stub banner, train-data path validation, and full
+                  regression coverage.</p>
+                <ul class="change-list">
+                  <li class="change-item" data-type="fixed"><span class="change-badge badge-fixed">Fixed</span><span
+                      class="change-text"><code>Trainer.train()</code> now prints a visible <code>[SIMULATED]</code>
+                      banner making it obvious the current loop is a stub (no weights, no gradients) rather than real
+                      training</span></li>
+                  <li class="change-item" data-type="fixed"><span class="change-badge badge-fixed">Fixed</span><span
+                      class="change-text"><code>swiftllm train</code> and <code>swiftllm finetune</code> validate
+                      <code>--train-data</code> / <code>--eval-data</code> paths up front — missing, non-regular, or
+                      empty files now fail fast with clear errors</span></li>
+                  <li class="change-item" data-type="changed"><span
+                      class="change-badge badge-changed">Changed</span><span class="change-text">Validation covers paths
+                      loaded from <code>--config</code> JSON so typos in saved configs surface immediately</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Full regression matrix: install → download → generate (18.61 tok/s) → finetune
+                      (LoRA) → train on Ubuntu 24.04 + CUDA 13.0</span></li>
+                </ul>
+                <div class="tl-foot">
+                  <a href="https://github.com/infrabrew/swiftllm/commit/962f6d8" class="commit-link"><i
+                      data-icon="git-branch"></i> 962f6d8</a>
+                  <div class="avatar">IB</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- v2.0.0.2-alpha -->
+            <div class="tl-entry alpha" id="v2002" data-cats="feature,fixed,security">
+              <div class="tl-dot"></div>
+              <div class="tl-card">
+                <div class="tl-head">
+                  <div class="tl-ver">v2.0.0.2-alpha</div>
+                  <div class="tl-meta"><span class="tl-tag tag-alpha">Alpha</span><span class="tl-date">2026</span>
+                  </div>
+                </div>
+                <p class="tl-sum">CPU &amp; ARM wheel support, installer portability, and critical Rust-side safety
+                  fixes.</p>
+                <ul class="change-list">
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">CPU-only build is now the default — portable wheel with zero CUDA
+                      dependencies, buildable on Apple Silicon, Graviton, Raspberry Pi, Jetson, Ampere</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Top-level <code>swiftllm</code> crate exposes <code>cpu</code> and
+                      <code>cuda</code> Cargo features; CUDA opt-in via <code>./install.sh --gpu</code></span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text"><code>airgap-bundle.sh --arch</code> flag auto-maps to pip platform tags and
+                      rustup target triples for cross-architecture bundles</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text"><code>[serve]</code> optional dependency (fastapi, uvicorn) wired into
+                      <code>install.sh</code> and the airgap bundle</span></li>
+                  <li class="change-item" data-type="fixed"><span class="change-badge badge-fixed">Fixed</span><span
+                      class="change-text">PEP 668 handling on Ubuntu 23.04+ / Debian 12+ externally-managed
+                      Python</span></li>
+                  <li class="change-item" data-type="fixed"><span class="change-badge badge-fixed">Fixed</span><span
+                      class="change-text">Replaced non-portable <code>grep -oP</code> with <code>sed</code> for CUDA
+                      detection (macOS/BSD compatible)</span></li>
+                  <li class="change-item" data-type="security"><span
+                      class="change-badge badge-security">Security</span><span class="change-text">Fixed 14
+                      <code>partial_cmp().unwrap()</code> calls — replaced with <code>unwrap_or(Ordering::Equal)</code>
+                      to prevent NaN panics</span></li>
+                  <li class="change-item" data-type="security"><span
+                      class="change-badge badge-security">Security</span><span class="change-text">Added
+                      <code>checked_add</code> bounds validation in GGUF loader — malformed files can no longer cause
+                      slice panics</span></li>
+                </ul>
+                <div class="tl-foot">
+                  <a href="https://github.com/infrabrew/swiftllm/commit/ae87421" class="commit-link"><i
+                      data-icon="git-branch"></i> ae87421</a>
+                  <div class="avatar">IB</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- v2.0.0.1-alpha -->
+            <div class="tl-entry alpha" id="v2001" data-cats="feature,security,fixed">
+              <div class="tl-dot"></div>
+              <div class="tl-card">
+                <div class="tl-head">
+                  <div class="tl-ver">v2.0.0.1-alpha</div>
+                  <div class="tl-meta"><span class="tl-tag tag-alpha">Alpha</span><span class="tl-date">2026</span>
+                  </div>
+                </div>
+                <p class="tl-sum">Air-gapped installation and comprehensive security hardening.</p>
+                <ul class="change-list">
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text"><code>airgap-bundle.sh</code> creates portable install archives (source, pip
+                      wheels, rustup-init, optional models)</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text"><code>install.sh --airgap</code> flag for fully offline installation from a
+                      bundle</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Runtime offline mode via <code>SWIFTLLM_OFFLINE=1</code> — disables all HF
+                      downloads</span></li>
+                  <li class="change-item" data-type="security"><span
+                      class="change-badge badge-security">Security</span><span
+                      class="change-text"><strong>Critical:</strong> Fixed JSON injection in SSE streaming — replaced
+                      raw <code>format!()</code> with <code>serde_json::json!()</code></span></li>
+                  <li class="change-item" data-type="security"><span
+                      class="change-badge badge-security">Security</span><span
+                      class="change-text"><strong>Critical:</strong> Fixed shell injection in
+                      <code>airgap-bundle.sh</code> — model names now passed via <code>sys.argv</code></span></li>
+                  <li class="change-item" data-type="security"><span
+                      class="change-badge badge-security">Security</span><span
+                      class="change-text"><strong>Critical:</strong> Added SHA256 checksum verification for downloaded
+                      <code>rustup-init</code></span></li>
+                  <li class="change-item" data-type="security"><span
+                      class="change-badge badge-security">Security</span><span class="change-text">Path validation
+                      against directory traversal; symlink traversal protection in offline cache</span></li>
+                  <li class="change-item" data-type="fixed"><span class="change-badge badge-fixed">Fixed</span><span
+                      class="change-text">Use-after-move in <code>engine.rs</code>; usize negation in
+                      <code>trainer.rs</code>; missing <code>mut</code> on <code>eval_data</code></span></li>
+                </ul>
+                <div class="tl-foot">
+                  <a href="https://github.com/infrabrew/swiftllm/commit/9ad73bb" class="commit-link"><i
+                      data-icon="git-branch"></i> 9ad73bb</a>
+                  <div class="avatar">IB</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- v2.0.0-alpha -->
+            <div class="tl-entry alpha" id="v200" data-cats="feature,fixed">
+              <div class="tl-dot"></div>
+              <div class="tl-card">
+                <div class="tl-head">
+                  <div class="tl-ver">v2.0.0-alpha</div>
+                  <div class="tl-meta"><span class="tl-tag tag-alpha">Alpha</span><span class="tl-date">2026</span>
+                  </div>
+                </div>
+                <p class="tl-sum">Training &amp; fine-tuning infrastructure, engine optimization, scheduler
+                  improvements.</p>
+                <ul class="change-list">
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text"><code>swiftllm-training</code> Rust crate with LoRA / QLoRA / full
+                      fine-tuning</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text"><strong>Muon optimizer</strong> with Newton-Schulz orthogonalization, plus
+                      AdamW and SGD with linear/cosine/constant LR schedulers</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Dataset loading (JSONL/CSV/text) with instruction templates; rolling-window
+                      metrics; perplexity</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Checkpoint save/load with <code>save_total_limit</code>; Python
+                      <code>Trainer</code> with callbacks and <code>EarlyStoppingConfig</code></span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">O(n) top-k / beam / logprobs selection via quickselect; <code>/metrics</code>
+                      JSON and Prometheus endpoints</span></li>
+                  <li class="change-item" data-type="fixed"><span class="change-badge badge-fixed">Fixed</span><span
+                      class="change-text">Eliminated redundant read-then-write lock in sampling hot path; numerically
+                      stable log-softmax</span></li>
+                  <li class="change-item" data-type="fixed"><span class="change-badge badge-fixed">Fixed</span><span
+                      class="change-text">O(n) victim selection for preemption scheduling; gradient clipping and LoRA
+                      scaling</span></li>
+                </ul>
+                <div class="tl-foot">
+                  <a href="https://github.com/infrabrew/swiftllm/commit/4af1106" class="commit-link"><i
+                      data-icon="git-branch"></i> 4af1106</a>
+                  <div class="avatar">IB</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- v1.0.0 -->
+            <div class="tl-entry stable" id="v100" data-cats="feature">
+              <div class="tl-dot"></div>
+              <div class="tl-card">
+                <div class="tl-head">
+                  <div class="tl-ver">v1.0.0</div>
+                  <div class="tl-meta"><span class="tl-tag tag-stable">Initial</span><span class="tl-date">2026</span>
+                  </div>
+                </div>
+                <p class="tl-sum">Initial release — Rust core, PagedAttention, continuous batching, OpenAI API, Python
+                  SDK.</p>
+                <ul class="change-list">
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Complete Rust rewrite with 5 modular crates (core, models, cuda, server,
+                      training)</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">PagedAttention memory management: block allocator with copy-on-write</span>
+                  </li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Continuous batching scheduler with preemption (swap / recompute)</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Token sampling: greedy, temperature, top-k, top-p, min-p, repetition
+                      penalty</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">OpenAI-compatible HTTP API built with Axum; Python SDK (<code>LLM</code>,
+                      <code>AsyncLLM</code>, <code>SamplingParams</code>)</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Speculative decoding with draft-model acceleration; multi-GPU tensor and
+                      pipeline parallelism</span></li>
+                </ul>
+                <div class="tl-foot">
+                  <a href="https://github.com/infrabrew/swiftllm/commit/04104da" class="commit-link"><i
+                      data-icon="git-branch"></i> 04104da</a>
+                  <div class="avatar">IB</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Mobile TOC drawer -->
+  <div class="toc-drawer-backdrop" onclick="document.body.classList.remove('toc-open')"></div>
+  <aside class="toc-drawer" id="tocDrawer">
+    <div class="toc-drawer-head">
+      <span class="label">On this page</span>
+      <button class="toc-drawer-close" onclick="document.body.classList.remove('toc-open')" aria-label="Close">
+        <i data-icon="x" data-size="16"></i>
+      </button>
+    </div>
+    <div id="tocDrawerContent"></div>
+  </aside>
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <img src="./assets/logo-mark.png" alt="" width="22" height="22">
+        <span class="footer-copy">SwiftLLM © 2026. Apache 2.0 License.</span>
+      </div>
+      <ul class="footer-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="docs.html">Docs</a></li>
+        <li><a href="https://github.com/infrabrew/swiftllm">GitHub</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+  <script src="./assets/icons.js"></script>
+  <script>
+    // ---------- Tab switching ----------
+    const tabs = document.querySelectorAll('.tab');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+    const sbPanels = document.querySelectorAll('.sb-panel');
+    tabs.forEach(t => {
+      t.addEventListener('click', () => {
+        const name = t.dataset.tab;
+        tabs.forEach(x => x.classList.toggle('active', x === t));
+        tabPanels.forEach(p => p.classList.toggle('active', p.dataset.panel === name));
+        sbPanels.forEach(p => p.style.display = (p.dataset.panel === name ? '' : 'none'));
+      });
+    });
+
+    // Deep-link: #changelog, #faq, etc → switch tab
+    function handleHash() {
+      const hash = location.hash.slice(1);
+      if (!hash) return;
+      const map = {
+        changelog: 'changelog', v201: 'changelog', v2002: 'changelog', v2001: 'changelog', v200: 'changelog', v100: 'changelog',
+        support: 'support', channels: 'support', faq: 'support', troubleshoot: 'support',
+        cli: 'api', 'python-api': 'api', configuration: 'api', models: 'api',
+        installation: 'guides', quickstart: 'guides', airgap: 'guides', platforms: 'guides', inference: 'guides', serving: 'guides', training: 'guides',
+      };
+      const target = map[hash];
+      if (target) {
+        const btn = document.querySelector(`.tab[data-tab="${target}"]`);
+        if (btn) btn.click();
+      }
+      setTimeout(() => document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    }
+    window.addEventListener('hashchange', handleHash);
+    handleHash();
+
+    // ---------- FAQ toggle ----------
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => item.classList.toggle('open'));
+    });
+
+    // ---------- Filter timeline ----------
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === btn));
+        const f = btn.dataset.filter;
+        document.querySelectorAll('.tl-entry').forEach(e => {
+          const cats = (e.dataset.cats || '').split(',');
+          e.style.display = (f === 'all' || cats.includes(f)) ? '' : 'none';
+        });
+      });
+    });
+
+    // ---------- Copy code block ----------
+    function copyBlock(btn) {
+      const pre = btn.closest('.code-block').querySelector('pre');
+      if (!pre) return;
+      navigator.clipboard?.writeText(pre.innerText);
+      const orig = btn.textContent;
+      btn.textContent = 'Copied';
+      btn.style.background = 'rgba(52,199,89,0.22)';
+      setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 1200);
+    }
+
+    // ---------- Scrollspy for sidebar ----------
+    const links = document.querySelectorAll('.sb-link');
+    const spyIO = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const id = e.target.id;
+          links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+        }
+      });
+    }, { rootMargin: '-50% 0px -45% 0px' });
+    document.querySelectorAll('.doc-section[id], .tl-entry[id]').forEach(s => spyIO.observe(s));
+
+    // ---------- Documentation search ----------
+    (function () {
+      const input = document.getElementById('searchInput');
+      const wrap = document.getElementById('searchWrap');
+      const results = document.getElementById('searchResults');
+      if (!input || !results) return;
+
+      // Build index from all doc-sections, faq-items, tl-entries, cli-items
+      const tabIcons = { guides: 'book-open', api: 'terminal', support: 'life-buoy', changelog: 'git-branch' };
+      const tabLabels = { guides: 'Guides', api: 'API', support: 'Support', changelog: 'Changelog' };
+
+      function tabOf(node) {
+        const panel = node.closest('.tab-panel');
+        return panel?.dataset.panel || 'guides';
+      }
+
+      const index = [];
+
+      // Doc sections (h2/h3 inside)
+      document.querySelectorAll('.doc-section[id]').forEach(sec => {
+        const h2 = sec.querySelector('h2');
+        if (!h2) return;
+        const tab = tabOf(sec);
+        const body = sec.innerText.replace(/\s+/g, ' ').trim();
+        index.push({
+          id: sec.id, tab, kind: 'Section',
+          title: h2.innerText.trim(),
+          body,
+        });
+        sec.querySelectorAll('h3[id], h3').forEach(h3 => {
+          const subId = h3.id || sec.id;
+          // collect text until next h3
+          let bodyParts = []; let n = h3.nextElementSibling;
+          while (n && n.tagName !== 'H3' && n.tagName !== 'H2') {
+            bodyParts.push(n.innerText || ''); n = n.nextElementSibling;
+          }
+          index.push({
+            id: subId, tab, kind: h2.innerText.trim(),
+            title: h3.innerText.trim(),
+            body: bodyParts.join(' ').replace(/\s+/g, ' ').trim(),
+          });
+        });
+      });
+
+      // FAQ items
+      document.querySelectorAll('.faq-item').forEach((item, i) => {
+        const q = item.querySelector('.faq-q'); const a = item.querySelector('.faq-a');
+        if (!q) return;
+        if (!item.id) item.id = 'faq-' + i;
+        index.push({
+          id: item.id, tab: tabOf(item), kind: 'FAQ',
+          title: q.innerText.replace(/\+$/, '').trim(),
+          body: (a?.innerText || '').replace(/\s+/g, ' ').trim(),
+        });
+      });
+
+      // Changelog entries
+      document.querySelectorAll('.tl-entry[id]').forEach(en => {
+        const title = en.querySelector('.tl-version, h3')?.innerText || en.id;
+        index.push({
+          id: en.id, tab: 'changelog', kind: 'Release',
+          title: title.trim(),
+          body: en.innerText.replace(/\s+/g, ' ').trim(),
+        });
+      });
+
+      // CLI commands
+      document.querySelectorAll('.cli-item').forEach((c, i) => {
+        const name = c.querySelector('code, h4, strong')?.innerText || ('Command ' + i);
+        if (!c.id) c.id = 'cli-' + i;
+        index.push({
+          id: c.id, tab: tabOf(c), kind: 'CLI',
+          title: name.trim(),
+          body: c.innerText.replace(/\s+/g, ' ').trim(),
+        });
+      });
+
+      function escapeHTML(s) { return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+      function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+      function highlight(text, terms) {
+        if (!text) return '';
+        let html = escapeHTML(text);
+        for (const t of terms) {
+          if (!t) continue;
+          html = html.replace(new RegExp('(' + escapeRe(t) + ')', 'gi'), '<mark>$1</mark>');
+        }
+        return html;
+      }
+      function snippet(body, terms, len = 140) {
+        if (!body) return '';
+        const lc = body.toLowerCase();
+        let pos = -1;
+        for (const t of terms) {
+          const p = lc.indexOf(t.toLowerCase());
+          if (p !== -1 && (pos === -1 || p < pos)) pos = p;
+        }
+        if (pos === -1) return body.slice(0, len) + (body.length > len ? '…' : '');
+        const start = Math.max(0, pos - 40);
+        const end = Math.min(body.length, pos + len - 40);
+        return (start > 0 ? '…' : '') + body.slice(start, end) + (end < body.length ? '…' : '');
+      }
+
+      function score(item, terms) {
+        let s = 0; const title = item.title.toLowerCase(); const body = item.body.toLowerCase();
+        for (const t of terms) {
+          const tl = t.toLowerCase(); if (!tl) continue;
+          if (title === tl) s += 100;
+          if (title.startsWith(tl)) s += 30;
+          if (title.includes(tl)) s += 20;
+          const m = body.match(new RegExp(escapeRe(tl), 'gi'));
+          if (m) s += Math.min(m.length, 5) * 2;
+        }
+        // Require every term to appear somewhere
+        for (const t of terms) {
+          const tl = t.toLowerCase();
+          if (!title.includes(tl) && !body.includes(tl)) return 0;
+        }
+        return s;
+      }
+
+      let active = 0;
+      function render(q) {
+        const terms = q.trim().split(/\s+/).filter(Boolean);
+        if (!terms.length) {
+          // suggested searches
+          results.innerHTML = `
+        <div class="sr-group-label">Popular</div>
+        ${['Installation', 'Quick Start', 'API Server', 'LoRA', 'GPU', 'Air-Gap', 'PagedAttention'].map(t => `
+          <a class="sr-item" data-q="${t}"><div class="sr-icon"><i data-icon="search"></i></div>
+            <div class="sr-body"><div class="sr-title">${t}</div><div class="sr-snippet">Jump to docs</div></div>
+            <span class="sr-tag">Suggest</span></a>`).join('')}
+        <div class="sr-foot"><span><kbd>↵</kbd> open · <kbd>↑↓</kbd> navigate · <kbd>esc</kbd> close</span><span>${index.length} indexed</span></div>`;
+          window.SwiftIcons?.hydrateIcons(results);
+          results.querySelectorAll('.sr-item').forEach(el => {
+            el.addEventListener('click', () => { input.value = el.dataset.q; input.dispatchEvent(new Event('input')); });
+          });
+          active = 0;
+          return;
+        }
+        const ranked = index.map(it => ({ it, s: score(it, terms) }))
+          .filter(x => x.s > 0)
+          .sort((a, b) => b.s - a.s)
+          .slice(0, 12);
+        if (!ranked.length) {
+          results.innerHTML = `<div class="sr-empty">No results for <strong>"${escapeHTML(q)}"</strong>.<br><span style="font-size:11px">Try shorter terms or check the sidebar.</span></div>`;
+          return;
+        }
+        // group by tab
+        const byTab = {};
+        ranked.forEach(({ it }) => { (byTab[it.tab] = byTab[it.tab] || []).push(it); });
+        let html = '';
+        Object.keys(byTab).forEach(tab => {
+          html += `<div class="sr-group-label">${tabLabels[tab] || tab}</div>`;
+          byTab[tab].forEach(it => {
+            html += `<a class="sr-item" data-tab="${it.tab}" data-id="${it.id}">
+          <div class="sr-icon"><i data-icon="${tabIcons[it.tab] || 'file'}"></i></div>
+          <div class="sr-body">
+            <div class="sr-title">${highlight(it.title, terms)}</div>
+            <div class="sr-snippet">${highlight(snippet(it.body, terms), terms)}</div>
+          </div>
+          <span class="sr-tag">${it.kind}</span>
+        </a>`;
+          });
+        });
+        html += `<div class="sr-foot"><span><kbd>↵</kbd> open · <kbd>↑↓</kbd> navigate · <kbd>esc</kbd> close</span><span>${ranked.length} of ${index.length}</span></div>`;
+        results.innerHTML = html;
+        window.SwiftIcons?.hydrateIcons(results);
+        active = 0;
+        updateActive();
+        results.querySelectorAll('.sr-item[data-id]').forEach(el => {
+          el.addEventListener('click', (e) => { e.preventDefault(); openResult(el); });
+        });
+      }
+
+      function openResult(el) {
+        const tab = el.dataset.tab; const id = el.dataset.id;
+        if (tab) {
+          const btn = document.querySelector(`.tab[data-tab="${tab}"]`);
+          if (btn && !btn.classList.contains('active')) btn.click();
+        }
+        location.hash = '#' + id;
+        setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+        closeSearch();
+      }
+
+      function getItems() { return [...results.querySelectorAll('.sr-item')]; }
+      function updateActive() {
+        const items = getItems();
+        items.forEach((el, i) => el.classList.toggle('active', i === active));
+        items[active]?.scrollIntoView({ block: 'nearest' });
+      }
+      function openSearch() { wrap.classList.add('is-open'); render(input.value); }
+      function closeSearch() { wrap.classList.remove('is-open'); }
+
+      input.addEventListener('focus', openSearch);
+      input.addEventListener('input', () => render(input.value));
+      input.addEventListener('keydown', (e) => {
+        const items = getItems();
+        if (e.key === 'ArrowDown') { e.preventDefault(); active = Math.min(items.length - 1, active + 1); updateActive(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); active = Math.max(0, active - 1); updateActive(); }
+        else if (e.key === 'Enter') {
+          const el = items[active];
+          if (el?.dataset.id) { e.preventDefault(); openResult(el); }
+          else if (el?.dataset.q) { e.preventDefault(); input.value = el.dataset.q; input.dispatchEvent(new Event('input')); }
+        }
+        else if (e.key === 'Escape') { e.preventDefault(); input.blur(); closeSearch(); }
+      });
+      document.addEventListener('click', (e) => {
+        if (!wrap.contains(e.target)) closeSearch();
+      });
+
+      // Cmd/Ctrl+K to focus
+      window.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault(); input.focus(); input.select();
+        }
+      });
+    })();
+
+    // ---------- Mobile TOC drawer ----------
+    (function () {
+      const trigger = document.getElementById('tocTrigger');
+      const drawer = document.getElementById('tocDrawer');
+      const drawerContent = document.getElementById('tocDrawerContent');
+      if (!trigger || !drawerContent) return;
+
+      function rebuild() {
+        // find the visible sidebar panel
+        const visible = [...document.querySelectorAll('.sb-panel')].find(p => p.style.display !== 'none');
+        if (!visible) { drawerContent.innerHTML = ''; return; }
+        drawerContent.innerHTML = visible.innerHTML;
+        // close drawer on link click
+        drawerContent.querySelectorAll('a').forEach(a => {
+          a.addEventListener('click', () => document.body.classList.remove('toc-open'));
+        });
+        window.SwiftIcons?.hydrateIcons(drawerContent);
+      }
+
+      trigger.addEventListener('click', () => {
+        rebuild();
+        document.body.classList.add('toc-open');
+      });
+
+      // rebuild whenever a tab changes
+      document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => setTimeout(rebuild, 0)));
+
+      // ESC closes
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') document.body.classList.remove('toc-open');
+      });
+    })();
+
+    // ---------- Nav bg on scroll ----------
+    const nav = document.querySelector('.nav');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 20) nav.style.background = 'rgba(255,255,255,0.92)';
+      else nav.style.background = '';
+    });
+  </script>
+
+</body>
+
+</html>
