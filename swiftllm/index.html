@@ -403,7 +403,7 @@
     /* ---------- STATS ---------- */
     .stats {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: var(--s-4);
       padding: var(--s-12) 0;
     }
@@ -1217,7 +1217,7 @@
       }
 
       .stats {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
       }
 
       .stat-value {
@@ -1398,22 +1398,16 @@
   <section class="hero">
     <div class="hero-bg"></div>
     <div class="hero-grid"></div>
-    
+
     <div class="hero-badge reveal in">
       <span class="hero-badge-dot"></span>
-      v2.0 Release May 17th 2026
-    </div>
-    
-    <div class="hero-badge reveal in">
-      <span class="hero-badge-dot"></span>
-      v2.0.1-beta · CPU & ARM wheels, training UX fixes
+      v2.0 Stable Release — Hybrid Mamba-3, GRPO Training, TurboQuant, Dense Verification
       <a href="docs.html#changelog" class="hero-badge-link">Read more →</a>
     </div>
 
     <h1 class="reveal in d1">SwiftLLM</h1>
-    <p class="hero-tagline reveal in d2">High-Performance LLM Inference Engine</p>
-    <p class="hero-desc reveal in d3">A Rust-powered LLM inference, serving, and training engine. Blazing fast, memory
-      efficient, production ready — now portable across CPU, CUDA, x86_64 and aarch64.</p>
+    <p class="hero-tagline reveal in d2">High-Performance LLM Inference, Serving &amp; Training Engine</p>
+    <p class="hero-desc reveal in d3">A Rust-powered engine with hybrid Mamba-3 SSM + Transformer + MoE architectures, GRPO reinforcement learning, TurboQuant KV cache compression, and advanced test-time inference — portable across CPU, CUDA, x86_64 and aarch64.</p>
     <div class="hero-actions reveal in d4">
       <a href="#quickstart" class="btn btn-primary">Get started <i data-icon="arrow-right" data-size="14"></i></a>
       <a href="https://github.com/infrabrew/swiftllm" target="_blank" class="btn btn-secondary">
@@ -1436,8 +1430,16 @@
           <div class="stat-label">Rust Crates</div>
         </div>
         <div class="stat">
-          <div class="stat-value" data-count="9">0</div>
-          <div class="stat-label">CLI Commands</div>
+          <div class="stat-value" data-count="329">0</div>
+          <div class="stat-label">Backend Tests</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" data-count="66">0</div>
+          <div class="stat-label">Frontend Tests</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" data-count="3">0</div>
+          <div class="stat-label">Research Phases</div>
         </div>
         <div class="stat">
           <div class="stat-value" data-count="4">0</div>
@@ -1453,16 +1455,16 @@
       <div class="split">
         <div class="split-text reveal">
           <h3>Built for performance.<br>Designed for developers.</h3>
-          <p>SwiftLLM combines continuous batching, PagedAttention for optimal memory management, and optimized CUDA
+          <p>SwiftLLM combines continuous batching, PagedAttention, TurboQuant KV cache compression, and optimized CUDA
             kernels to deliver maximum throughput with minimum latency.</p>
-          <p>Whether you need an OpenAI-style API server, batch processing, interactive chat, or fine-tuning with
-            LoRA/QLoRA, SwiftLLM provides a unified, production-ready solution.</p>
+          <p>Whether you need an OpenAI-style API server, batch processing, interactive chat, RL fine-tuning with GRPO,
+            or hybrid Mamba-3 model architectures, SwiftLLM provides a unified, production-ready solution.</p>
           <div class="highlights">
             <div class="hl">
               <div class="hl-icon"><i data-icon="zap"></i></div>
               <div>
                 <h4>Rust + Python Hybrid</h4>
-                <p>Rust core via PyO3 + maturin abi3 wheels for Python 3.8–3.12</p>
+                <p>Rust core via PyO3 + maturin abi3 wheels for Python 3.8–3.12. PyTorch is optional — SDK imports cleanly without it</p>
               </div>
             </div>
             <div class="hl">
@@ -1470,7 +1472,7 @@
               </div>
               <div>
                 <h4>CPU, CUDA, ARM</h4>
-                <p>CPU is default — CUDA opt-in with <code>--gpu</code>. Ships x86_64 and aarch64 wheels</p>
+                <p>CPU is default — CUDA opt-in with <code>--gpu</code>. Ships x86_64 and aarch64 wheels for Linux and macOS</p>
               </div>
             </div>
             <div class="hl">
@@ -1478,7 +1480,23 @@
               </div>
               <div>
                 <h4>Air-Gapped Deployment</h4>
-                <p>Bundle wheels, source, and models into a signed tarball for offline installs</p>
+                <p>Bundle wheels, source, and models via <code>airgap-bundle.sh</code>. SHA256 verification + cross-architecture support</p>
+              </div>
+            </div>
+            <div class="hl">
+              <div class="hl-icon" style="background:var(--orange-wash);color:var(--orange)"><i data-icon="wrench"></i>
+              </div>
+              <div>
+                <h4>Lifecycle Management</h4>
+                <p><code>install.sh</code>, <code>update.sh</code>, <code>uninstall.sh</code> — auto-detect GPU, switch branches/tags, purge cleanly</p>
+              </div>
+            </div>
+            <div class="hl">
+              <div class="hl-icon" style="background:var(--teal-wash);color:var(--teal)"><i data-icon="shield"></i>
+              </div>
+              <div>
+                <h4>Security Hardened</h4>
+                <p>Constant-time API key auth, CORS from config, authenticated /metrics, CUDA error checking on every kernel launch</p>
               </div>
             </div>
           </div>
@@ -1502,12 +1520,18 @@ params = <span class="cls">SamplingParams</span>(
     max_tokens=<span class="num">256</span>,
 )
 
-<span class="cm"># Generate</span>
+<span class="cm"># Generate with self-consistency voting</span>
+results = llm.<span class="fn">generate_with_self_consistency</span>(
+    <span class="str">"What is 12 x 15?"</span>,
+    num_samples=<span class="num">8</span>,
+)
+<span class="fn">print</span>(results[<span class="num">0</span>].answer)
+
+<span class="cm"># Or standard generation</span>
 outputs = llm.<span class="fn">generate</span>(
     [<span class="str">"Explain quantum computing"</span>],
     params,
 )
-
 <span class="kw">for</span> output <span class="kw">in</span> outputs:
     <span class="fn">print</span>(output.text)</pre>
         </div>
@@ -1515,76 +1539,247 @@ outputs = llm.<span class="fn">generate</span>(
     </div>
   </section>
 
-  <!-- ========== FEATURES ========== -->
+  <!-- ========== FEATURES — CORE ENGINE ========== -->
   <section class="section" id="features">
     <div class="section-inner">
       <div class="section-head reveal">
-        <div class="section-eyebrow">Capabilities</div>
+        <div class="section-eyebrow">Capabilities — Core Engine</div>
         <h2 class="section-title">Powerful features, built-in.</h2>
-        <p class="section-sub">Everything you need to deploy and manage LLMs in production environments.</p>
+        <p class="section-sub">A complete inference, serving, and training stack — from a single <code>pip install</code>.</p>
       </div>
       <div class="features">
         <div class="feature reveal" data-tilt>
           <div class="feature-icon fi-blue"><i data-icon="zap"></i></div>
           <h3>High Throughput</h3>
-          <p>Continuous batching and efficient scheduling maximize tokens per second.</p>
+          <p>Continuous batching with preemption-capable scheduling. New requests slot into the next decoder step without blocking long-running generations.</p>
         </div>
         <div class="feature reveal d1" data-tilt>
           <div class="feature-icon fi-purple"><i data-icon="trending-up"></i></div>
           <h3>PagedAttention</h3>
-          <p>Block-allocator KV cache with copy-on-write delivers optimal VRAM utilization.</p>
+          <p>Block-allocator KV cache with copy-on-write. Dynamic block tables eliminate fragmentation and enable near-100% VRAM utilization.</p>
         </div>
         <div class="feature reveal d2" data-tilt>
           <div class="feature-icon fi-teal"><i data-icon="clock"></i></div>
           <h3>Speculative Decoding</h3>
-          <p>Draft-model acceleration and O(n) quickselect sampling for sub-second latency.</p>
+          <p>Draft-model acceleration with O(n) quickselect sampling. Reduces latency by validating multiple draft tokens per forward pass.</p>
         </div>
         <div class="feature reveal" data-tilt>
           <div class="feature-icon fi-pink"><i data-icon="layers"></i></div>
           <h3>Multi-GPU Scaling</h3>
-          <p>Tensor parallelism and pipeline parallelism scale seamlessly across NVIDIA GPUs.</p>
+          <p>Tensor parallelism and pipeline parallelism scale seamlessly across NVIDIA GPUs. Automatic sharding with configurable <code>--tensor-parallel</code>.</p>
         </div>
         <div class="feature reveal d1" data-tilt>
           <div class="feature-icon fi-green"><i data-icon="plug"></i></div>
-          <h3>OpenAI-Style API</h3>
-          <p>API server with key auth, input validation, CORS, TLS, and Prometheus metrics. Compatible with most common
-            OpenAI SDK calls — review the docs for supported endpoints.</p>
+          <h3>OpenAI-Compatible API</h3>
+          <p>Drop-in replacement with <code>/v1/completions</code>, <code>/v1/chat/completions</code>, streaming SSE, API key auth, CORS, and Prometheus <code>/metrics</code>. Default bind is <code>127.0.0.1</code> with security hardening.</p>
+        </div>
+        <div class="feature reveal d2" data-tilt>
+          <div class="feature-icon fi-blue"><i data-icon="package"></i></div>
+          <h3>Multi-Format Models</h3>
+          <p>HuggingFace repos, GGUF quantized models (via llama-cpp-python), SafeTensors, and PyTorch <code>.bin</code> formats — all with auto-detection and seamless loading.</p>
+        </div>
+        <div class="feature reveal" data-tilt>
+          <div class="feature-icon fi-indigo"><i data-icon="shield"></i></div>
+          <h3>Air-Gapped Install</h3>
+          <p>Create portable bundles with <code>airgap-bundle.sh</code> — source, wheels, rustup-init, and optional models in one tarball. SHA256 verification and <code>--arch</code> cross-compilation.</p>
+        </div>
+        <div class="feature reveal d1" data-tilt>
+          <div class="feature-icon fi-purple"><i data-icon="cpu"></i></div>
+          <h3>CPU &amp; ARM Ready</h3>
+          <p>Ships portable abi3 wheels for <code>manylinux2014_x86_64</code>, <code>manylinux2014_aarch64</code>, <code>macosx_10_15_x86_64</code>, and <code>macosx_11_0_arm64</code>. Works on Graviton, Jetson, Raspberry Pi, and Apple Silicon.</p>
         </div>
         <div class="feature reveal d2" data-tilt>
           <div class="feature-icon fi-orange"><i data-icon="wrench"></i></div>
-          <h3>Training &amp; Fine-Tuning</h3>
-          <p>LoRA, QLoRA, full fine-tuning with Muon, AdamW, and SGD optimizers.</p>
-        </div>
-        <div class="feature reveal" data-tilt>
-          <div class="feature-icon fi-blue"><i data-icon="package"></i></div>
-          <h3>Multi-Format Models</h3>
-          <p>HuggingFace, GGUF, SafeTensors, and PyTorch formats with auto-detection.</p>
-        </div>
-        <div class="feature reveal d1" data-tilt>
-          <div class="feature-icon fi-indigo"><i data-icon="shield"></i></div>
-          <h3>Air-Gapped Install</h3>
-          <p>Portable bundles with SHA256 verification for fully offline deployment.</p>
-        </div>
-        <div class="feature reveal d2" data-tilt>
-          <div class="feature-icon fi-purple"><i data-icon="cpu"></i></div>
-          <h3>CPU &amp; ARM Ready</h3>
-          <p>Ships portable wheels for x86_64, aarch64, Apple Silicon, and Graviton — CUDA is opt-in.</p>
+          <h3>Lifecycle Scripts</h3>
+          <p><code>install.sh</code> auto-detects GPU and builds from source. <code>update.sh</code> switches branches/tags and rebuilds. <code>uninstall.sh</code> cleanly removes everything with <code>--purge</code> or <code>--keep-models</code>.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ========== MODELS MARQUEE ========== -->
+  <!-- ========== FEATURES — TRAINING & DATA ========== -->
+  <section class="section section-mist">
+    <div class="section-inner">
+      <div class="section-head reveal">
+        <div class="section-eyebrow">Capabilities — Training &amp; Data</div>
+        <h2 class="section-title">Train, fine-tune, and ingest.</h2>
+        <p class="section-sub">LoRA/QLoRA fine-tuning, GRPO reinforcement learning, multi-format dataset ingestion, and HuggingFace Hub integration.</p>
+      </div>
+      <div class="features">
+        <div class="feature reveal" data-tilt>
+          <div class="feature-icon fi-orange"><i data-icon="wrench"></i></div>
+          <h3>LoRA / QLoRA / Full Fine-Tuning</h3>
+          <p>Memory-efficient adapter training or full parameter updates. Muon (Newton-Schulz orthogonalization), AdamW (decoupled weight decay), and SGD (Nesterov momentum) optimizers with linear, cosine, and constant LR schedulers.</p>
+        </div>
+        <div class="feature reveal d1" data-tilt>
+          <div class="feature-icon fi-pink"><i data-icon="trending-up"></i></div>
+          <h3>GRPO Reinforcement Learning</h3>
+          <p>Group Relative Policy Optimization (DeepSeekMath, Shao 2024) — RL fine-tuning without a critic model. Generates G rollouts per prompt, computes group-relative advantages, applies PPO-style clipped policy gradient with KL penalty.</p>
+        </div>
+        <div class="feature reveal d2" data-tilt>
+          <div class="feature-icon fi-teal"><i data-icon="clock"></i></div>
+          <h3>CGAR Depth Curriculum</h3>
+          <p>Curriculum-Guided Adaptive Recursion — progressive depth training from shallow to full. Smooth Hermite interpolation at phase boundaries. Up to 1.71x speedup vs. full-depth from the start.</p>
+        </div>
+        <div class="feature reveal" data-tilt>
+          <div class="feature-icon fi-blue"><i data-icon="check-circle"></i></div>
+          <h3>Process Reward Models</h3>
+          <p>Step-level reasoning feedback via <code>RulePrm</code> (heuristic) or <code>NeuralPrm</code> (learned verifier). Five aggregation strategies: Min, Mean, Product, LastStep, WeightedMean. Blended with outcome rewards.</p>
+        </div>
+        <div class="feature reveal d1" data-tilt>
+          <div class="feature-icon fi-green"><i data-icon="trending-up"></i></div>
+          <h3>LongR Dense Rewards</h3>
+          <p>Per-token relative NLL information gain vs. a frozen reference model. Provides dense token-level rewards for long-context tasks — +9% improvement on LongBench v2 in the original paper.</p>
+        </div>
+        <div class="feature reveal d2" data-tilt>
+          <div class="feature-icon fi-indigo"><i data-icon="package"></i></div>
+          <h3>Dataset Ingestion</h3>
+          <p>One command converts directories of <code>.txt</code>, <code>.md</code>, <code>.py</code>, <code>.rs</code>, <code>.pdf</code>, <code>.docx</code>, <code>.csv</code>, <code>.html</code>, <code>.jsonl</code> and 40+ formats into JSONL. Four output schemas, SHA-256 dedup, code-aware chunking.</p>
+        </div>
+        <div class="feature reveal" data-tilt>
+          <div class="feature-icon fi-purple"><i data-icon="package"></i></div>
+          <h3>HuggingFace Datasets</h3>
+          <p>Pull any dataset from the Hub with <code>--hf-dataset</code> or <code>HuggingFaceSource</code>. Auto-detects Alpaca, ShareGPT, OpenAI-messages, prompt/completion, Q&amp;A, and plain text. Streaming mode for large corpora.</p>
+        </div>
+        <div class="feature reveal d1" data-tilt>
+          <div class="feature-icon fi-orange"><i data-icon="zap"></i></div>
+          <h3>Auto-Ingest in Trainer</h3>
+          <p>Pass a directory or HuggingFace dataset to <code>Trainer</code> or <code>fine_tune()</code> — ingestion fires transparently. No separate preprocessing step needed.</p>
+        </div>
+        <div class="feature reveal d2" data-tilt>
+          <div class="feature-icon fi-blue"><i data-icon="book"></i></div>
+          <h3>Checkpoints &amp; Early Stopping</h3>
+          <p>Save/load checkpoints with configurable <code>save_total_limit</code> rotation. <code>EarlyStoppingConfig</code> monitors validation loss. Rolling-window metrics and perplexity tracking throughout training.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FEATURES — INFERENCE ========== -->
+  <section class="section">
+    <div class="section-inner">
+      <div class="section-head reveal">
+        <div class="section-eyebrow">Capabilities — Inference</div>
+        <h2 class="section-title">Advanced test-time compute.</h2>
+        <p class="section-sub">Six research-derived inference enhancements, TurboQuant memory compression, and hybrid SSM architectures — all accessible via Python API and CLI.</p>
+      </div>
+      <div class="features">
+        <div class="feature reveal" data-tilt>
+          <div class="feature-icon fi-teal"><i data-icon="trending-up"></i></div>
+          <h3>TurboQuant KV Cache</h3>
+          <p>ICLR 2026 (Zandieh et al.) online vector quantization for KV cache compression. Random rotation via fast Walsh-Hadamard transform with deterministic sign flips, then scalar quantization using precomputed Beta-distribution Max-Lloyd codebooks at 1-4 bits per channel. <code>TurboQuantMse</code> (MSE-optimal) and <code>TurboQuantProd</code> (unbiased inner products) variants. 3-5x memory reduction.</p>
+        </div>
+        <div class="feature reveal d1" data-tilt>
+          <div class="feature-icon fi-pink"><i data-icon="layers"></i></div>
+          <h3>Hybrid Mamba-3 Architecture</h3>
+          <p>Selective SSM with MIMO multi-head scan, complex-valued states, and exponential-trapezoidal discretization. <code>LatentMoeConfig</code> enables compress-dispatch-expand MoE with aux-loss-free dynamic-bias load balancing (87.5% less inter-GPU traffic). Jamba-style interleaved Attention + Mamba blocks.</p>
+        </div>
+        <div class="feature reveal d2" data-tilt>
+          <div class="feature-icon fi-blue"><i data-icon="check-circle"></i></div>
+          <h3>Self-Consistency Voting</h3>
+          <p>Generates N independent reasoning chains at temperature &gt; 0, extracts a final answer via configurable extractor (regex, sentinel, JSON, freeform), and returns the plurality-majority answer. Ties broken by mean sequence log-probability. (Wang et al., 2022)</p>
+        </div>
+        <div class="feature reveal" data-tilt>
+          <div class="feature-icon fi-green"><i data-icon="trending-up"></i></div>
+          <h3>Multi-Round Self-Refinement</h3>
+          <p>Iterative critique-revision loop. Each round: model critiques its own output, then produces a revised version. Stops when improvement (normalized Levenshtein edit distance) falls below threshold or round limit is reached. O(min(m,n)) 2-row DP. (Madaan et al., 2023)</p>
+        </div>
+        <div class="feature reveal d1" data-tilt>
+          <div class="feature-icon fi-orange"><i data-icon="trending-up"></i></div>
+          <h3>Best-of-N Dense Verification</h3>
+          <p>Generates N candidate responses, scores each using rule-based heuristic, neural PRM, ensemble, or sequence log-prob strategy, then returns the highest-scoring candidate. Mirrors <code>verify_and_rank()</code> in the Rust core.</p>
+        </div>
+        <div class="feature reveal d2" data-tilt>
+          <div class="feature-icon fi-purple"><i data-icon="layers"></i></div>
+          <h3>Disaggregated Serving</h3>
+          <p>Separates compute-bound prefill and bandwidth-bound decode into dedicated, independently-scaled worker pools (Splitwise/DistServe). Round-robin, least-loaded, and locality-aware scheduling. <code>optimal_worker_ratio()</code> auto-sizes pools.</p>
+        </div>
+        <div class="feature reveal" data-tilt>
+          <div class="feature-icon fi-indigo"><i data-icon="zap"></i></div>
+          <h3>Recursive Language Model (RLM)</h3>
+          <p>Bounded recursive self-calling for complex sub-problem decomposition. REPL sandbox with four step types: Assign, Compute, Verify, Recurse. Variable binding table via soft-attention key-value store. Complexity-classifier MLP with early exit. Modes: DISABLED, SHALLOW (depth=1), REASONING (depth=3), AGENTIC (depth=5).</p>
+        </div>
+        <div class="feature reveal d1" data-tilt>
+          <div class="feature-icon fi-teal"><i data-icon="shield"></i></div>
+          <h3>Dense Verification Layer</h3>
+          <p>Cross-attention draft-token scoring against embedded REPL execution traces. Per-token and per-step confidence scores via sigmoid projection. Strategies: SCORE_ONLY (always accept), GATE (reject below threshold), GATE_AND_REGEN (reject and regenerate up to max attempts).</p>
+        </div>
+        <div class="feature reveal d2" data-tilt>
+          <div class="feature-icon fi-orange"><i data-icon="wrench"></i></div>
+          <h3>Custom CUDA Kernels</h3>
+          <p>Dedicated <code>.cu</code> kernels for Mamba-3 parallel scan, MoE sparse dispatch, dense verification cross-attention, RLM operations, and half-precision matrix multiplications — all with <code>check_cuda_last_error()</code> after every launch.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== MODELS ========== -->
   <section class="section section-mist">
     <div class="section-inner">
       <div class="section-head reveal">
         <div class="section-eyebrow">Compatibility</div>
-        <h2 class="section-title">Supported models</h2>
-        <p class="section-sub">Run the most popular open-source model families out of the box.</p>
+        <h2 class="section-title">10 model families. Every major format.</h2>
+        <p class="section-sub">Run the most popular open-source model families out of the box — from 130M-parameter Mamba SSMs to 100B+ MoE hybrids. Load from HuggingFace, GGUF, or SafeTensors.</p>
       </div>
       <div class="marquee-wrap reveal">
         <div class="marquee-track" id="marquee"></div>
       </div>
+      <div class="platforms reveal" style="margin-top:var(--s-8);">
+        <table class="plat-table">
+          <thead>
+            <tr>
+              <th>Architecture</th>
+              <th>Models</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>LLaMA</td>
+              <td>LLaMA 3, Code Llama</td>
+              <td class="mono"></td>
+            </tr>
+            <tr>
+              <td>Mistral</td>
+              <td>Mistral 7B, Mixtral 8x7B, Devstral</td>
+              <td class="mono">Mixtral uses MoE FFN</td>
+            </tr>
+            <tr>
+              <td>Qwen</td>
+              <td>Qwen 3, Qwen 3.5</td>
+              <td class="mono"></td>
+            </tr>
+            <tr>
+              <td>Phi</td>
+              <td>Phi-3, Phi-4</td>
+              <td class="mono"></td>
+            </tr>
+            <tr>
+              <td>Deepseek</td>
+              <td>R1, V4</td>
+              <td class="mono"></td>
+            </tr>
+            <tr>
+              <td>Gemma</td>
+              <td>Gemma</td>
+              <td class="mono"></td>
+            </tr>
+            <tr>
+              <td>Mamba</td>
+              <td>Mamba-130M through Mamba-3B</td>
+              <td class="mono">Phase 1 — pure SSM</td>
+            </tr>
+            <tr>
+              <td>Jamba</td>
+              <td>Jamba-v0.1, custom hybrids</td>
+              <td class="mono">Phase 1 — Attention + Mamba + MoE</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="text-align:center; font-size:12px; color:var(--fg-tertiary); margin-top:var(--s-5); max-width:600px; margin-inline:auto;">
+        Formats supported: HuggingFace <code style="background:var(--gray-100); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">transformers</code> repos, GGUF quantized models (via llama-cpp-python), SafeTensors, and PyTorch <code style="background:var(--gray-100); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">.bin</code> checkpoints with automatic detection.
+      </p>
     </div>
   </section>
 
@@ -1594,35 +1789,38 @@ outputs = llm.<span class="fn">generate</span>(
       <div class="section-head reveal">
         <div class="section-eyebrow">Architecture</div>
         <h2 class="section-title">Five crates. One engine.</h2>
-        <p class="section-sub">Modular Rust crates working together for maximum performance.</p>
+        <p class="section-sub">Modular Rust workspace with clean separation of concerns. Each crate is independently testable; the workspace builds with <code>cargo build --workspace</code>.</p>
       </div>
       <div class="arch reveal">
         <div class="arch-item">
           <div class="arch-icon"><i data-icon="cog"></i></div>
           <div class="arch-name">swiftllm-core</div>
-          <div class="arch-desc">Inference & scheduling</div>
+          <div class="arch-desc">Engine, scheduler, PagedAttention, TurboQuant KV cache, sampling (self-consistency, refinement, verification), disaggregated serving</div>
         </div>
         <div class="arch-item">
           <div class="arch-icon"><i data-icon="package"></i></div>
           <div class="arch-name">swiftllm-models</div>
-          <div class="arch-desc">Model loading & formats</div>
+          <div class="arch-desc">Model loading (HF, GGUF, SafeTensors), Mamba SSM layers, MoE routing, Jamba hybrid blocks, RLM, Dense Verification</div>
         </div>
         <div class="arch-item">
           <div class="arch-icon"><i data-icon="droplet"></i></div>
           <div class="arch-name">swiftllm-cuda</div>
-          <div class="arch-desc">CUDA kernels</div>
+          <div class="arch-desc">Custom CUDA kernels: mamba3_scan, moe_dispatch, dense_verif_attn, rlm_ops, linear_f16 — with error checking on every launch</div>
         </div>
         <div class="arch-item">
           <div class="arch-icon"><i data-icon="globe"></i></div>
           <div class="arch-name">swiftllm-server</div>
-          <div class="arch-desc">HTTP API (Axum)</div>
+          <div class="arch-desc">Axum HTTP server: /v1/completions, /v1/chat/completions, SSE streaming, API key auth, CORS, Prometheus /metrics</div>
         </div>
         <div class="arch-item">
           <div class="arch-icon"><i data-icon="book"></i></div>
           <div class="arch-name">swiftllm-training</div>
-          <div class="arch-desc">LoRA & fine-tuning</div>
+          <div class="arch-desc">LoRA/QLoRA/full fine-tuning, GRPO RL, CGAR curriculum, PRM step scoring, LongR dense rewards, checkpoint management</div>
         </div>
       </div>
+      <p style="text-align:center; font-size:12px; color:var(--fg-tertiary); margin-top:var(--s-6); max-width:640px; margin-inline:auto;">
+        Python SDK wraps everything via PyO3 bindings. The top-level <code style="background:var(--gray-100); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">swiftllm</code> crate produces a <code style="background:var(--gray-100); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">cdylib</code> wheel with <code style="background:var(--gray-100); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">abi3-py38</code> — one wheel covers Python 3.8 through 3.12. Release profile uses thin LTO, <code style="background:var(--gray-100); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">codegen-units = 1</code>, and <code style="background:var(--gray-100); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">opt-level = 3</code> for maximum performance.
+      </p>
     </div>
   </section>
 
@@ -1632,7 +1830,7 @@ outputs = llm.<span class="fn">generate</span>(
       <div class="section-head reveal">
         <div class="section-eyebrow">Portability</div>
         <h2 class="section-title">Runs everywhere.</h2>
-        <p class="section-sub">Portable abi3 wheels for Python 3.8–3.12. CPU is the default; CUDA is opt-in.</p>
+        <p class="section-sub">Portable abi3 wheels for Python 3.8–3.12. CPU is the default; CUDA 11.8+ is opt-in. Build on your dev laptop, deploy to Graviton, Raspberry Pi, Jetson, or Apple Silicon.</p>
       </div>
       <div class="platforms reveal">
         <table class="plat-table">
@@ -1657,14 +1855,58 @@ outputs = llm.<span class="fn">generate</span>(
           </tbody>
         </table>
       </div>
-      <p
-        style="text-align:center; font-size:12px; color:var(--fg-tertiary); margin-top:var(--s-5); max-width:560px; margin-inline:auto;">
-        Build on your dev laptop, ship to Graviton, Raspberry Pi, Jetson, or Apple Silicon. CUDA 11.8+ unlocks GPU
-        inference;
-        <code
-          style="background:var(--gray-100); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">./install.sh --gpu</code>
-        enables it.
-      </p>
+
+      <div class="split reveal" style="margin-top:var(--s-10); gap:var(--s-8);">
+        <div>
+          <div class="highlights">
+            <div class="hl">
+              <div class="hl-icon"><i data-icon="download"></i></div>
+              <div>
+                <h4>Installer Options</h4>
+                <p><code>--cpu</code> CPU-only &middot; <code>--gpu</code> force CUDA &middot; <code>--venv ~/sllm</code> custom venv &middot; <code>--no-venv</code> system install &middot; <code>--model-dir</code> set cache &middot; <code>--airgap</code> offline</p>
+              </div>
+            </div>
+            <div class="hl">
+              <div class="hl-icon" style="background:var(--green-wash);color:var(--green)"><i data-icon="lock"></i></div>
+              <div>
+                <h4>Air-Gap Deployment</h4>
+                <p><code>airgap-bundle.sh</code> creates portable archives with source, pip wheels, rustup-init, and optional models. <code>--arch</code> flag cross-compiles for different targets. SHA256 verification on all components.</p>
+              </div>
+            </div>
+            <div class="hl">
+              <div class="hl-icon" style="background:var(--purple-wash);color:var(--purple)"><i data-icon="wrench"></i></div>
+              <div>
+                <h4>Update &amp; Uninstall</h4>
+                <p><code>update.sh --branch</code> / <code>--tag</code> to switch releases and rebuild. <code>uninstall.sh --purge</code> removes everything or <code>--keep-models</code> to preserve downloads.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-window" style="font-size:11.5px; line-height:1.65;">
+          <div class="code-header">
+            <span class="code-dot red"></span>
+            <span class="code-dot yellow"></span>
+            <span class="code-dot green"></span>
+            <span class="code-file">install &amp; deploy</span>
+          </div>
+          <pre style="margin:0; font-family:inherit;"><span class="cm"># Quick install (auto-detects GPU)</span>
+<span class="var">$</span> ./install.sh
+
+<span class="cm"># CPU-only for ARM deployment</span>
+<span class="var">$</span> ./install.sh --cpu
+
+<span class="cm"># Create air-gap bundle</span>
+<span class="var">$</span> ./airgap-bundle.sh --arch aarch64 \
+    --model <span class="str">"Qwen/Qwen2.5-0.5B-Instruct-GGUF"</span>
+
+<span class="cm"># Deploy on air-gapped host</span>
+<span class="var">$</span> ./install.sh --airgap
+
+<span class="cm"># Runtime offline mode</span>
+<span class="var">$</span> <span class="kw">export</span> SWIFTLLM_OFFLINE=<span class="num">1</span>
+<span class="var">$</span> swiftllm generate -m ./model.gguf -p <span class="str">"Hello"</span></pre>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1674,35 +1916,64 @@ outputs = llm.<span class="fn">generate</span>(
       <div class="section-head reveal">
         <div class="section-eyebrow">Get Started</div>
         <h2 class="section-title">Up and running in minutes.</h2>
-        <p class="section-sub">Four simple steps to install, download a model, and start serving.</p>
+        <p class="section-sub">From clone to production serving in four commands. Fine-tune, ingest datasets, or run advanced inference with just a few more.</p>
       </div>
       <div class="steps">
         <div class="step reveal">
           <div class="step-num">1</div>
           <h3>Clone &amp; install</h3>
-          <p>Installer auto-detects GPU, builds with Rust + maturin, installs <code>[serve]</code> extras.</p>
-          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>./install.sh</span></div>
+          <p>Installer auto-detects GPU and CUDA toolkit, creates a Python venv, installs Rust if needed, builds the wheel with maturin, and installs <code>[serve]</code> extras for the API server.</p>
+          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>git clone https://github.com/swiftllm/swiftllm.git && cd swiftllm && ./install.sh</span></div>
         </div>
         <div class="step reveal d1">
           <div class="step-num">2</div>
           <h3>Download a model</h3>
-          <p>Pull any supported model from HuggingFace Hub, including GGUF quantized variants.</p>
-          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>swiftllm download -m
-              Qwen/Qwen2.5-7B</span></div>
+          <p>Pull any supported model from HuggingFace Hub — standard weights, GGUF quantized variants, or SafeTensors checkpoints. Supports <code>--revision</code> pinning and HF transfer acceleration.</p>
+          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>swiftllm download -m Qwen/Qwen2.5-7B</span></div>
         </div>
         <div class="step reveal d2">
           <div class="step-num">3</div>
           <h3>Run inference</h3>
-          <p>Batch generate, chat interactively, or pipe prompts from a file.</p>
-          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>swiftllm generate -p "Say
-              hi"</span></div>
+          <p>Batch generate, interactive <code>swiftllm chat</code> REPL, or pipe prompts from a file. Add <code>--self-consistency 8</code> for majority voting, <code>--best-of-n 4</code> for dense verification, or <code>--rlm 3</code> for recursive reasoning.</p>
+          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>swiftllm generate -p "Explain PagedAttention" --self-consistency 8</span></div>
         </div>
         <div class="step reveal d3">
           <div class="step-num">4</div>
           <h3>Serve an API</h3>
-          <p>OpenAI-style server with key auth, CORS, and /metrics endpoint.</p>
-          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>swiftllm serve --port
-              8000</span></div>
+          <p>OpenAI-compatible HTTP server with API key auth (via <code>SWIFTLLM_API_KEY</code>), CORS, SSE streaming, <code>/health</code>, and Prometheus <code>/metrics</code>. Default bind is <code>127.0.0.1</code> for security.</p>
+          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>swiftllm serve --port 8000</span></div>
+        </div>
+      </div>
+
+      <div class="section-head reveal" style="margin-top:var(--s-16);">
+        <div class="section-eyebrow">Go Further</div>
+        <h2 class="section-title">Training, datasets, and more.</h2>
+        <p class="section-sub">Fine-tune with LoRA, run GRPO reinforcement learning, or ingest datasets from HuggingFace and local files.</p>
+      </div>
+      <div class="steps">
+        <div class="step reveal">
+          <div class="step-num">5</div>
+          <h3>Fine-tune with LoRA</h3>
+          <p>LoRA adapter training with configurable rank, alpha, and dropout. Supports Muon, AdamW, and SGD optimizers with cosine/linear/constant LR scheduling.</p>
+          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>swiftllm finetune -m meta-llama/Llama-3-8B --train-data ./data.jsonl --lora-r 16</span></div>
+        </div>
+        <div class="step reveal d1">
+          <div class="step-num">6</div>
+          <h3>Ingest a dataset</h3>
+          <p>Convert directories of text, code, PDF, DOCX, CSV, HTML, JSON (and 40+ more formats) into JSONL training data — or pull directly from HuggingFace Hub with auto-detected schemas.</p>
+          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>swiftllm dataset --input ./src/ ./docs/ --output train.jsonl --format code</span></div>
+        </div>
+        <div class="step reveal d2">
+          <div class="step-num">7</div>
+          <h3>GRPO RL training</h3>
+          <p>Group Relative Policy Optimization — RL fine-tuning without a critic model. Combine with CGAR curriculum scheduling, Process Reward Models, and LongR dense rewards.</p>
+          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>swiftllm grpo -m meta-llama/Llama-3-8B --group-size 8 --kl-coeff 0.05</span></div>
+        </div>
+        <div class="step reveal d3">
+          <div class="step-num">8</div>
+          <h3>HuggingFace datasets</h3>
+          <p>Pull Alpaca, ShareGPT, OpenAI-messages, or any custom schema directly from the Hub. Streaming mode for large corpora like FineWeb and RedPajama.</p>
+          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>swiftllm dataset --hf-dataset tatsu-lab/alpaca --output alpaca.jsonl --format sft_messages</span></div>
         </div>
       </div>
     </div>
@@ -1712,12 +1983,13 @@ outputs = llm.<span class="fn">generate</span>(
   <section class="cta-section">
     <div class="cta-card reveal">
       <h2>Ready to run LLMs<br>at full speed?</h2>
-      <p>Join the community building the next generation of LLM infrastructure.</p>
+      <p>SwiftLLM v2.0 ships hybrid Mamba-3 architectures, GRPO training, TurboQuant KV cache compression, and six test-time inference enhancements — all in one Rust-powered package.</p>
       <div class="hero-actions">
         <a href="https://github.com/infrabrew/swiftllm" class="btn btn-primary">
           <i data-icon="github" data-size="14"></i> Star on GitHub
         </a>
         <a href="docs.html" class="btn btn-secondary">Read the docs <i data-icon="arrow-right" data-size="14"></i></a>
+        <a href="docs.html#changelog" class="btn btn-secondary">v2.0 Changelog <i data-icon="git-branch" data-size="14"></i></a>
       </div>
     </div>
   </section>
@@ -1794,9 +2066,10 @@ outputs = llm.<span class="fn">generate</span>(
 
     // ---------- Models marquee (build twice for seamless loop) ----------
     const models = [
-      ['LLaMA 3', '#007AFF'], ['LLaMA 2', '#5856D6'], ['Code Llama', '#00C7BE'],
-      ['Mistral', '#FF2D55'], ['Mixtral', '#34C759'], ['Qwen 1/2/3', '#FF9500'],
-      ['Phi-2', '#007AFF'], ['Phi-3', '#5856D6'], ['Falcon', '#00C7BE'], ['Gemma', '#FF2D55'],
+      ['LLaMA 3', '#007AFF'], ['Code Llama', '#5856D6'], ['Mistral', '#FF2D55'],
+      ['Mixtral', '#34C759'], ['Qwen 3', '#FF9500'], ['Phi-3/4', '#007AFF'],
+      ['Deepseek R1/V4', '#5856D6'], ['Gemma', '#FF2D55'], ['Devstral', '#00C7BE'],
+      ['Mamba SSM', '#34C759'], ['Jamba Hybrid', '#FF9500'],
     ];
     const mq = document.getElementById('marquee');
     const render = () => models.map(([n, c]) =>

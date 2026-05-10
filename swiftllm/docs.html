@@ -1591,7 +1591,7 @@
 
   <!-- ========== HEADER ========== -->
   <section class="docs-header">
-    <div class="docs-eyebrow">Documentation · v2.0.1-beta</div>
+    <div class="docs-eyebrow">Documentation · v2.0</div>
     <h1>Everything you need to ship.</h1>
     <p>Install, configure, and run SwiftLLM for LLM inference, serving, and training — on Linux, macOS, x86_64, or
       ARM64.</p>
@@ -1625,6 +1625,8 @@
           <a href="#installation" class="sb-link active"><i data-icon="download"></i> Installation</a>
           <a href="#quickstart" class="sb-link"><i data-icon="zap"></i> Quick Start</a>
           <a href="#airgap" class="sb-link"><i data-icon="lock"></i> Air-Gap Install</a>
+          <a href="#update" class="sb-link"><i data-icon="refresh-cw"></i> Update</a>
+          <a href="#uninstall" class="sb-link"><i data-icon="trash-2"></i> Uninstall</a>
           <a href="#platforms" class="sb-link"><i data-icon="server"></i> Platforms</a>
         </div>
         <div class="sb-section">
@@ -1657,7 +1659,13 @@
       <div class="sb-panel" data-panel="changelog" style="display:none">
         <div class="sb-section">
           <div class="sb-label">Releases</div>
-          <a href="#v201" class="sb-link active"><i data-icon="sparkles"></i> v2.0.1-beta</a>
+          <a href="#v20" class="sb-link active"><i data-icon="sparkles"></i> v2.0</a>
+          <a href="#v206" class="sb-link"><i data-icon="git-branch"></i> v2.0.6-beta</a>
+          <a href="#v205" class="sb-link"><i data-icon="git-branch"></i> v2.0.5-beta</a>
+          <a href="#v204" class="sb-link"><i data-icon="git-branch"></i> v2.0.4-beta</a>
+          <a href="#v203" class="sb-link"><i data-icon="git-branch"></i> v2.0.3-beta</a>
+          <a href="#v202" class="sb-link"><i data-icon="git-branch"></i> v2.0.2-beta</a>
+          <a href="#v201" class="sb-link"><i data-icon="git-branch"></i> v2.0.1-beta</a>
           <a href="#v2002" class="sb-link"><i data-icon="git-branch"></i> v2.0.0.2-alpha</a>
           <a href="#v2001" class="sb-link"><i data-icon="git-branch"></i> v2.0.0.1-alpha</a>
           <a href="#v200" class="sb-link"><i data-icon="git-branch"></i> v2.0.0-alpha</a>
@@ -1701,15 +1709,15 @@
             <div class="guide-icon" style="background:var(--orange-wash);color:var(--orange)"><i data-icon="wrench"></i>
             </div>
             <h4>Training &amp; Fine-Tuning</h4>
-            <p>LoRA, QLoRA, and full fine-tuning with Muon / AdamW.</p>
+            <p>LoRA, QLoRA, GRPO RL, dataset ingestion, and full fine-tuning.</p>
           </a>
         </div>
 
         <section class="doc-section" id="installation">
           <h2>Installation</h2>
           <p>SwiftLLM provides a smart installer that auto-detects your system, installs dependencies, and builds the
-            engine from source. As of v2.0.1-beta it ships pre-built wheels for Linux (x86_64, aarch64) and macOS
-            (x86_64, arm64).</p>
+            engine from source. As of v2.0 it ships portable abi3 wheels for Linux (x86_64, aarch64) and macOS
+            (x86_64, arm64) — a single wheel covers Python 3.8 through 3.12.</p>
           <h3>Prerequisites</h3>
           <ul>
             <li><strong>Python 3.8+</strong> (3.10+ recommended)</li>
@@ -1753,12 +1761,16 @@ bash install.sh</pre>
                 <td>Custom virtual environment location</td>
               </tr>
               <tr>
-                <td><code>--airgap</code></td>
-                <td>Install from a pre-built offline bundle</td>
+                <td><code>--no-venv</code></td>
+                <td>Install into current Python environment instead of creating a venv</td>
               </tr>
               <tr>
-                <td><code>--dev</code></td>
-                <td>Install developer extras</td>
+                <td><code>--model-dir DIR</code></td>
+                <td>Set model storage directory</td>
+              </tr>
+              <tr>
+                <td><code>--airgap</code></td>
+                <td>Install from a pre-built offline bundle (no network required)</td>
               </tr>
             </tbody>
           </table>
@@ -1850,40 +1862,216 @@ outputs = llm.<span class="fn">generate</span>([<span class="str">"What is machi
     <span class="fn">print</span>(output.text)</pre>
           </div>
 
+          <h3>Self-Consistency Voting</h3>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">Python</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="kw">from</span> swiftllm <span class="kw">import</span> LLM
+<span class="kw">from</span> swiftllm.config <span class="kw">import</span> SelfConsistencyConfig
+
+llm = <span class="cls">LLM</span>(<span class="str">"meta-llama/Llama-3-8B"</span>)
+results = llm.<span class="fn">generate_with_self_consistency</span>(
+    <span class="str">"What is 12 x 15?"</span>,
+    config=<span class="cls">SelfConsistencyConfig</span>(num_samples=<span class="num">8</span>),
+)
+<span class="fn">print</span>(results[<span class="num">0</span>].answer)  <span class="cm"># majority-voted answer</span></pre>
+          </div>
+
+          <h3>TurboQuant KV Cache Compression</h3>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">Python</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="kw">from</span> swiftllm <span class="kw">import</span> LLM, SamplingParams, EngineConfig, TurboQuantConfig
+
+<span class="cm"># Enable 3-5x KV cache compression</span>
+engine_cfg = <span class="cls">EngineConfig</span>(
+    turbo_quant=<span class="cls">TurboQuantConfig</span>.<span class="fn">quality_neutral</span>(),  <span class="cm"># 4-bit K, 3-bit V</span>
+)
+llm = <span class="cls">LLM</span>(<span class="str">"meta-llama/Llama-3-8B"</span>, engine_config=engine_cfg)
+outputs = llm.<span class="fn">generate</span>([<span class="str">"Summarize this article..."</span>],
+    <span class="cls">SamplingParams</span>(max_tokens=<span class="num">512</span>))</pre>
+          </div>
+
           <h3>Start an API Server</h3>
           <div class="code-block">
             <div class="code-block-header"><span class="code-lang">Shell</span><button class="code-copy"
                 onclick="copyBlock(this)">Copy</button></div>
-            <pre
-              style="margin:0; font-family:inherit;">swiftllm serve --model meta-llama/Llama-3-8B --port <span class="num">8000</span></pre>
+            <pre style="margin:0; font-family:inherit;"><span class="cm"># Start with API key authentication</span>
+<span class="kw">export</span> SWIFTLLM_API_KEY=<span class="str">"your-secret-key"</span>
+swiftllm serve --model meta-llama/Llama-3-8B --port <span class="num">8000</span></pre>
+          </div>
+
+          <h3>CLI — Advanced Generation</h3>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">Shell</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="cm"># Self-consistency with 8 chains</span>
+swiftllm generate -p <span class="str">"What is 12 x 15?"</span> --self-consistency <span class="num">8</span>
+
+<span class="cm"># Best-of-N dense verification</span>
+swiftllm generate -p <span class="str">"Prove the Pythagorean theorem"</span> --best-of-n <span class="num">4</span>
+
+<span class="cm"># Recursive Language Model (depth=3)</span>
+swiftllm generate -p <span class="str">"Solve step by step: 2^10 mod 7"</span> --rlm <span class="num">3</span>
+
+<span class="cm"># Multi-round self-refinement</span>
+swiftllm generate -p <span class="str">"Write a haiku about Rust"</span> --refinement-rounds <span class="num">3</span></pre>
           </div>
         </section>
 
         <section class="doc-section" id="airgap">
           <h2>Air-Gapped Installation</h2>
           <p>SwiftLLM supports deployment on isolated networks with no internet access. Create a portable bundle on a
-            connected machine, then install offline.</p>
+            connected machine, then install offline. The bundle includes source, Python wheels, rustup-init, and
+            optionally pre-downloaded models with SHA256 checksum verification.</p>
           <div class="code-block">
             <div class="code-block-header"><span class="code-lang">Shell</span><button class="code-copy"
                 onclick="copyBlock(this)">Copy</button></div>
-            <pre style="margin:0; font-family:inherit;"><span class="cm"># On a connected machine</span>
-bash airgap-bundle.sh --model TheBloke/Llama-2-7B-GGUF
+            <pre style="margin:0; font-family:inherit;"><span class="cm"># On a connected machine — basic bundle</span>
+./airgap-bundle.sh
 
-<span class="cm"># On the air-gapped target</span>
-tar xzf swiftllm-airgap-*.tar.gz
-cd swiftllm-airgap-*/ && bash install.sh --airgap</pre>
+<span class="cm"># Include a model in the bundle</span>
+./airgap-bundle.sh --model <span class="str">"Qwen/Qwen2.5-0.5B-Instruct-GGUF:qwen2.5-0.5b-instruct-q4_k_m.gguf"</span>
+
+<span class="cm"># Cross-architecture bundle (x86_64 host → ARM64 target)</span>
+./airgap-bundle.sh --arch aarch64 -o swiftllm-bundle-arm64.tar.gz
+
+<span class="cm"># CPU-only wheels</span>
+./airgap-bundle.sh --cpu -o /mnt/usb/swiftllm-bundle.tar.gz
+
+<span class="cm"># macOS Apple Silicon</span>
+./airgap-bundle.sh --arch arm64 --platform macosx_11_0_arm64</pre>
+          </div>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">Shell</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="cm"># On the air-gapped target</span>
+tar xzf swiftllm-airgap-bundle.tar.gz
+cd swiftllm-airgap-bundle/swiftllm
+./install.sh --airgap
+
+<span class="cm"># Runtime offline mode (disable all HF downloads)</span>
+<span class="kw">export</span> SWIFTLLM_OFFLINE=<span class="num">1</span>
+swiftllm generate -m /path/to/local/model.gguf -p <span class="str">"Hello"</span></pre>
           </div>
           <div class="callout callout-info"><i data-icon="help-circle" data-size="16"></i>
-            <p>The bundle includes source, Python wheels, Rust installer, and optionally pre-downloaded models. SHA256
-              checksums verify integrity.</p>
+            <p>The <code>--arch</code> flag auto-maps to the correct pip platform tag and rustup target triple for
+              cross-architecture bundles. Supported targets: x86_64 Linux/macOS, aarch64 Linux, arm64 macOS (Apple Silicon).</p>
+          </div>
+        </section>
+
+        <section class="doc-section" id="update">
+          <h2>Update</h2>
+          <p>The <code>update.sh</code> lifecycle script pulls the latest source, rebuilds the wheel, and reinstalls
+            the package — preserving your virtual environment and downloaded models.</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">bash</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="cm"># Pull latest and rebuild</span>
+./update.sh
+
+<span class="cm"># Switch to a specific branch</span>
+./update.sh --branch main-hybrid-rd
+
+<span class="cm"># Switch to a specific tag</span>
+./update.sh --tag v2.0.5
+
+<span class="cm"># Clean build artifacts before rebuilding</span>
+./update.sh --clean
+
+<span class="cm"># Rebuild from current source (skip git pull)</span>
+./update.sh --no-pull
+
+<span class="cm"># Force CPU-only rebuild</span>
+./update.sh --cpu</pre>
+          </div>
+          <h3>Update Flags</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Flag</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>--branch NAME</code></td>
+                <td>Switch to a specific git branch before rebuilding</td>
+              </tr>
+              <tr>
+                <td><code>--tag TAG</code></td>
+                <td>Check out a specific release tag</td>
+              </tr>
+              <tr>
+                <td><code>--clean</code></td>
+                <td>Remove <code>target/</code> build artifacts before rebuilding</td>
+              </tr>
+              <tr>
+                <td><code>--no-pull</code></td>
+                <td>Rebuild from current source without running <code>git pull</code></td>
+              </tr>
+              <tr>
+                <td><code>--cpu</code> / <code>--gpu</code></td>
+                <td>Force CPU-only or GPU/CUDA rebuild</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="doc-section" id="uninstall">
+          <h2>Uninstall</h2>
+          <p>The <code>uninstall.sh</code> lifecycle script cleanly removes SwiftLLM, with options to preserve models
+            and virtual environments.</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">bash</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="cm"># Interactive uninstall (prompts before each step)</span>
+./uninstall.sh
+
+<span class="cm"># Uninstall but keep downloaded models</span>
+./uninstall.sh --keep-models
+
+<span class="cm"># Remove everything non-interactively</span>
+./uninstall.sh --purge --yes</pre>
+          </div>
+          <h3>Uninstall Flags</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Flag</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>--keep-models</code></td>
+                <td>Preserve downloaded models in <code>~/.cache/swiftllm/models</code></td>
+              </tr>
+              <tr>
+                <td><code>--keep-venv</code></td>
+                <td>Preserve the Python virtual environment</td>
+              </tr>
+              <tr>
+                <td><code>--purge</code></td>
+                <td>Remove everything: package, model cache, venv, and build artifacts</td>
+              </tr>
+              <tr>
+                <td><code>--yes</code></td>
+                <td>Non-interactive mode — skip all confirmation prompts</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="callout callout-warn"><i data-icon="help-circle" data-size="16"></i>
+            <p><strong>Caution:</strong> <code>--purge</code> permanently deletes all downloaded models and cached data.
+              Use <code>--keep-models</code> if you want to reinstall later without re-downloading.</p>
           </div>
         </section>
 
         <section class="doc-section" id="inference">
           <h2>Inference</h2>
-          <p>SwiftLLM's inference engine is built on PagedAttention with continuous batching, FlashAttention-2, and
+          <p>SwiftLLM's inference engine is built on PagedAttention with continuous batching, speculative decoding, and
             KV-cache reuse — designed to serve dozens of concurrent requests on a single GPU without head-of-line
-            blocking.</p>
+            blocking. v2.0 adds six research-derived test-time inference enhancements and TurboQuant KV cache compression.</p>
           <h3>Sync, async, and streaming</h3>
           <ul>
             <li><strong><code>LLM</code></strong> — synchronous engine for single-shot generation. Best for scripts and
@@ -1921,6 +2109,10 @@ cd swiftllm-airgap-*/ && bash install.sh --airgap</pre>
                 <td>Cap on generated tokens. Required.</td>
               </tr>
               <tr>
+                <td><code>min_p</code></td>
+                <td>Minimum probability threshold. Default 0 (off).</td>
+              </tr>
+              <tr>
                 <td><code>stop</code></td>
                 <td>List of strings to halt generation.</td>
               </tr>
@@ -1949,35 +2141,226 @@ params = <span class="cls">SamplingParams</span>(temperature=<span class="num">0
             <p>Continuous batching means a long-running request never blocks short ones — new requests slot into the
               next decoder step.</p>
           </div>
+
+          <h3>Test-Time Inference Enhancements (Phase 3)</h3>
+          <p>Six research-derived methods for improving output quality at inference time. Each is available as a Python API method and a CLI flag.</p>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Python API</th>
+                <th>CLI Flag</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Self-Consistency</strong></td>
+                <td><code>llm.generate_with_self_consistency()</code></td>
+                <td><code>--self-consistency N</code></td>
+                <td>Majority voting over N independent chains (Wang et al., 2022). Configurable answer extractor (regex, sentinel, JSON, freeform). Ties broken by mean log-prob.</td>
+              </tr>
+              <tr>
+                <td><strong>Self-Refinement</strong></td>
+                <td><code>llm.generate_with_refinement()</code></td>
+                <td><code>--refinement-rounds N</code></td>
+                <td>Iterative critique-revision loop (Madaan et al., 2023). Stops when normalized edit distance improvement falls below threshold.</td>
+              </tr>
+              <tr>
+                <td><strong>Best-of-N</strong></td>
+                <td><code>llm.generate_best_of_n()</code></td>
+                <td><code>--best-of-n N</code></td>
+                <td>Generates N candidates, scores via rule-based, neural PRM, ensemble, or log-prob strategy, returns highest-scoring.</td>
+              </tr>
+              <tr>
+                <td><strong>Disaggregated Serving</strong></td>
+                <td><code>DisaggregatedServingConfig</code></td>
+                <td>—</td>
+                <td>Separates prefill and decode into independent worker pools (Splitwise/DistServe). Round-robin, least-loaded, or locality-aware scheduling.</td>
+              </tr>
+              <tr>
+                <td><strong>RLM</strong></td>
+                <td><code>llm.generate_with_rlm()</code></td>
+                <td><code>--rlm DEPTH</code></td>
+                <td>Recursive Language Model — bounded recursive self-calling with REPL sandbox (Assign/Compute/Verify/Recurse steps), variable binding table, and complexity-classifier MLP.</td>
+              </tr>
+              <tr>
+                <td><strong>Dense Verification</strong></td>
+                <td><code>llm.generate_with_dense_verification()</code></td>
+                <td><code>--dense-verification</code></td>
+                <td>Cross-attention scoring of draft tokens against REPL trace. Per-token and per-step confidence. Strategies: SCORE_ONLY, GATE, GATE_AND_REGEN.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>TurboQuant KV Cache Compression</h3>
+          <p>ICLR 2026 (Zandieh et al., arXiv 2504.19874) — online vector quantization for KV cache. Random rotation via fast Walsh-Hadamard transform with deterministic sign flips, then scalar quantization using precomputed Beta-distribution Max-Lloyd codebooks at 1-4 bits per channel.</p>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Preset</th>
+                <th>Key Bits</th>
+                <th>Value Bits</th>
+                <th>Compression</th>
+                <th>Use Case</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>quality_neutral()</code></td>
+                <td>4</td>
+                <td>3</td>
+                <td>~4x</td>
+                <td>Minimal quality loss — recommended default</td>
+              </tr>
+              <tr>
+                <td><code>aggressive()</code></td>
+                <td>3</td>
+                <td>2</td>
+                <td>~5x</td>
+                <td>Maximum memory savings — some quality tradeoff</td>
+              </tr>
+              <tr>
+                <td>Custom</td>
+                <td>1-4</td>
+                <td>1-4</td>
+                <td>Varies</td>
+                <td>Per-use-case tuning via <code>TurboQuantConfig</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <p>Two quantization variants: <code>TurboQuantMse</code> (minimizes MSE, best for general use) and
+            <code>TurboQuantProd</code> (unbiased inner-product estimation via JL sign sketch, best when attention score
+            preservation matters more than individual vector reconstruction).</p>
+
+          <h3>Recursive Language Model (RLM)</h3>
+          <p>Bounded recursive self-calling with a REPL sandbox, variable binding table, and complexity-classifier MLP.
+            Four operating modes: <code>DISABLED</code>, <code>SHALLOW</code> (depth=1), <code>REASONING</code>
+            (depth=3, default), <code>AGENTIC</code> (depth=5).</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">Python</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="kw">from</span> swiftllm <span class="kw">import</span> LLM, RlmConfig, RlmMode, SamplingParams
+
+llm = <span class="cls">LLM</span>(model=<span class="str">"path/to/model"</span>)
+results = llm.<span class="fn">generate_with_rlm</span>(
+    <span class="str">"Prove by induction that 1+2+…+n = n(n+1)/2."</span>,
+    config=<span class="cls">RlmConfig</span>(mode=RlmMode.REASONING, max_depth=<span class="num">3</span>,
+                     enable_repl=<span class="kw">True</span>, early_exit_threshold=<span class="num">0.92</span>),
+    base_params=<span class="cls">SamplingParams</span>(temperature=<span class="num">0.7</span>, max_tokens=<span class="num">768</span>),
+)
+result = results[<span class="num">0</span>]
+<span class="fn">print</span>(f<span class="str">"Depth used: {result.recursion_depth_used}"</span>)
+<span class="fn">print</span>(f<span class="str">"REPL steps: {len(result.repl_trace)}"</span>)</pre>
+          </div>
+
+          <h3>Dense Verification Layer</h3>
+          <p>Cross-attention scoring of draft tokens against REPL execution trace. Per-token and per-step confidence.
+            Strategies: <code>SCORE_ONLY</code>, <code>GATE</code>, <code>GATE_AND_REGEN</code>.</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">Python</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="kw">from</span> swiftllm <span class="kw">import</span> LLM, DenseVerificationConfig, VerificationStrategy
+
+llm = <span class="cls">LLM</span>(model=<span class="str">"path/to/model"</span>)
+results = llm.<span class="fn">generate_with_dense_verification</span>(
+    <span class="str">"Explain Gödel's incompleteness theorems."</span>,
+    config=<span class="cls">DenseVerificationConfig</span>(
+        strategy=VerificationStrategy.GATE_AND_REGEN,
+        min_confidence=<span class="num">0.80</span>, max_regen_attempts=<span class="num">3</span>),
+)
+result = results[<span class="num">0</span>]
+<span class="fn">print</span>(f<span class="str">"Confidence: {result.global_score:.1%}"</span>)
+<span class="fn">print</span>(f<span class="str">"Accepted on attempt: {result.accepted_on_attempt}"</span>)</pre>
+          </div>
         </section>
 
         <section class="doc-section" id="serving">
           <h2>API Server</h2>
           <p>SwiftLLM includes an OpenAI-compatible HTTP server built with Axum, supporting streaming, API key
-            authentication, and security hardening.</p>
+            authentication, CORS, and security hardening. As of v2.0 the server binds to <code>127.0.0.1</code> by
+            default (localhost only) to prevent accidental exposure on open networks.</p>
           <h3>Endpoints</h3>
           <ul>
             <li><code>POST /v1/completions</code> — Text completion</li>
             <li><code>POST /v1/chat/completions</code> — Chat completion</li>
             <li><code>GET /v1/models</code> — List loaded models</li>
-            <li><code>GET /health</code> — Health check</li>
-            <li><code>GET /metrics</code> — Prometheus metrics</li>
+            <li><code>GET /health</code> — Health check (unauthenticated)</li>
+            <li><code>GET /metrics</code> — Prometheus metrics (authenticated — requires API key when <code>SWIFTLLM_API_KEY</code> is set)</li>
           </ul>
+
+          <h3>Security Hardening</h3>
+          <p>v2.0 ships with production-grade security defaults out of the box:</p>
+          <ul>
+            <li><strong>Default bind <code>127.0.0.1</code></strong> — the server listens on localhost only. Set <code>SWIFTLLM_HOST=0.0.0.0</code> to expose externally.</li>
+            <li><strong>Constant-time API key auth</strong> — set <code>SWIFTLLM_API_KEY</code> to require <code>Authorization: Bearer &lt;key&gt;</code> on all endpoints except <code>/health</code>. Uses constant-time comparison to prevent timing attacks.</li>
+            <li><strong>CORS from config</strong> — allowed origins are configured via <code>ServerConfig.cors_origins</code> or <code>SWIFTLLM_CORS_ORIGINS</code>. Defaults to same-origin only.</li>
+            <li><strong>Authenticated <code>/metrics</code></strong> — Prometheus metrics are gated behind the same API key, preventing info leakage.</li>
+            <li><strong>Rate limiting</strong> — configurable via <code>tower-http</code> middleware. Defaults to no limit; set <code>SWIFTLLM_RATE_LIMIT</code> for requests/second cap.</li>
+          </ul>
+
+          <h3>Launch examples</h3>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">bash</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="cm"># Basic — localhost only, no auth</span>
+swiftllm serve --model meta-llama/Llama-3-8B
+
+<span class="cm"># Production — external, with API key and CORS</span>
+<span class="kw">export</span> SWIFTLLM_API_KEY=<span class="str">"sk-your-secret-key"</span>
+<span class="kw">export</span> SWIFTLLM_CORS_ORIGINS=<span class="str">"https://app.example.com"</span>
+swiftllm serve --model meta-llama/Llama-3-8B --host <span class="num">0.0.0.0</span> --port <span class="num">8000</span>
+
+<span class="cm"># Verify auth is required</span>
+curl http://localhost:<span class="num">8000</span>/v1/models \
+  -H <span class="str">"Authorization: Bearer sk-your-secret-key"</span></pre>
+          </div>
+
           <div class="callout callout-tip"><i data-icon="sparkles" data-size="16"></i>
-            <p>The server is a drop-in replacement for the OpenAI API. Any client library that works with OpenAI will
-              work with SwiftLLM.</p>
+            <p>The server is a drop-in replacement for the OpenAI API. Point any OpenAI client (Python, Node, curl) at
+              <code>http://localhost:8000/v1</code> and it just works — including SSE streaming for chat completions.</p>
           </div>
         </section>
 
         <section class="doc-section" id="training">
           <h2>Training &amp; Fine-Tuning</h2>
-          <p>SwiftLLM supports full training, LoRA, and QLoRA fine-tuning with multiple optimizer options. The CLI
-            exposes two subcommands: <code>swiftllm train</code> and <code>swiftllm finetune</code>.</p>
+          <p>SwiftLLM supports full training, LoRA, QLoRA fine-tuning, and GRPO reinforcement learning with three
+            optimizer backends: <strong>Muon</strong> (Newton-Schulz orthogonalization), <strong>AdamW</strong>
+            (decoupled weight decay), and <strong>SGD</strong> (optional Nesterov momentum). The CLI exposes subcommands:
+            <code>swiftllm train</code>, <code>swiftllm finetune</code>, and <code>swiftllm grpo</code>.</p>
           <div class="callout callout-warn"><i data-icon="help-circle" data-size="16"></i>
-            <p><strong>Simulated backend (v2.0.1-beta):</strong> CUDA training kernels are not yet wired up. Every
-              training run prints a visible <code>[SIMULATED]</code> banner. Real gradient training ships in a later
-              beta.</p>
+            <p><strong>Simulated backend:</strong> CUDA training kernels are not yet wired up. Every
+              training run prints a visible <code>[SIMULATED]</code> banner. Real gradient training ships in a later release.</p>
           </div>
+
+          <h3>Supported Methods</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Description</th>
+                <th>Memory</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>LoRA</strong></td>
+                <td>Low-Rank Adaptation — trains small adapter matrices</td>
+                <td>Low</td>
+              </tr>
+              <tr>
+                <td><strong>QLoRA</strong></td>
+                <td>4-bit quantized base model + LoRA adapters (~65-70% less VRAM)</td>
+                <td>Very Low</td>
+              </tr>
+              <tr>
+                <td><strong>Full</strong></td>
+                <td>Full parameter fine-tuning</td>
+                <td>High</td>
+              </tr>
+            </tbody>
+          </table>
+
           <h3>LoRA Fine-Tuning</h3>
           <div class="code-block">
             <div class="code-block-header"><span class="code-lang">Python</span><button class="code-copy"
@@ -1986,13 +2369,150 @@ params = <span class="cls">SamplingParams</span>(temperature=<span class="num">0
 
 lora = <span class="cls">LoRAConfig</span>(r=<span class="num">16</span>, alpha=<span class="num">32</span>, dropout=<span class="num">0.05</span>)
 config = <span class="cls">TrainingConfig</span>(learning_rate=<span class="num">2e-4</span>, num_epochs=<span class="num">3</span>,
-                        batch_size=<span class="num">4</span>, optimizer=<span class="str">"adamw"</span>)
+                        per_device_batch_size=<span class="num">4</span>)
 
 <span class="fn">fine_tune</span>(model=<span class="str">"meta-llama/Llama-3-8B"</span>,
-          dataset=<span class="str">"./my_data.jsonl"</span>,
+          train_data=<span class="str">"./my_data.jsonl"</span>,
           lora_config=lora, training_config=config,
           output_dir=<span class="str">"./output"</span>)</pre>
           </div>
+
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">bash</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="cm"># CLI — LoRA fine-tuning</span>
+swiftllm finetune -m meta-llama/Llama-3-8B \
+  --train-data ./data/train.jsonl \
+  --lora-r <span class="num">16</span> --lora-alpha <span class="num">32</span> --learning-rate <span class="num">2e-4</span>
+
+<span class="cm"># CLI — QLoRA (4-bit base + LoRA)</span>
+swiftllm train -m meta-llama/Llama-3-8B \
+  --train-data ./data/train.jsonl --method qlora \
+  --lora-r <span class="num">16</span> --mixed-precision bf16</pre>
+          </div>
+
+          <h3>Auto-Ingest from Files or HuggingFace</h3>
+          <p>Pass a directory, file list, or HuggingFace dataset directly to <code>fine_tune()</code> — SwiftLLM
+            automatically converts it to JSONL before training. No manual dataset preparation needed.</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">Python</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="cm"># Fine-tune from a directory (auto-ingested to JSONL)</span>
+<span class="fn">fine_tune</span>(model=<span class="str">"meta-llama/Llama-3-8B"</span>,
+          train_data=<span class="str">"./my_corpus/"</span>,
+          output_dir=<span class="str">"./output"</span>, lora_r=<span class="num">16</span>)
+
+<span class="cm"># Fine-tune from a HuggingFace dataset</span>
+<span class="fn">fine_tune</span>(model=<span class="str">"meta-llama/Llama-3-8B"</span>,
+          hf_dataset=<span class="str">"tatsu-lab/alpaca"</span>,
+          dataset_format=<span class="str">"sft_completion"</span>,
+          output_dir=<span class="str">"./output"</span>, lora_r=<span class="num">32</span>)
+
+<span class="cm"># Combine local files + HuggingFace in one command</span>
+<span class="fn">fine_tune</span>(model=<span class="str">"meta-llama/Llama-3-8B"</span>,
+          train_data=<span class="str">"./my_docs/"</span>,
+          hf_dataset=<span class="str">"tatsu-lab/alpaca"</span>,
+          hf_max_samples=<span class="num">10_000</span>,
+          dataset_format=<span class="str">"sft_completion"</span>,
+          output_dir=<span class="str">"./output"</span>, lora_r=<span class="num">16</span>)</pre>
+          </div>
+
+          <h3>GRPO Reinforcement Learning</h3>
+          <p>Group Relative Policy Optimization — RL fine-tuning without a critic model. Includes CGAR depth curriculum
+            (1.71x speedup), Process Reward Models (5 aggregation strategies for step-level feedback), and LongR dense
+            token-level rewards (+9% LongBench v2).</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">Python</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="kw">from</span> swiftllm <span class="kw">import</span> GrpoTrainer, TrainingConfig
+<span class="kw">from</span> swiftllm.config <span class="kw">import</span> GrpoConfig, CgarConfig, PrmConfig
+
+config = <span class="cls">TrainingConfig</span>(
+    model=<span class="str">"meta-llama/Llama-3-8B"</span>,
+    train_data=<span class="str">"./data/math_prompts.jsonl"</span>,
+    output_dir=<span class="str">"./grpo_output"</span>,
+    num_layers=<span class="num">32</span>,
+    grpo=<span class="cls">GrpoConfig</span>(group_size=<span class="num">8</span>, kl_coeff=<span class="num">0.04</span>),
+    cgar=<span class="cls">CgarConfig</span>(),
+    prm=<span class="cls">PrmConfig</span>(aggregation=<span class="str">"last_step"</span>),
+)
+trainer = <span class="cls">GrpoTrainer</span>(config)
+trainer.<span class="fn">train</span>()</pre>
+          </div>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">bash</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="cm"># GRPO with full research stack: CGAR + PRM + LongR</span>
+swiftllm grpo -m meta-llama/Llama-3-8B \
+  --train-data ./data/math_prompts.jsonl \
+  --group-size <span class="num">8</span> --enable-prm --long-reward-weight <span class="num">0.1</span> \
+  --num-layers <span class="num">32</span></pre>
+          </div>
+
+          <h3>Dataset Ingestion</h3>
+          <p>Convert directories of text, code, PDF, DOCX, CSV, HTML, and JSON files into JSONL training data in one
+            command. Supports HuggingFace Hub datasets via <code>HuggingFaceSource</code>. Four output schemas:
+            <code>pretraining</code>, <code>sft_messages</code>, <code>sft_completion</code>, <code>code</code>.
+            SHA-256 deduplication across all sources.</p>
+          <div class="code-block">
+            <div class="code-block-header"><span class="code-lang">bash</span><button class="code-copy"
+                onclick="copyBlock(this)">Copy</button></div>
+            <pre style="margin:0; font-family:inherit;"><span class="cm"># Local files — code fine-tuning</span>
+swiftllm dataset --input ./src/ ./docs/ --output train.jsonl --format code
+
+<span class="cm"># HuggingFace dataset</span>
+swiftllm dataset --hf-dataset tatsu-lab/alpaca --output alpaca.jsonl --format sft_completion
+
+<span class="cm"># Mixed: local files + HuggingFace combined</span>
+swiftllm dataset --input ./my_docs/ --hf-dataset tatsu-lab/alpaca \
+  --hf-max-samples <span class="num">10000</span> --format sft_completion --output combined.jsonl
+
+<span class="cm"># Large corpus with streaming (avoids full download)</span>
+swiftllm dataset --hf-dataset HuggingFaceFW/fineweb --hf-subset sample-10BT \
+  --hf-streaming --hf-max-samples <span class="num">100000</span> --format pretraining --output fineweb.jsonl</pre>
+          </div>
+
+          <h3>Training Data Formats</h3>
+          <p>Three accepted input formats for supervised fine-tuning:</p>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Format</th>
+                <th>Schema</th>
+                <th>Use Case</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Messages (JSONL)</td>
+                <td><code>{"messages": [{"role": "...", "content": "..."}]}</code></td>
+                <td>Chat / instruction tuning (recommended)</td>
+              </tr>
+              <tr>
+                <td>Prompt-Completion (JSONL)</td>
+                <td><code>{"prompt": "...", "completion": "..."}</code></td>
+                <td>Classic SFT, GRPO (add <code>"answer"</code> for RL)</td>
+              </tr>
+              <tr>
+                <td>Plain Text / CSV</td>
+                <td>One example per line or CSV with <code>prompt</code>/<code>completion</code> columns</td>
+                <td>Language modelling pretraining</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Advanced Inference</h3>
+          <p>SwiftLLM v2.0 includes six test-time inference enhancements accessible via Python API and CLI flags.
+            These improve output quality by spending more compute at inference time — no training required.</p>
+          <ul>
+            <li><strong>Self-Consistency:</strong> <code>llm.generate_with_self_consistency()</code> — majority voting over N independent chains (Wang et al., 2022)</li>
+            <li><strong>Self-Refinement:</strong> <code>llm.generate_with_refinement()</code> — iterative critique→revision cycles (Madaan et al., 2023)</li>
+            <li><strong>Best-of-N:</strong> <code>llm.generate_best_of_n()</code> — dense scoring and reranking of N candidates</li>
+            <li><strong>Disaggregated Serving:</strong> <code>DisaggregatedServingConfig</code> — separate prefill/decode worker pools (Splitwise/DistServe)</li>
+            <li><strong>RLM:</strong> <code>llm.generate_with_rlm()</code> — recursive self-calling with REPL sandbox and variable binding</li>
+            <li><strong>Dense Verification:</strong> <code>llm.generate_with_dense_verification()</code> — cross-attention token/step confidence scoring</li>
+            <li><strong>TurboQuant:</strong> Set <code>EngineConfig(turbo_quant=TurboQuantConfig.quality_neutral())</code> for 3-5x KV cache compression</li>
+          </ul>
         </section>
       </div>
 
@@ -2000,14 +2520,14 @@ config = <span class="cls">TrainingConfig</span>(learning_rate=<span class="num"
       <div class="tab-panel" data-panel="api">
         <section class="doc-section" id="cli">
           <h2>CLI Commands</h2>
-          <p>The <code>swiftllm</code> CLI provides nine subcommands covering inference, serving, training, and model
+          <p>The <code>swiftllm</code> CLI provides subcommands covering inference, serving, training, dataset ingestion, and model
             management.</p>
           <div class="cli-grid">
             <div class="cli-item"><code>serve</code>
               <p>OpenAI-compatible API server</p>
             </div>
             <div class="cli-item"><code>generate</code>
-              <p>Batch text generation</p>
+              <p>Batch text generation with --self-consistency, --refinement-rounds, --best-of-n, --rlm, --dense-verification flags</p>
             </div>
             <div class="cli-item"><code>chat</code>
               <p>Interactive REPL</p>
@@ -2029,6 +2549,12 @@ config = <span class="cls">TrainingConfig</span>(learning_rate=<span class="num"
             </div>
             <div class="cli-item"><code>finetune</code>
               <p>LoRA convenience command</p>
+            </div>
+            <div class="cli-item"><code>grpo</code>
+              <p>GRPO RL training with CGAR/PRM/LongR</p>
+            </div>
+            <div class="cli-item"><code>dataset</code>
+              <p>Multi-format ingestion to JSONL with HuggingFace support</p>
             </div>
           </div>
 
@@ -2053,7 +2579,7 @@ config = <span class="cls">TrainingConfig</span>(learning_rate=<span class="num"
               </tr>
               <tr>
                 <td><code>--quantization</code></td>
-                <td><code>awq</code>, <code>gptq</code>, <code>bnb4</code>, or <code>none</code></td>
+                <td><code>awq</code>, <code>gptq</code>, <code>bnb4</code>, <code>turboquant</code>, or <code>none</code></td>
               </tr>
               <tr>
                 <td><code>--tensor-parallel</code></td>
@@ -2111,19 +2637,160 @@ config = <span class="cls">TrainingConfig</span>(learning_rate=<span class="num"
             <tbody>
               <tr>
                 <td><code>Trainer</code></td>
-                <td>High-level training loop</td>
+                <td>High-level training loop with callbacks, early stopping, checkpointing</td>
               </tr>
               <tr>
                 <td><code>TrainingConfig</code></td>
-                <td>learning_rate, num_epochs, batch_size, optimizer, lr_scheduler</td>
+                <td>learning_rate, num_epochs, per_device_batch_size, lr_scheduler, mixed_precision</td>
               </tr>
               <tr>
                 <td><code>LoRAConfig</code></td>
-                <td>r, alpha, dropout, target_modules, bias</td>
+                <td>r, alpha, dropout, target_modules, use_rslora</td>
               </tr>
               <tr>
                 <td><code>fine_tune</code></td>
-                <td>One-call LoRA convenience</td>
+                <td>One-call convenience — accepts JSONL, directory, or HuggingFace dataset</td>
+              </tr>
+              <tr>
+                <td><code>GrpoTrainer</code></td>
+                <td>GRPO RL training with CGAR curriculum integration</td>
+              </tr>
+              <tr>
+                <td><code>GrpoConfig</code></td>
+                <td>group_size, kl_coeff, clip_eps, correctness/format/length weights</td>
+              </tr>
+              <tr>
+                <td><code>CgarConfig</code></td>
+                <td>Curriculum-Guided Adaptive Recursion — shallow_end, medium_end phases</td>
+              </tr>
+              <tr>
+                <td><code>PrmConfig</code></td>
+                <td>Process Reward Model — 5 aggregation strategies (Min/Mean/Product/LastStep/WeightedMean)</td>
+              </tr>
+              <tr>
+                <td><code>LongRewardConfig</code></td>
+                <td>LongR dense token-level rewards — weight, aggregation, normalise</td>
+              </tr>
+              <tr>
+                <td><code>grpo_train</code></td>
+                <td>One-call GRPO convenience function</td>
+              </tr>
+            </tbody>
+          </table>
+          <h3>Dataset Ingestion</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Export</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>DatasetIngester</code></td>
+                <td>Full-control multi-format dataset ingestion API</td>
+              </tr>
+              <tr>
+                <td><code>IngestionConfig</code></td>
+                <td>input_paths, output_path, format, chunk_size, hf_sources</td>
+              </tr>
+              <tr>
+                <td><code>IngestionResult</code></td>
+                <td>Ingestion summary — chunks, files, HF rows, skipped files</td>
+              </tr>
+              <tr>
+                <td><code>HuggingFaceSource</code></td>
+                <td>Describes one HuggingFace Hub dataset with auto-detected schema</td>
+              </tr>
+              <tr>
+                <td><code>DatasetFormat</code></td>
+                <td>Output format enum — pretraining, sft_messages, sft_completion, code</td>
+              </tr>
+              <tr>
+                <td><code>ingest_dataset</code></td>
+                <td>One-liner for local files, HuggingFace, or combined ingestion</td>
+              </tr>
+              <tr>
+                <td><code>prepare_dataset</code></td>
+                <td>Convenience shortcut available as <code>swiftllm.prepare_dataset()</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <h3>Phase 3 — Inference Configs</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Export</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>SelfConsistencyConfig</code></td>
+                <td>num_samples, extractor strategy, temperature</td>
+              </tr>
+              <tr>
+                <td><code>RefinementConfig</code></td>
+                <td>max_rounds, stopping criterion, improvement metric</td>
+              </tr>
+              <tr>
+                <td><code>VerificationConfig</code></td>
+                <td>num_candidates, scoring strategy, threshold</td>
+              </tr>
+              <tr>
+                <td><code>DisaggregatedServingConfig</code></td>
+                <td>Separate prefill/decode worker pool config</td>
+              </tr>
+              <tr>
+                <td><code>RlmConfig</code></td>
+                <td>max_depth, mode (DISABLED/SHALLOW/REASONING/AGENTIC)</td>
+              </tr>
+              <tr>
+                <td><code>DenseVerificationConfig</code></td>
+                <td>min_confidence, strategy (SCORE_ONLY/GATE/GATE_AND_REGEN)</td>
+              </tr>
+              <tr>
+                <td><code>TurboQuantConfig</code></td>
+                <td>key_bits, value_bits, presets: quality_neutral(), aggressive()</td>
+              </tr>
+            </tbody>
+          </table>
+          <h3>Hybrid Architecture (Phase 1)</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Export</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>HybridModelBuilder</code></td>
+                <td>Fluent builder for hybrid Mamba-3 models</td>
+              </tr>
+              <tr>
+                <td><code>build_mamba3_reasoning_model</code></td>
+                <td>Mamba-3 + LatentMoE + RLM + Dense Verification preset</td>
+              </tr>
+              <tr>
+                <td><code>HybridModelConfig</code></td>
+                <td>Top-level architecture configuration</td>
+              </tr>
+              <tr>
+                <td><code>MambaConfig</code></td>
+                <td>Mamba-3 SSM layer configuration</td>
+              </tr>
+              <tr>
+                <td><code>LatentMoeConfig</code></td>
+                <td>Latent MoE FFN configuration (87.5% less inter-GPU traffic)</td>
+              </tr>
+              <tr>
+                <td><code>estimate_parameters</code></td>
+                <td>Compute total parameter count for a <code>HybridModelConfig</code></td>
+              </tr>
+              <tr>
+                <td><code>parameter_summary</code></td>
+                <td>Formatted breakdown of parameter counts by component</td>
               </tr>
             </tbody>
           </table>
@@ -2131,8 +2798,11 @@ config = <span class="cls">TrainingConfig</span>(learning_rate=<span class="num"
 
         <section class="doc-section" id="configuration">
           <h2>Configuration</h2>
-          <p>SwiftLLM is configured via environment variables prefixed <code>SWIFTLLM_</code>. CLI flags take highest
+          <p>Every <code>SWIFTLLM_*</code> environment variable maps to a field in <code>EngineConfig</code> or
+            <code>ServerConfig</code>. Set them in your shell profile, systemd unit, or Docker Compose file — they are
+            read at startup and override coded defaults. Explicit constructor arguments and CLI flags always take final
             precedence.</p>
+
           <h3>GPU &amp; Memory</h3>
           <table class="config-table">
             <thead>
@@ -2146,26 +2816,267 @@ config = <span class="cls">TrainingConfig</span>(learning_rate=<span class="num"
               <tr>
                 <td><code>SWIFTLLM_GPU_MEMORY_UTILIZATION</code></td>
                 <td>0.90</td>
-                <td>VRAM fraction for model + KV cache</td>
+                <td>Fraction of GPU VRAM for model weights + KV cache (0.0–1.0). Raise to ~0.95 on dedicated hosts.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_GPU_OVERHEAD_MB</code></td>
+                <td>0</td>
+                <td>VRAM (in MB) to reserve for the OS and other processes.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_NUM_GPU_LAYERS</code></td>
+                <td>all</td>
+                <td>Number of layers to offload to GPU. <code>0</code> = CPU-only, <code>999</code> = all.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_SWAP_SPACE</code></td>
+                <td>4.0</td>
+                <td>CPU swap space in GiB for KV cache offloading.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_CPU_OFFLOAD_GB</code></td>
+                <td>0.0</td>
+                <td>Model weight gigabytes to keep on CPU RAM instead of GPU.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_KV_CACHE_DTYPE</code></td>
+                <td>auto</td>
+                <td>Data type for the KV cache. <code>fp8_e4m3</code>/<code>fp8_e5m2</code> halves memory.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_BLOCK_SIZE</code></td>
+                <td>16</td>
+                <td>Tokens per PagedAttention block. Allowed: <code>8</code>, <code>16</code>, <code>32</code>.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_FLASH_ATTENTION</code></td>
+                <td>true</td>
+                <td>Enable FlashAttention kernels.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_ENFORCE_EAGER</code></td>
+                <td>false</td>
+                <td>Disable CUDA graph capture; use eager execution.</td>
+              </tr>
+              <tr>
+                <td><code>CUDA_VISIBLE_DEVICES</code></td>
+                <td>(all)</td>
+                <td>Restrict which GPUs are visible, e.g. <code>0,2</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Tensor Parallelism &amp; Multi-GPU</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>SWIFTLLM_TENSOR_PARALLEL_SIZE</code></td>
+                <td>1</td>
+                <td>GPUs for tensor parallelism. Must evenly divide attention heads.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_PIPELINE_PARALLEL_SIZE</code></td>
+                <td>1</td>
+                <td>Pipeline-parallel stages.</td>
+              </tr>
+              <tr>
+                <td><code>NCCL_DEBUG</code></td>
+                <td>—</td>
+                <td>NCCL logging level: <code>INFO</code>, <code>WARN</code>, <code>TRACE</code>.</td>
+              </tr>
+              <tr>
+                <td><code>NCCL_P2P_DISABLE</code></td>
+                <td>0</td>
+                <td>Set to <code>1</code> to disable GPU peer-to-peer on certain PCIe topologies.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Scheduling &amp; Batching</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>SWIFTLLM_MAX_NUM_SEQS</code></td>
+                <td>256</td>
+                <td>Maximum concurrent sequences in a batch.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_MAX_NUM_BATCHED_TOKENS</code></td>
+                <td>8192</td>
+                <td>Maximum total tokens per forward pass.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_MAX_PADDINGS</code></td>
+                <td>256</td>
+                <td>Maximum padding tokens tolerated per batch.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_SCHEDULER_POLICY</code></td>
+                <td>fcfs</td>
+                <td><code>fcfs</code>, <code>sjf</code>, or <code>priority</code>.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_PREEMPTION_MODE</code></td>
+                <td>swap</td>
+                <td><code>swap</code> (KV cache to CPU) or <code>recompute</code>.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_ENABLE_PREFIX_CACHING</code></td>
+                <td>false</td>
+                <td>Reuse KV cache across requests sharing the same prefix.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_ENABLE_CHUNKED_PREFILL</code></td>
+                <td>false</td>
+                <td>Interleave prefill and decode; reduces time-to-first-token.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_NUM_PARALLEL</code></td>
+                <td>1</td>
+                <td>Parallel inference slots per model.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_MAX_LOADED_MODELS</code></td>
+                <td>1</td>
+                <td>Models held in GPU memory simultaneously.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_KEEP_ALIVE</code></td>
+                <td>300</td>
+                <td>Seconds a model stays loaded after last request.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Speculative Decoding</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>SWIFTLLM_SPECULATIVE_MODEL</code></td>
+                <td>—</td>
+                <td>Draft model for speculative decoding.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_NUM_SPECULATIVE_TOKENS</code></td>
+                <td>5</td>
+                <td>Tokens to draft per step.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_SPECULATIVE_MAX_MODEL_LEN</code></td>
+                <td>—</td>
+                <td>Override max sequence length for the draft model.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Model &amp; Weights</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>SWIFTLLM_MODEL_DIR</code></td>
+                <td>~/.cache/swiftllm/models</td>
+                <td>Default directory for downloaded models.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_OFFLINE</code></td>
+                <td>false</td>
+                <td>Set to <code>1</code> to disable all network downloads (air-gapped mode).</td>
               </tr>
               <tr>
                 <td><code>SWIFTLLM_DTYPE</code></td>
                 <td>auto</td>
-                <td>float16, bfloat16, float32, int8, int4</td>
+                <td>Weight data type: <code>auto</code>, <code>float16</code>, <code>bfloat16</code>, <code>float32</code>, <code>int8</code>, <code>int4</code>, <code>fp8_e4m3</code>, <code>fp8_e5m2</code>.</td>
               </tr>
               <tr>
-                <td><code>SWIFTLLM_TENSOR_PARALLEL_SIZE</code></td>
-                <td>1</td>
-                <td>GPUs for tensor parallelism</td>
+                <td><code>SWIFTLLM_QUANTIZATION</code></td>
+                <td>none</td>
+                <td>Quantization method: <code>none</code>, <code>awq</code>, <code>gptq</code>, <code>squeezellm</code>, <code>gguf</code>.</td>
               </tr>
               <tr>
-                <td><code>SWIFTLLM_CPU_OFFLOAD_GB</code></td>
+                <td><code>SWIFTLLM_MAX_MODEL_LEN</code></td>
+                <td>(model default)</td>
+                <td>Override the model's max sequence length.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_TRUST_REMOTE_CODE</code></td>
+                <td>false</td>
+                <td>Allow executing custom code from HuggingFace repos.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_DEVICE</code></td>
+                <td>auto</td>
+                <td>Device: <code>auto</code>, <code>cuda</code>, <code>cpu</code>, <code>metal</code>, <code>rocm</code>.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_SEED</code></td>
                 <td>0</td>
-                <td>GB of weights to offload to CPU RAM</td>
+                <td>Global random seed.</td>
+              </tr>
+              <tr>
+                <td><code>HF_TOKEN</code></td>
+                <td>—</td>
+                <td>HuggingFace API token for gated models.</td>
               </tr>
             </tbody>
           </table>
-          <h3>Server</h3>
+
+          <h3>LoRA</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>SWIFTLLM_ENABLE_LORA</code></td>
+                <td>false</td>
+                <td>Enable LoRA adapter support in the inference engine.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_MAX_LORAS</code></td>
+                <td>1</td>
+                <td>Maximum LoRA adapters loaded simultaneously.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_MAX_LORA_RANK</code></td>
+                <td>16</td>
+                <td>Maximum LoRA rank.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Server &amp; Networking</h3>
           <table class="config-table">
             <thead>
               <tr>
@@ -2177,23 +3088,109 @@ config = <span class="cls">TrainingConfig</span>(learning_rate=<span class="num"
             <tbody>
               <tr>
                 <td><code>SWIFTLLM_HOST</code></td>
-                <td>0.0.0.0</td>
-                <td>HTTP bind address</td>
+                <td>127.0.0.1</td>
+                <td>HTTP bind address. Localhost by default for security; set <code>0.0.0.0</code> to expose externally.</td>
               </tr>
               <tr>
                 <td><code>SWIFTLLM_PORT</code></td>
                 <td>8000</td>
-                <td>Listen port</td>
+                <td>Listen port.</td>
               </tr>
               <tr>
-                <td><code>SWIFTLLM_API_KEYS</code></td>
+                <td><code>SWIFTLLM_API_KEY</code></td>
                 <td>—</td>
-                <td>Comma-separated API keys</td>
+                <td>Bearer-token API key (constant-time comparison).</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_CORS_ALLOW_ORIGINS</code></td>
+                <td>*</td>
+                <td>Comma-separated allowed CORS origins.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_SSL_CERTFILE</code></td>
+                <td>—</td>
+                <td>Path to TLS certificate for HTTPS.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_SSL_KEYFILE</code></td>
+                <td>—</td>
+                <td>Path to TLS private key for HTTPS.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_ROOT_PATH</code></td>
+                <td>—</td>
+                <td>URL prefix for reverse-proxy deployments.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_SERVED_MODEL_NAME</code></td>
+                <td>—</td>
+                <td>Override model name in API responses.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_MAX_LOG_LEN</code></td>
+                <td>—</td>
+                <td>Truncate request/response logs to this many characters.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_RESPONSE_ROLE</code></td>
+                <td>assistant</td>
+                <td>Default role name in chat completion responses.</td>
               </tr>
               <tr>
                 <td><code>SWIFTLLM_METRICS_ENABLED</code></td>
                 <td>true</td>
-                <td>Expose Prometheus <code>/metrics</code></td>
+                <td>Expose Prometheus <code>/metrics</code> (authenticated when API key is set).</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Build &amp; CUDA</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>CUDA_PATH</code> / <code>CUDA_HOME</code></td>
+                <td>—</td>
+                <td>Path to CUDA toolkit.</td>
+              </tr>
+              <tr>
+                <td><code>CUDACXX</code></td>
+                <td>—</td>
+                <td>Path to <code>nvcc</code> binary.</td>
+              </tr>
+              <tr>
+                <td><code>CMAKE_ARGS</code></td>
+                <td>—</td>
+                <td>Extra CMake arguments for llama-cpp-python build.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Logging &amp; Debug</h3>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>RUST_LOG</code></td>
+                <td>info</td>
+                <td>Rust log level: <code>trace</code>, <code>debug</code>, <code>info</code>, <code>warn</code>, <code>error</code>.</td>
+              </tr>
+              <tr>
+                <td><code>SWIFTLLM_LOG_LEVEL</code></td>
+                <td>—</td>
+                <td>Python log level: <code>DEBUG</code>, <code>INFO</code>, <code>WARNING</code>, <code>ERROR</code>.</td>
               </tr>
             </tbody>
           </table>
@@ -2202,16 +3199,67 @@ config = <span class="cls">TrainingConfig</span>(learning_rate=<span class="num"
         <section class="doc-section" id="models">
           <h2>Supported Models</h2>
           <p>Ten model families supported out of the box, with auto-detection for HuggingFace, GGUF, SafeTensors, and
-            PyTorch formats.</p>
-          <ul>
-            <li><strong>LLaMA 3 / 2</strong> — Meta's flagship families</li>
-            <li><strong>Code Llama</strong> — Specialized for code generation</li>
-            <li><strong>Mistral / Mixtral</strong> — Dense and MoE variants</li>
-            <li><strong>Qwen 1 / 2 / 3</strong> — Alibaba multilingual models</li>
-            <li><strong>Phi-2 / Phi-3</strong> — Microsoft small models</li>
-            <li><strong>Falcon</strong> — TII open models</li>
-            <li><strong>Gemma</strong> — Google open models</li>
-          </ul>
+            PyTorch formats. Phase 1 research models (Mamba, Jamba) are available when building with hybrid architecture support.</p>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Model Family</th>
+                <th>Variants</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>LLaMA 3</strong></td>
+                <td>8B, 70B, 405B</td>
+                <td>Meta's latest flagship. Full tensor-parallel support for 70B/405B.</td>
+              </tr>
+              <tr>
+                <td><strong>Code Llama</strong></td>
+                <td>7B, 13B, 34B</td>
+                <td>Code-specialized. Python, Instruct, and base variants.</td>
+              </tr>
+              <tr>
+                <td><strong>Mistral / Mixtral / Devstral</strong></td>
+                <td>7B, 8x7B, Devstral</td>
+                <td>Dense (7B), MoE (Mixtral 8x7B), and code-agent (Devstral) variants.</td>
+              </tr>
+              <tr>
+                <td><strong>Qwen 3 / 3.5</strong></td>
+                <td>0.6B – 235B</td>
+                <td>Alibaba multilingual. MoE and dense variants.</td>
+              </tr>
+              <tr>
+                <td><strong>Phi-3 / Phi-4</strong></td>
+                <td>Mini, Small, Medium</td>
+                <td>Microsoft small-language models optimized for edge deployment.</td>
+              </tr>
+              <tr>
+                <td><strong>Deepseek R1 / V4</strong></td>
+                <td>R1-Distill, V4-0324</td>
+                <td>Reasoning-focused. R1 chain-of-thought and V4 MoE architectures.</td>
+              </tr>
+              <tr>
+                <td><strong>Gemma</strong></td>
+                <td>2B, 7B</td>
+                <td>Google open models. Instruct and base variants.</td>
+              </tr>
+              <tr>
+                <td><strong>Mamba</strong></td>
+                <td>130M – 2.8B</td>
+                <td>Phase 1 — SSM backbone. Requires hybrid architecture build.</td>
+              </tr>
+              <tr>
+                <td><strong>Jamba</strong></td>
+                <td>Hybrid configs</td>
+                <td>Phase 1 — Mamba + Attention + MoE hybrid (AI21 architecture).</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="callout callout-info"><i data-icon="help-circle" data-size="16"></i>
+            <p>All models support HuggingFace (SafeTensors/PyTorch), GGUF, and raw SafeTensors formats. Format is auto-detected
+              by file extension. Use <code>swiftllm convert</code> to move between formats.</p>
+          </div>
         </section>
       </div>
 
@@ -2252,9 +3300,9 @@ config = <span class="cls">TrainingConfig</span>(learning_rate=<span class="num"
           <div class="faq-item">
             <div class="faq-q">Do I need a GPU to run SwiftLLM? <i data-icon="plus" data-size="18"></i></div>
             <div class="faq-a">
-              <div class="faq-a-inner">No. As of v2.0.0.2-alpha, CPU is the default build target. The installer only
+              <div class="faq-a-inner">No. As of v2.0 CPU is the default build target. The installer only
                 pulls CUDA libraries if you pass <code>--gpu</code> or run on a machine with <code>nvidia-smi</code>
-                detected. CPU wheels ship for x86_64 and aarch64 on both Linux and macOS.</div>
+                detected. CPU wheels ship for x86_64 and aarch64 on both Linux and macOS, plus arm64 on Apple Silicon.</div>
             </div>
           </div>
 
@@ -2270,10 +3318,11 @@ config = <span class="cls">TrainingConfig</span>(learning_rate=<span class="num"
           <div class="faq-item">
             <div class="faq-q">Is training production-ready yet? <i data-icon="plus" data-size="18"></i></div>
             <div class="faq-a">
-              <div class="faq-a-inner">Not in v2.0.1-beta. The training pipeline, CLI, config parsing, checkpointing,
-                and dataset loading are all wired up, but the actual CUDA gradient kernels are stubbed. Runs print a
-                <code>[SIMULATED]</code> banner. Real gradient training lands in a later beta — follow the <a
-                  href="#changelog">changelog</a> for dates.
+              <div class="faq-a-inner">The full training pipeline — CLI, config parsing, checkpointing, dataset loading,
+                GRPO RL, CGAR curriculum, PRM scoring, and LongR dense rewards — is wired up and usable. However, the
+                actual CUDA gradient kernels are still stubbed; runs print a visible <code>[SIMULATED]</code> banner.
+                Real GPU gradient training is planned for a future release — follow the <a
+                  href="#changelog">changelog</a> for updates.
               </div>
             </div>
           </div>
@@ -2324,8 +3373,8 @@ config = <span class="cls">TrainingConfig</span>(learning_rate=<span class="num"
             from NVIDIA.</p>
 
           <h3>Training shows <code>[SIMULATED]</code></h3>
-          <p>This is expected on v2.0.1-beta — the stub is intentional. See the <a href="#training">Training
-              section</a>.</p>
+          <p>This is expected behaviour — the training loop is a simulation stub. Full GPU training
+            requires PyTorch and a CUDA environment. See the <a href="#training">Training section</a>.</p>
 
           <h3>Model downloads hang</h3>
           <p>Set <code>HF_HUB_ENABLE_HF_TRANSFER=1</code> for the accelerated downloader, or pass
@@ -2349,14 +3398,200 @@ config = <span class="cls">TrainingConfig</span>(learning_rate=<span class="num"
           </div>
 
           <div class="timeline">
+            <!-- v2.0 Stable -->
+            <div class="tl-entry latest" id="v20" data-cats="feature">
+              <div class="tl-dot"></div>
+              <div class="tl-card">
+                <div class="tl-head">
+                  <div class="tl-ver">v2.0</div>
+                  <div class="tl-meta">
+                    <span class="tl-tag tag-latest">Latest</span>
+                    <span class="tl-tag tag-stable">Stable</span>
+                    <span class="tl-date">2026</span>
+                  </div>
+                </div>
+                <p class="tl-sum">Stable release — all beta features promoted to production. Hybrid Mamba-3, GRPO training, TurboQuant KV cache compression, and advanced test-time inference.</p>
+                <ul class="change-list">
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Hybrid Mamba-3 SSM + Transformer + MoE architecture (Phase 1) — selective SSM with MIMO multi-head scan, LatentMoE with dynamic-bias load balancing, Jamba-style hybrid blocks</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">GRPO / CGAR / PRM / LongReward training pipelines (Phase 2) — reinforcement learning fine-tuning without a critic model</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Self-consistency, refinement, best-of-N, disaggregated serving, Recursive Language Model, and Dense Verification (Phase 3)</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">TurboQuant KV cache compression (ICLR 2026) — Walsh-Hadamard rotation + Max-Lloyd codebooks for 3-5x memory reduction</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Lifecycle scripts (<code>install.sh</code>, <code>update.sh</code>, <code>uninstall.sh</code>) for full install management</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Comprehensive static analysis sweep — zero Clippy warnings, logic bug fixes</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">329 backend tests and 66 frontend tests — all passing</span></li>
+                </ul>
+                <div class="tl-foot">
+                  <div class="avatar">IB</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- v2.0.6-beta -->
+            <div class="tl-entry beta" id="v206" data-cats="feature">
+              <div class="tl-dot"></div>
+              <div class="tl-card">
+                <div class="tl-head">
+                  <div class="tl-ver">v2.0.6-beta</div>
+                  <div class="tl-meta">
+                    <span class="tl-tag tag-beta">Beta</span>
+                    <span class="tl-date">2026</span>
+                  </div>
+                </div>
+                <p class="tl-sum">TurboQuant KV cache compression — online vector quantization from ICLR 2026.</p>
+                <ul class="change-list">
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Full TurboQuant implementation (Zandieh et al., arXiv 2504.19874) — random rotation via fast Walsh-Hadamard transform, precomputed Max-Lloyd codebooks for 1-4 bit scalar quantization</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text"><code>TurboQuantMse</code> (MSE-optimal) and <code>TurboQuantProd</code> (unbiased inner products via JL sign sketch) variants</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text"><code>TurboQuantConfig</code> in Rust and Python with <code>quality_neutral()</code> and <code>aggressive()</code> presets</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text"><code>TurboQuantKvCache</code> — compressed KV cache layer with slot-based store/load/clear</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">25 Rust + 16 Python tests covering codebook construction, rotation invertibility, roundtrip quality, memory stats</span></li>
+                </ul>
+                <div class="tl-foot">
+                  <div class="avatar">IB</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- v2.0.5-beta -->
+            <div class="tl-entry beta" id="v205" data-cats="fixed,feature">
+              <div class="tl-dot"></div>
+              <div class="tl-card">
+                <div class="tl-head">
+                  <div class="tl-ver">v2.0.5-beta</div>
+                  <div class="tl-meta">
+                    <span class="tl-tag tag-beta">Beta</span>
+                    <span class="tl-date">2026</span>
+                  </div>
+                </div>
+                <p class="tl-sum">Code quality &amp; zero-warning build, lifecycle scripts, comprehensive static analysis and bug fixes.</p>
+                <ul class="change-list">
+                  <li class="change-item" data-type="fixed"><span class="change-badge badge-fixed">Fixed</span><span
+                      class="change-text">Resolved all 130+ compiler warnings across 4 workspace crates — dead code annotations, doc comments, unused imports</span></li>
+                  <li class="change-item" data-type="fixed"><span class="change-badge badge-fixed">Fixed</span><span
+                      class="change-text">Logic bug in <code>CurriculumScheduler::ssm_lr_scale()</code> — identical if/else branches; replaced with correct linear inverse mapping</span></li>
+                  <li class="change-item" data-type="fixed"><span class="change-badge badge-fixed">Fixed</span><span
+                      class="change-text">Incorrect <code>#[cfg(has_cuda)]</code> in PyO3 bindings — changed to proper <code>#[cfg(feature = "cuda")]</code></span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text"><code>update.sh</code> and <code>uninstall.sh</code> lifecycle scripts with branch/tag switching and purge options</span></li>
+                  <li class="change-item" data-type="fixed"><span class="change-badge badge-fixed">Fixed</span><span
+                      class="change-text">Python SDK imports cleanly without PyTorch — <code>torch_model</code> features guarded with <code>try/except ImportError</code></span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">304 Rust tests + 50 Python tests — all passing with zero actionable warnings</span></li>
+                </ul>
+                <div class="tl-foot">
+                  <div class="avatar">IB</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- v2.0.4-beta -->
+            <div class="tl-entry beta" id="v204" data-cats="security,feature">
+              <div class="tl-dot"></div>
+              <div class="tl-card">
+                <div class="tl-head">
+                  <div class="tl-ver">v2.0.4-beta</div>
+                  <div class="tl-meta">
+                    <span class="tl-tag tag-beta">Beta</span>
+                    <span class="tl-date">2026</span>
+                  </div>
+                </div>
+                <p class="tl-sum">Security audit, CUDA acceleration kernels, and PyTorch integration.</p>
+                <ul class="change-list">
+                  <li class="change-item" data-type="security"><span
+                      class="change-badge badge-security">Security</span><span class="change-text"><strong>Critical:</strong> Added <code>Drop</code> for CUDA storage, <code>check_cuda_last_error()</code> after all kernel launches, constant-time API key comparison</span></li>
+                  <li class="change-item" data-type="security"><span
+                      class="change-badge badge-security">Security</span><span class="change-text"><strong>High:</strong> CORS from config, authenticated <code>/metrics</code>, default bind <code>127.0.0.1</code>, input validation on legacy endpoints</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Custom CUDA kernels: <code>mamba3_scan.cu</code>, <code>moe_dispatch.cu</code>, <code>dense_verif_attn.cu</code>, <code>rlm_ops.cu</code>, <code>linear_f16.cu</code></span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text"><code>hybrid_model.py</code> and <code>torch_model.py</code> — PyTorch <code>nn.Module</code> bridge for GPU-executable hybrid models</span></li>
+                  <li class="change-item" data-type="fixed"><span class="change-badge badge-fixed">Fixed</span><span
+                      class="change-text">Integer overflow in block sizing, TOCTOU race in scheduler, UTF-8 slicing panic in repr</span></li>
+                </ul>
+                <div class="tl-foot">
+                  <div class="avatar">IB</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- v2.0.3-beta -->
+            <div class="tl-entry beta" id="v203" data-cats="feature">
+              <div class="tl-dot"></div>
+              <div class="tl-card">
+                <div class="tl-head">
+                  <div class="tl-ver">v2.0.3-beta</div>
+                  <div class="tl-meta">
+                    <span class="tl-tag tag-beta">Beta</span>
+                    <span class="tl-date">2026</span>
+                  </div>
+                </div>
+                <p class="tl-sum">Phase 1 hybrid architectures, Phase 2 training enhancements, Phase 3 inference and model-level reasoning.</p>
+                <ul class="change-list">
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text"><strong>Phase 1:</strong> <code>mamba.rs</code>, <code>moe.rs</code>, <code>jamba.rs</code> — Mamba SSM with MIMO scan, sparse MoE routing, Jamba hybrid blocks</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text"><strong>Phase 2:</strong> <code>grpo.rs</code>, <code>curriculum.rs</code>, <code>process_reward.rs</code>, <code>long_reward.rs</code> — GRPO RL, CGAR curriculum, PRM step scoring, LongR dense rewards</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text"><strong>Phase 3:</strong> Self-consistency voting, multi-round self-refinement, best-of-N verification, disaggregated prefill/decode serving</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text"><strong>Phase 3 Model:</strong> <code>rlm.rs</code> (Recursive Language Model with REPL sandbox) and <code>dense_verification.rs</code> (cross-attention draft scoring)</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">14 new Python config dataclasses, CLI flags for self-consistency/refinement/best-of-N/RLM/dense-verification, 4 new example scripts</span></li>
+                </ul>
+                <div class="tl-foot">
+                  <div class="avatar">IB</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- v2.0.2-beta -->
+            <div class="tl-entry beta" id="v202" data-cats="feature">
+              <div class="tl-dot"></div>
+              <div class="tl-card">
+                <div class="tl-head">
+                  <div class="tl-ver">v2.0.2-beta</div>
+                  <div class="tl-meta">
+                    <span class="tl-tag tag-beta">Beta</span>
+                    <span class="tl-date">2026</span>
+                  </div>
+                </div>
+                <p class="tl-sum">HuggingFace dataset support and multi-format dataset ingestion pipeline.</p>
+                <ul class="change-list">
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text"><code>HuggingFaceSource</code> — auto-detects Alpaca, ShareGPT, OpenAI messages, prompt/completion, Q&amp;A, and plain text schemas</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Multi-format ingestion: <code>.txt</code>, <code>.md</code>, <code>.py</code>, <code>.rs</code>, <code>.pdf</code>, <code>.docx</code>, <code>.csv</code>, <code>.html</code>, <code>.jsonl</code> and 40+ more into JSONL</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">4 output schemas: pretraining, sft_messages, sft_completion, code — with SHA-256 dedup and code-aware chunking</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">CLI <code>swiftllm dataset</code> subcommand with 14 <code>--hf-*</code> flags; streaming mode for large corpora</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">Auto-ingest in <code>Trainer</code> and <code>fine_tune()</code> — directories and HF datasets converted transparently</span></li>
+                </ul>
+                <div class="tl-foot">
+                  <div class="avatar">IB</div>
+                </div>
+              </div>
+            </div>
+
             <!-- v2.0.1-beta -->
-            <div class="tl-entry latest" id="v201" data-cats="fixed,feature">
+            <div class="tl-entry beta" id="v201" data-cats="fixed,feature">
               <div class="tl-dot"></div>
               <div class="tl-card">
                 <div class="tl-head">
                   <div class="tl-ver">v2.0.1-beta</div>
                   <div class="tl-meta">
-                    <span class="tl-tag tag-latest">Latest</span>
                     <span class="tl-tag tag-beta">Beta</span>
                     <span class="tl-date">2026</span>
                   </div>
@@ -2613,7 +3848,7 @@ config = <span class="cls">TrainingConfig</span>(learning_rate=<span class="num"
       const hash = location.hash.slice(1);
       if (!hash) return;
       const map = {
-        changelog: 'changelog', v201: 'changelog', v2002: 'changelog', v2001: 'changelog', v200: 'changelog', v100: 'changelog',
+        changelog: 'changelog', v20: 'changelog', v206: 'changelog', v205: 'changelog', v204: 'changelog', v203: 'changelog', v202: 'changelog', v201: 'changelog', v2002: 'changelog', v2001: 'changelog', v200: 'changelog', v100: 'changelog',
         support: 'support', channels: 'support', faq: 'support', troubleshoot: 'support',
         cli: 'api', 'python-api': 'api', configuration: 'api', models: 'api',
         installation: 'guides', quickstart: 'guides', airgap: 'guides', platforms: 'guides', inference: 'guides', serving: 'guides', training: 'guides',
