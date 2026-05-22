@@ -1,1212 +1,1852 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PyDep Explorer — Python Dependency Tree</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        /* ================================================================
-           CSS RESET & VARIABLES
-           ================================================================ */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PyDep — Python Dependency Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   TOKENS — Apple system colors, Material-ish elevation
+============================================================ */
+:root{
+  /* Surfaces (light) */
+  --bg: #f5f5f7;
+  --bg-grad-top: #eef0f5;
+  --bg-grad-bot: #f7f7fa;
+  --surface: #ffffff;
+  --surface-2: #fafafc;
+  --surface-3: #f2f2f5;
 
-        :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --glass-bg: rgba(255, 255, 255, 0.04);
-            --glass-bg-hover: rgba(255, 255, 255, 0.07);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --glass-border-hover: rgba(255, 255, 255, 0.15);
-            --glass-shine: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.05) 100%);
-            --text-primary: #e8e8f0;
-            --text-secondary: #8888a0;
-            --text-muted: #555570;
-            --accent-1: #6c5ce7;    /* Purple */
-            --accent-2: #a29bfe;    /* Light purple */
-            --accent-3: #00cec9;    /* Teal */
-            --accent-4: #fd79a8;    /* Pink */
-            --accent-gradient: linear-gradient(135deg, var(--accent-1), var(--accent-3));
-            --glow-purple: rgba(108, 92, 231, 0.3);
-            --glow-teal: rgba(0, 206, 201, 0.3);
-            --radius-sm: 8px;
-            --radius-md: 14px;
-            --radius-lg: 20px;
-            --radius-xl: 28px;
-            --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            --shadow-glow: 0 0 40px rgba(108, 92, 231, 0.15);
-            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-spring: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-        }
+  /* Ink */
+  --ink: #1d1d1f;
+  --ink-2: #424245;
+  --ink-3: #6e6e73;
+  --ink-4: #86868b;
+  --ink-5: #b4b4b8;
 
-        html { height: 100%; scroll-behavior: smooth; }
+  /* Accent: Apple blue */
+  --blue: #0071e3;
+  --blue-hover: #0077ed;
+  --blue-press: #006edb;
+  --blue-wash: #eaf2ff;
+  --blue-soft: #d6e6ff;
 
-        body {
-            font-family: var(--font-sans);
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
+  /* System colors */
+  --green:#34c759; --green-wash:#e7f8ec;
+  --orange:#ff9500; --orange-wash:#fff2e0;
+  --purple:#af52de; --purple-wash:#f6ecfb;
+  --pink:#ff2d55;   --pink-wash:#ffe6ec;
+  --teal:#00c7be;   --teal-wash:#dff8f6;
+  --red:#ff3b30;    --red-wash:#ffe7e5;
+  --indigo:#5856d6; --indigo-wash:#ecebfa;
+  --yellow:#ffcc00; --yellow-wash:#fff7d6;
 
-        /* ================================================================
-           ANIMATED BACKGROUND
-           ================================================================ */
-        .bg-canvas {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            overflow: hidden;
-            pointer-events: none;
-        }
-        .bg-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.4;
-            animation: orbFloat 20s ease-in-out infinite;
-        }
-        .bg-orb:nth-child(1) {
-            width: 500px; height: 500px;
-            background: var(--accent-1);
-            top: -10%; left: -10%;
-            animation-duration: 25s;
-        }
-        .bg-orb:nth-child(2) {
-            width: 400px; height: 400px;
-            background: var(--accent-3);
-            bottom: -10%; right: -10%;
-            animation-duration: 30s;
-            animation-delay: -10s;
-        }
-        .bg-orb:nth-child(3) {
-            width: 300px; height: 300px;
-            background: var(--accent-4);
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            animation-duration: 22s;
-            animation-delay: -5s;
-        }
-        @keyframes orbFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(60px, -40px) scale(1.1); }
-            50% { transform: translate(-30px, 60px) scale(0.9); }
-            75% { transform: translate(40px, 30px) scale(1.05); }
-        }
+  /* Borders */
+  --hair: rgba(0,0,0,0.06);
+  --hair-strong: rgba(0,0,0,0.10);
 
-        /* Noise overlay for texture */
-        .bg-canvas::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-            opacity: 0.5;
-        }
+  /* Glass */
+  --glass: rgba(255,255,255,0.72);
+  --glass-strong: rgba(255,255,255,0.86);
+  --glass-blur: saturate(180%) blur(24px);
 
-        /* ================================================================
-           GLASSMORPHISM UTILITY CLASSES
-           ================================================================ */
-        .glass {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px) saturate(1.5);
-            -webkit-backdrop-filter: blur(20px) saturate(1.5);
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--shadow-glass);
-        }
-        .glass::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: inherit;
-            background: var(--glass-shine);
-            pointer-events: none;
-        }
-        .glass-hover:hover {
-            background: var(--glass-bg-hover);
-            border-color: var(--glass-border-hover);
-            box-shadow: var(--shadow-glass), var(--shadow-glow);
-        }
+  /* Elevation (Material-inspired but soft) */
+  --e1: 0 1px 2px rgba(0,0,0,0.04), 0 1px 1px rgba(0,0,0,0.02);
+  --e2: 0 4px 12px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.03);
+  --e3: 0 12px 32px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  --e4: 0 24px 64px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
 
-        /* ================================================================
-           LAYOUT
-           ================================================================ */
-        .app {
-            position: relative;
-            z-index: 1;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem 1rem;
-            width: 100%;
-        }
-        .container {
-            width: 100%;
-            max-width: 720px;
-        }
+  /* Radii — Apple continuous-ish */
+  --r-4:4px; --r-6:6px; --r-8:8px; --r-10:10px; --r-12:12px;
+  --r-14:14px; --r-16:16px; --r-22:22px; --r-full:9999px;
 
-        /* ================================================================
-           HEADER / LOGO
-           ================================================================ */
-        .header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-            animation: fadeSlideDown 0.8s ease-out;
-        }
-        .logo {
-            display: inline-flex;
-            align-items: baseline;
-            gap: 2px;
-            font-size: 3rem;
-            font-weight: 800;
-            letter-spacing: -2px;
-            margin-bottom: 0.5rem;
-            user-select: none;
-        }
-        .logo span {
-            display: inline-block;
-            transition: transform var(--transition-spring);
-        }
-        .logo:hover span {
-            animation: logoWave 0.6s ease forwards;
-        }
-        .logo span:nth-child(1) { color: #6c5ce7; }
-        .logo span:nth-child(2) { color: #a29bfe; }
-        .logo span:nth-child(3) { color: #00cec9; }
-        .logo span:nth-child(4) { color: #fd79a8; }
-        .logo span:nth-child(5) { color: #fdcb6e; }
+  /* Motion */
+  --ease: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-emph: cubic-bezier(0.2, 0.0, 0, 1);
+  --dur-1: 140ms;
+  --dur-2: 220ms;
+  --dur-3: 360ms;
+  --dur-4: 520ms;
 
-        .logo:hover span:nth-child(1) { animation-delay: 0s; }
-        .logo:hover span:nth-child(2) { animation-delay: 0.05s; }
-        .logo:hover span:nth-child(3) { animation-delay: 0.1s; }
-        .logo:hover span:nth-child(4) { animation-delay: 0.15s; }
-        .logo:hover span:nth-child(5) { animation-delay: 0.2s; }
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', "SF Mono", ui-monospace, monospace;
+}
+html[data-theme="dark"]{
+  --bg:#000;
+  --bg-grad-top:#0a0a0c;
+  --bg-grad-bot:#000;
+  --surface:#1c1c1e;
+  --surface-2:#161618;
+  --surface-3:#26262a;
 
-        @keyframes logoWave {
-            0% { transform: translateY(0); }
-            40% { transform: translateY(-12px); }
-            100% { transform: translateY(0); }
-        }
+  --ink:#f5f5f7;
+  --ink-2:#d2d2d7;
+  --ink-3:#a1a1a6;
+  --ink-4:#86868b;
+  --ink-5:#48484a;
 
-        .tagline {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            font-weight: 400;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
+  --blue:#0a84ff;
+  --blue-hover:#3a9eff;
+  --blue-wash:rgba(10,132,255,0.16);
+  --blue-soft:rgba(10,132,255,0.28);
 
-        /* ================================================================
-           SEARCH
-           ================================================================ */
-        .search-wrapper {
-            position: relative;
-            margin-bottom: 2rem;
-            animation: fadeSlideUp 0.7s 0.1s ease-out both;
-        }
-        .search-bar {
-            position: relative;
-            display: flex;
-            align-items: center;
-            border-radius: var(--radius-xl);
-            padding: 6px 6px 6px 20px;
-            transition: all var(--transition-smooth);
-            overflow: hidden;
-        }
-        .search-bar:focus-within {
-            border-color: rgba(108, 92, 231, 0.4);
-            box-shadow: var(--shadow-glass), 0 0 30px var(--glow-purple), 0 0 60px rgba(108, 92, 231, 0.1);
-        }
-        .search-icon {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            flex-shrink: 0;
-            margin-right: 12px;
-            transition: color var(--transition-fast);
-        }
-        .search-bar:focus-within .search-icon {
-            color: var(--accent-2);
-        }
-        .search-input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            color: var(--text-primary);
-            font-family: var(--font-sans);
-            font-size: 1rem;
-            font-weight: 400;
-            outline: none;
-            padding: 12px 0;
-            min-width: 0;
-        }
-        .search-input::placeholder {
-            color: var(--text-muted);
-        }
-        .version-input {
-            border: none;
-            background: rgba(255, 255, 255, 0.04);
-            color: var(--text-secondary);
-            font-family: var(--font-mono);
-            font-size: 0.85rem;
-            outline: none;
-            padding: 8px 12px;
-            width: 100px;
-            border-radius: var(--radius-sm);
-            text-align: center;
-            margin-right: 8px;
-            transition: all var(--transition-fast);
-        }
-        .version-input:focus {
-            background: rgba(255, 255, 255, 0.07);
-            color: var(--text-primary);
-        }
-        .version-input::placeholder {
-            color: var(--text-muted);
-            font-style: italic;
-        }
-        .search-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            border: none;
-            background: var(--accent-gradient);
-            color: white;
-            font-size: 1.1rem;
-            cursor: pointer;
-            flex-shrink: 0;
-            transition: all var(--transition-fast);
-            box-shadow: 0 4px 15px var(--glow-purple);
-            position: relative;
-            overflow: hidden;
-        }
-        .search-btn::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
-            border-radius: inherit;
-        }
-        .search-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 25px var(--glow-purple);
-        }
-        .search-btn:active {
-            transform: scale(0.96);
-        }
+  --green-wash:rgba(52,199,89,0.16);
+  --orange-wash:rgba(255,159,10,0.18);
+  --purple-wash:rgba(191,90,242,0.18);
+  --pink-wash:rgba(255,69,98,0.18);
+  --teal-wash:rgba(100,210,255,0.18);
+  --red-wash:rgba(255,69,58,0.18);
+  --indigo-wash:rgba(94,92,230,0.20);
+  --yellow-wash:rgba(255,214,10,0.18);
 
-        /* Autocomplete dropdown */
-        .autocomplete-dropdown {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 0; right: 0;
-            border-radius: var(--radius-md);
-            max-height: 280px;
-            overflow-y: auto;
-            z-index: 100;
-            display: none;
-        }
-        .autocomplete-dropdown.visible { display: block; }
-        .autocomplete-item {
-            padding: 12px 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: background var(--transition-fast);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-        }
-        .autocomplete-item:last-child { border-bottom: none; }
-        .autocomplete-item:hover, .autocomplete-item.active {
-            background: rgba(108, 92, 231, 0.12);
-        }
-        .autocomplete-item .ac-name {
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-        .autocomplete-item .ac-version {
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
+  --hair:rgba(255,255,255,0.08);
+  --hair-strong:rgba(255,255,255,0.14);
 
-        /* Scrollbar for dropdown */
-        .autocomplete-dropdown::-webkit-scrollbar { width: 6px; }
-        .autocomplete-dropdown::-webkit-scrollbar-track { background: transparent; }
-        .autocomplete-dropdown::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-        }
+  --glass:rgba(28,28,30,0.72);
+  --glass-strong:rgba(28,28,30,0.88);
 
-        /* ================================================================
-           STATS BAR
-           ================================================================ */
-        .stats-bar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-            animation: fadeIn 0.6s 0.3s ease-out both;
-        }
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-        .stat-value {
-            font-weight: 700;
-            font-family: var(--font-mono);
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+  --e1: 0 1px 2px rgba(0,0,0,0.4);
+  --e2: 0 4px 14px rgba(0,0,0,0.45);
+  --e3: 0 14px 34px rgba(0,0,0,0.55);
+  --e4: 0 24px 64px rgba(0,0,0,0.7);
+}
 
-        /* ================================================================
-           RESULTS
-           ================================================================ */
-        .results-section {
-            display: none;
-            animation: fadeSlideUp 0.5s ease-out;
-        }
-        .results-section.visible { display: block; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--font-sans);
+  color:var(--ink);
+  background:
+    radial-gradient(1200px 600px at 80% -10%, var(--blue-wash) 0%, transparent 60%),
+    radial-gradient(900px 500px at -10% 30%, var(--purple-wash) 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg-grad-top), var(--bg-grad-bot));
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.005em;
+  min-height: 100vh;
+}
 
-        .results-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1.5rem;
-            padding: 0 4px;
-        }
-        .results-title {
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-        }
-        .results-title strong {
-            color: var(--text-primary);
-            font-weight: 700;
-        }
-        .results-count {
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            padding: 4px 12px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--glass-border);
-        }
+/* ============================================================
+   NAV
+============================================================ */
+.nav{
+  position: sticky; top: 0; z-index: 50;
+  height: 56px;
+  background: var(--glass);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--hair);
+}
+.nav-inner{
+  max-width: 1180px; margin: 0 auto;
+  height: 100%; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+  font-weight:700; letter-spacing:-0.02em; font-size:17px; color:var(--ink);
+  text-decoration:none;
+}
+.brand-mark{
+  width:28px; height:28px; border-radius:8px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  display:grid; place-items:center; color:#fff;
+  box-shadow: 0 4px 12px rgba(29,78,216,0.32), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.brand-mark svg{ width:16px; height:16px; }
+.nav-links{ display:flex; align-items:center; gap:6px; }
+.nav-pill{
+  font-size:13px; font-weight:500; color:var(--ink-2);
+  padding:7px 12px; border-radius:var(--r-full); text-decoration:none;
+  transition: background var(--dur-1) var(--ease), color var(--dur-1) var(--ease);
+}
+.nav-pill:hover{ background: var(--surface-3); color: var(--ink); }
+.theme-toggle{
+  width:34px; height:34px; border-radius:50%;
+  border:1px solid var(--hair); background:transparent; cursor:pointer;
+  color: var(--ink-2);
+  display:grid; place-items:center;
+  transition: all var(--dur-1) var(--ease);
+}
+.theme-toggle:hover{ color:var(--ink); border-color:var(--hair-strong); background:var(--surface-3); }
+.theme-toggle svg{ width:16px; height:16px; }
+.theme-toggle .icon-sun{ display:none; }
+html[data-theme="dark"] .theme-toggle .icon-sun{ display:block; }
+html[data-theme="dark"] .theme-toggle .icon-moon{ display:none; }
 
-        /* ================================================================
-           DEPENDENCY TREE
-           ================================================================ */
-        .dep-tree {
-            list-style: none;
-            padding: 0;
-        }
-        .dep-node {
-            position: relative;
-            border-radius: var(--radius-md);
-            margin-bottom: 8px;
-            overflow: hidden;
-            animation: nodeSlideIn 0.4s ease-out both;
-            transition: all var(--transition-smooth);
-        }
-        .dep-node:hover {
-            border-color: var(--glass-border-hover);
-        }
+/* ============================================================
+   HERO + SEARCH
+============================================================ */
+.shell{
+  max-width: 1180px; margin: 0 auto;
+  padding: 56px 24px 96px;
+}
+.hero{ text-align:center; margin-bottom: 36px; }
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase;
+  color:var(--blue);
+  padding:6px 12px; border-radius:var(--r-full);
+  background:var(--blue-wash);
+  margin-bottom:18px;
+}
+.eyebrow .dot{
+  width:6px; height:6px; border-radius:50%; background:var(--blue);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse{ 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.85)} }
 
-        .dep-row {
-            display: flex;
-            align-items: center;
-            padding: 14px 16px;
-            gap: 12px;
-            position: relative;
-        }
-        /* Liquid glass shimmer on hover */
-        .dep-row::after {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 200%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
-            transition: left 0.6s ease;
-            pointer-events: none;
-        }
-        .dep-node:hover .dep-row::after {
-            left: 100%;
-        }
+h1{
+  font-size: clamp(40px, 6.4vw, 64px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.04;
+  margin-bottom: 14px;
+  color: var(--ink);
+}
+h1 .grad{
+  background: linear-gradient(135deg, #0a84ff 0%, #5856d6 50%, #af52de 100%);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color: transparent;
+}
+.lede{
+  font-size: 18px; line-height:1.5; color: var(--ink-3);
+  max-width: 560px; margin: 0 auto;
+}
 
-        .dep-icon {
-            width: 36px; height: 36px;
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-            flex-shrink: 0;
-            background: linear-gradient(135deg, rgba(108, 92, 231, 0.15), rgba(0, 206, 201, 0.1));
-            color: var(--accent-2);
-            border: 1px solid rgba(108, 92, 231, 0.15);
-        }
-        .dep-info {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .dep-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-            color: var(--text-primary);
-            text-decoration: none;
-            transition: color var(--transition-fast);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        a.dep-name:hover {
-            color: var(--accent-2);
-        }
-        .dep-version {
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            background: rgba(255, 255, 255, 0.04);
-            padding: 3px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 200px;
-        }
-        .dep-badge {
-            font-size: 0.65rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 2px 8px;
-            border-radius: 999px;
-            white-space: nowrap;
-        }
-        .dep-badge.conditional {
-            color: var(--accent-4);
-            background: rgba(253, 121, 168, 0.1);
-            border: 1px solid rgba(253, 121, 168, 0.2);
-        }
+/* SEARCH */
+.search-stage{
+  margin: 36px auto 0;
+  max-width: 760px;
+  position: relative;
+}
+.search{
+  display:flex; align-items:center; gap:6px;
+  padding: 8px 8px 8px 18px;
+  border-radius: var(--r-16);
+  background: var(--glass-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--hair);
+  box-shadow: var(--e2);
+  transition: box-shadow var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease), transform var(--dur-2) var(--ease);
+}
+.search:focus-within{
+  border-color: var(--blue-soft);
+  box-shadow: var(--e3), 0 0 0 4px var(--blue-wash);
+}
+.search svg.search-glyph{
+  width:20px; height:20px; color:var(--ink-3); flex-shrink:0;
+  transition: color var(--dur-1) var(--ease);
+}
+.search:focus-within svg.search-glyph{ color: var(--blue); }
+.search input[type=text]{
+  flex:1; min-width:0;
+  border:none; outline:none; background:transparent;
+  font:500 16px/1 var(--font-sans);
+  color: var(--ink); padding: 14px 8px;
+  letter-spacing:-0.005em;
+}
+.search input::placeholder{ color: var(--ink-4); font-weight:400; }
+.search .divider{ width:1px; height:24px; background: var(--hair); flex-shrink:0; }
+.search .ver{
+  border:none; outline:none; background:transparent;
+  font:500 14px/1 var(--font-mono);
+  color: var(--ink-2); padding: 14px 12px;
+  width: 110px; text-align:center;
+}
+.search .ver::placeholder{ color: var(--ink-4); font-weight:400; }
+.search button.go{
+  height: 44px; min-width: 44px;
+  padding: 0 18px;
+  border:none; cursor:pointer;
+  background: var(--blue); color:#fff;
+  font: 600 14px/1 var(--font-sans);
+  border-radius: var(--r-full);
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  box-shadow: 0 4px 14px rgba(0,113,227,0.25);
+  transition: background var(--dur-1) var(--ease), transform var(--dur-1) var(--ease), box-shadow var(--dur-2) var(--ease);
+  position: relative; overflow: hidden;
+}
+.search button.go:hover{ background: var(--blue-hover); box-shadow: 0 6px 20px rgba(0,113,227,0.32); }
+.search button.go:active{ transform: scale(0.97); }
+.search button.go svg{ width:16px; height:16px; }
 
-        .expand-btn {
-            width: 32px; height: 32px;
-            border-radius: 50%;
-            border: 1px solid var(--glass-border);
-            background: transparent;
-            color: var(--text-muted);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            flex-shrink: 0;
-            transition: all var(--transition-fast);
-            font-size: 0.7rem;
-        }
-        .expand-btn:hover {
-            border-color: var(--accent-2);
-            color: var(--accent-2);
-            background: rgba(108, 92, 231, 0.08);
-        }
-        .expand-btn.expanded { transform: rotate(90deg); }
-        .expand-btn.loading {
-            color: var(--accent-3);
-            border-color: rgba(0, 206, 201, 0.3);
-        }
-        .expand-btn.loading svg {
-            animation: spin 0.8s linear infinite;
-        }
-        .expand-btn.no-deps {
-            opacity: 0.3;
-            cursor: default;
-        }
+/* Quick chips below search */
+.quick{
+  display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+  margin-top: 18px;
+}
+.chip{
+  font: 500 12.5px/1 var(--font-sans);
+  color: var(--ink-2);
+  background: var(--surface);
+  border:1px solid var(--hair);
+  padding: 8px 12px; border-radius: var(--r-full);
+  cursor: pointer;
+  display:inline-flex; align-items:center; gap:6px;
+  transition: all var(--dur-1) var(--ease);
+}
+.chip:hover{ border-color: var(--hair-strong); background: var(--surface-2); color: var(--ink); transform: translateY(-1px); box-shadow: var(--e1); }
+.chip .glyph{ width:13px; height:13px; color: var(--ink-3); }
 
-        /* Sub-tree */
-        .sub-tree {
-            list-style: none;
-            padding: 0 0 0 28px;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height var(--transition-smooth), padding var(--transition-smooth);
-            position: relative;
-        }
-        .sub-tree::before {
-            content: '';
-            position: absolute;
-            left: 20px;
-            top: 0;
-            bottom: 8px;
-            width: 1px;
-            background: linear-gradient(to bottom, var(--glass-border), transparent);
-        }
-        .sub-tree.visible {
-            padding-top: 4px;
-            padding-bottom: 4px;
-        }
-        .sub-tree .dep-node {
-            background: rgba(255, 255, 255, 0.02);
-            border-color: rgba(255, 255, 255, 0.04);
-            margin-bottom: 4px;
-            margin-left: 8px;
-        }
-        .sub-tree .dep-node::before {
-            content: '';
-            position: absolute;
-            left: -9px;
-            top: 50%;
-            width: 9px;
-            height: 1px;
-            background: var(--glass-border);
-        }
-        .sub-tree .dep-row { padding: 10px 14px; }
-        .sub-tree .dep-icon { width: 28px; height: 28px; font-size: 0.75rem; }
-        .sub-tree .dep-name { font-size: 0.88rem; }
-        .sub-tree .dep-version { font-size: 0.7rem; padding: 2px 8px; }
+/* Autocomplete */
+.ac{
+  position: absolute; left: 0; right: 0; top: calc(100% + 8px);
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-14);
+  box-shadow: var(--e3);
+  overflow: hidden;
+  max-height: 360px; overflow-y: auto;
+  z-index: 30;
+  display: none;
+  animation: acIn 200ms var(--ease-emph);
+}
+@keyframes acIn{
+  from{ opacity:0; transform: translateY(-6px) scale(0.99); }
+  to{ opacity:1; transform: translateY(0) scale(1); }
+}
+.ac.visible{ display:block; }
+.ac-item{
+  display:flex; align-items:center; gap:12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--hair);
+  transition: background var(--dur-1) var(--ease);
+}
+.ac-item:last-child{ border-bottom:none; }
+.ac-item:hover, .ac-item.active{ background: var(--blue-wash); }
+.ac-icon{
+  width: 32px; height: 32px; border-radius: var(--r-8);
+  background: var(--blue-wash); color: var(--blue);
+  display:grid; place-items:center; flex-shrink:0;
+}
+.ac-icon svg{ width:16px; height:16px; }
+.ac-body{ flex:1; min-width:0; }
+.ac-name{ font: 600 14px/1.3 var(--font-sans); color: var(--ink); }
+.ac-desc{ font: 400 12.5px/1.4 var(--font-sans); color: var(--ink-3); margin-top:2px;
+  display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
+.ac-ver{
+  font: 500 11.5px/1 var(--font-mono);
+  color: var(--ink-3); padding: 4px 8px; border-radius: var(--r-full);
+  background: var(--surface-3); flex-shrink:0;
+}
+.ac-empty{
+  padding: 24px; text-align:center; color: var(--ink-3); font-size: 13px;
+}
 
-        /* ================================================================
-           LOADING / ERROR / EMPTY STATES
-           ================================================================ */
-        .loader-overlay {
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 3rem;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        .loader-overlay.visible { display: flex; }
+/* ============================================================
+   RESULTS LAYOUT (2-column on wide)
+============================================================ */
+.results{
+  margin-top: 40px;
+  display: none;
+  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+  gap: 24px;
+  animation: fadeUp 360ms var(--ease-emph);
+}
+.results.visible{ display: grid; }
+@media (max-width: 960px){
+  .results{ grid-template-columns: 1fr; }
+}
+@keyframes fadeUp{ from{ opacity:0; transform: translateY(12px); } to{ opacity:1; transform: translateY(0);} }
 
-        .loader-ring {
-            width: 40px; height: 40px;
-            border: 3px solid rgba(108, 92, 231, 0.1);
-            border-top-color: var(--accent-1);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        .loader-text {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            animation: pulse 1.5s ease-in-out infinite;
-        }
+/* ===== Package Info Card (left) ===== */
+.pkg-card{
+  background: var(--surface);
+  border-radius: var(--r-16);
+  border: 1px solid var(--hair);
+  box-shadow: var(--e1);
+  padding: 24px;
+  position: sticky; top: 76px;
+  align-self: start;
+}
+.pkg-head{ display:flex; gap:14px; align-items:flex-start; margin-bottom: 14px; }
+.pkg-avatar{
+  width:48px; height:48px; border-radius: var(--r-12);
+  display:grid; place-items:center; flex-shrink:0;
+  background: linear-gradient(135deg, var(--blue), #4ea0ff);
+  color: #fff; font: 700 20px/1 var(--font-sans);
+  box-shadow: 0 6px 18px rgba(0,113,227,0.30), inset 0 1px 0 rgba(255,255,255,0.25);
+}
+.pkg-title{ font: 700 22px/1.15 var(--font-sans); color: var(--ink); letter-spacing:-0.015em; word-break: break-word; }
+.pkg-version-row{
+  display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap;
+}
+.pkg-ver{
+  font: 500 12px/1 var(--font-mono);
+  color: var(--ink-3);
+  padding: 4px 8px; border-radius: var(--r-full);
+  background: var(--surface-3);
+}
+.pkg-pyver{
+  font: 500 11px/1 var(--font-mono);
+  color: var(--green); padding: 4px 8px; border-radius: var(--r-full);
+  background: var(--green-wash);
+}
+.pkg-summary{
+  font: 400 14px/1.5 var(--font-sans);
+  color: var(--ink-2); margin: 14px 0 18px;
+}
 
-        .error-card {
-            display: none;
-            border-radius: var(--radius-md);
-            padding: 1rem 1.5rem;
-            text-align: center;
-            background: rgba(214, 48, 49, 0.08);
-            border: 1px solid rgba(214, 48, 49, 0.2);
-            color: #ff6b6b;
-            font-size: 0.9rem;
-            animation: fadeIn 0.3s ease-out;
-        }
-        .error-card.visible { display: block; }
+/* pip install copy */
+.install{
+  background: var(--surface-2);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-10);
+  padding: 10px 12px;
+  display:flex; align-items:center; gap: 10px;
+  margin-bottom: 18px;
+  font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-2);
+}
+.install .prompt{ color: var(--ink-4); user-select:none; }
+.install .cmd{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.install button.copy{
+  border:none; background:transparent; cursor:pointer;
+  width: 30px; height: 30px; border-radius: var(--r-8);
+  color: var(--ink-3); display:grid; place-items:center;
+  transition: all var(--dur-1) var(--ease);
+}
+.install button.copy:hover{ color: var(--blue); background: var(--blue-wash); }
+.install button.copy.copied{ color: var(--green); background: var(--green-wash); }
 
-        .empty-state {
-            display: none;
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-muted);
-            font-style: italic;
-            font-size: 0.9rem;
-        }
-        .empty-state.visible { display: block; }
+/* Meta list */
+.meta{ display:flex; flex-direction:column; gap: 2px; }
+.meta-row{
+  display:flex; align-items:center; gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--hair);
+  font-size: 13px;
+}
+.meta-row:first-child{ border-top: none; }
+.meta-key{
+  color: var(--ink-3); flex-shrink:0; width: 100px;
+  display:flex; align-items:center; gap:8px;
+}
+.meta-key svg{ width:14px; height:14px; }
+.meta-val{
+  color: var(--ink); font-weight:500;
+  min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  text-align: right; flex:1;
+}
+.meta-val a{ color: var(--blue); text-decoration:none; }
+.meta-val a:hover{ text-decoration: underline; }
 
-        /* ================================================================
-           FOOTER
-           ================================================================ */
-        footer {
-            position: relative;
-            z-index: 1;
-            text-align: center;
-            padding: 1.5rem;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            border-top: 1px solid var(--glass-border);
-            margin-top: auto;
-        }
-        footer a {
-            color: var(--accent-2);
-            text-decoration: none;
-        }
-        footer a:hover { text-decoration: underline; }
+/* Stats grid in card */
+.stats{
+  display:grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+  margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--hair);
+}
+.stat{
+  padding: 12px;
+  border-radius: var(--r-10);
+  background: var(--surface-2);
+  border: 1px solid var(--hair);
+}
+.stat-num{
+  font: 700 20px/1 var(--font-sans);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.stat-lbl{
+  font: 500 11px/1 var(--font-sans);
+  color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em;
+  margin-top: 6px;
+}
 
-        /* ================================================================
-           ANIMATIONS
-           ================================================================ */
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeSlideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        @keyframes nodeSlideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+/* ===== Right column ===== */
+.right-col{ min-width: 0; display:flex; flex-direction:column; gap:16px; }
 
-        /* stagger children */
-        .dep-node:nth-child(1) { animation-delay: 0.02s; }
-        .dep-node:nth-child(2) { animation-delay: 0.06s; }
-        .dep-node:nth-child(3) { animation-delay: 0.1s; }
-        .dep-node:nth-child(4) { animation-delay: 0.14s; }
-        .dep-node:nth-child(5) { animation-delay: 0.18s; }
-        .dep-node:nth-child(6) { animation-delay: 0.22s; }
-        .dep-node:nth-child(7) { animation-delay: 0.26s; }
-        .dep-node:nth-child(8) { animation-delay: 0.3s; }
-        .dep-node:nth-child(9) { animation-delay: 0.34s; }
-        .dep-node:nth-child(10) { animation-delay: 0.38s; }
+/* Tabs */
+.tabs{
+  display:flex; gap: 4px; padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-12);
+  width: max-content; max-width: 100%;
+  box-shadow: var(--e1);
+  position: relative;
+}
+.tab{
+  font: 500 13px/1 var(--font-sans); color: var(--ink-3);
+  padding: 8px 14px; border-radius: var(--r-8);
+  background: transparent; border:none; cursor: pointer;
+  display:inline-flex; align-items:center; gap:8px;
+  transition: color var(--dur-1) var(--ease), background var(--dur-1) var(--ease);
+  position: relative; z-index:1;
+}
+.tab svg{ width:14px; height:14px; }
+.tab:hover{ color: var(--ink); }
+.tab.active{ color: var(--ink); background: var(--surface-3); }
+.tab .count{
+  font: 500 11px/1 var(--font-mono);
+  color: var(--ink-3); padding: 3px 7px; border-radius: var(--r-full);
+  background: var(--surface-3); border: 1px solid var(--hair);
+}
+.tab.active .count{ background: var(--surface); color: var(--blue); border-color: var(--blue-soft); }
 
-        /* ================================================================
-           RESPONSIVE
-           ================================================================ */
-        @media (max-width: 600px) {
-            .logo { font-size: 2.2rem; }
-            .stats-bar { gap: 1rem; flex-wrap: wrap; }
-            .version-input { width: 80px; }
-            .dep-info { flex-direction: column; align-items: flex-start; gap: 4px; }
-            .dep-version { max-width: 160px; }
-        }
-    </style>
+/* Toolbar above tree */
+.tree-toolbar{
+  display:flex; align-items:center; justify-content:space-between; gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-12);
+  flex-wrap: wrap;
+}
+.tree-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+.tree-action{
+  font: 500 12.5px/1 var(--font-sans);
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--hair);
+  padding: 7px 11px; border-radius: var(--r-full);
+  display:inline-flex; align-items:center; gap:6px;
+  cursor: pointer;
+  transition: all var(--dur-1) var(--ease);
+}
+.tree-action svg{ width:13px; height:13px; }
+.tree-action:hover{ border-color: var(--hair-strong); background: var(--surface-3); color: var(--ink); }
+.tree-action.toggle.on{
+  color: var(--blue); border-color: var(--blue-soft); background: var(--blue-wash);
+}
+.tree-search{
+  display:flex; align-items:center; gap:6px;
+  background: var(--surface-2); border: 1px solid var(--hair);
+  border-radius: var(--r-full); padding: 6px 10px;
+  flex: 1; min-width: 160px; max-width: 280px;
+}
+.tree-search svg{ width:13px; height:13px; color: var(--ink-4); flex-shrink:0; }
+.tree-search input{
+  border:none; outline:none; background:transparent;
+  font: 500 13px/1 var(--font-sans); color: var(--ink);
+  flex:1; min-width:0; padding: 4px 0;
+}
+.tree-search input::placeholder{ color: var(--ink-4); font-weight:400; }
+
+/* ===== TREE ===== */
+.tree-pane{
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-14);
+  padding: 8px;
+  box-shadow: var(--e1);
+}
+.dep-tree{ list-style:none; padding: 0; margin: 0; }
+
+.dep-node{
+  position: relative;
+  border-radius: var(--r-10);
+  overflow: visible;
+  transition: background var(--dur-1) var(--ease);
+  animation: rowIn 280ms var(--ease-emph) both;
+}
+@keyframes rowIn{
+  from{ opacity:0; transform: translateY(4px); }
+  to{ opacity:1; transform: translateY(0); }
+}
+.dep-row{
+  display: grid;
+  grid-template-columns: 28px 36px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-10);
+  cursor: default;
+  transition: background var(--dur-1) var(--ease);
+  position: relative;
+}
+.dep-row:hover{ background: var(--surface-3); }
+.dep-row.expandable{ cursor: pointer; }
+
+/* Expand chevron */
+.chevron{
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--ink-3);
+  display:inline-flex; align-items:center; justify-content:center;
+  cursor: pointer; flex-shrink: 0;
+  transition: transform var(--dur-2) var(--ease), color var(--dur-1) var(--ease), background var(--dur-1) var(--ease);
+}
+.chevron svg{ width:14px; height:14px; }
+.chevron:hover{ background: var(--surface); color: var(--ink); }
+.dep-row.expandable:hover .chevron{ color: var(--ink); }
+.chevron.open{ transform: rotate(90deg); }
+.chevron.loading svg{ animation: spin 0.85s linear infinite; }
+.chevron.leaf{ color: var(--ink-5); cursor: default; opacity: 0.55; }
+.chevron.leaf:hover{ background: transparent; }
+.chevron.err{ color: var(--red); }
+@keyframes spin{ to{ transform: rotate(360deg);} }
+
+/* Avatar */
+.dep-avatar{
+  width: 32px; height: 32px;
+  border-radius: var(--r-8);
+  font: 600 13px/1 var(--font-sans);
+  display:grid; place-items:center;
+  flex-shrink: 0; letter-spacing: -0.01em;
+}
+/* Color rotation for avatars */
+.avatar-blue   { background: var(--blue-wash);   color: var(--blue); }
+.avatar-green  { background: var(--green-wash);  color: var(--green); }
+.avatar-orange { background: var(--orange-wash); color: var(--orange); }
+.avatar-purple { background: var(--purple-wash); color: var(--purple); }
+.avatar-pink   { background: var(--pink-wash);   color: var(--pink); }
+.avatar-teal   { background: var(--teal-wash);   color: var(--teal); }
+.avatar-red    { background: var(--red-wash);    color: var(--red); }
+.avatar-indigo { background: var(--indigo-wash); color: var(--indigo); }
+
+.dep-info{ min-width:0; display:flex; flex-direction:column; gap: 3px; }
+.dep-name-row{ display:flex; align-items:center; gap:8px; min-width:0; }
+.dep-name{
+  font: 600 14px/1.2 var(--font-sans); color: var(--ink);
+  text-decoration:none;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  max-width: 100%;
+}
+a.dep-name:hover{ color: var(--blue); }
+.dep-extras{
+  font: 500 11px/1 var(--font-mono);
+  color: var(--purple);
+  padding: 3px 7px; border-radius: var(--r-full);
+  background: var(--purple-wash);
+}
+.dep-sub{
+  display:flex; align-items:center; gap:10px;
+  font: 400 12px/1.2 var(--font-sans);
+  color: var(--ink-3);
+  min-width: 0;
+}
+.dep-constraint{
+  font-family: var(--font-mono);
+  color: var(--ink-2);
+  background: var(--surface-3);
+  padding: 2px 8px; border-radius: var(--r-full);
+  font-size: 11px;
+  border: 1px solid var(--hair);
+  white-space: nowrap;
+  max-width: 100%;
+  overflow:hidden; text-overflow:ellipsis;
+}
+.dep-condition{
+  display:inline-flex; align-items:center; gap:4px;
+  font: 500 10.5px/1 var(--font-sans);
+  color: var(--orange);
+  padding: 3px 7px; border-radius: var(--r-full);
+  background: var(--orange-wash);
+  white-space: nowrap;
+  cursor: help;
+}
+.dep-condition svg{ width:11px; height:11px; }
+
+.dep-actions{ display:flex; align-items:center; gap:4px; flex-shrink:0; }
+.icon-btn{
+  width: 28px; height: 28px; border-radius: var(--r-8);
+  border:none; background: transparent;
+  color: var(--ink-4); cursor: pointer;
+  display:grid; place-items:center;
+  transition: all var(--dur-1) var(--ease);
+  opacity: 0;
+}
+.dep-row:hover .icon-btn{ opacity: 1; }
+.icon-btn:hover{ background: var(--surface); color: var(--ink); }
+.icon-btn svg{ width: 14px; height: 14px; }
+
+/* Sub-tree (children) */
+.sub-tree{
+  list-style:none; padding: 0; margin: 0;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur-3) var(--ease-emph);
+  padding-left: 28px;
+  position: relative;
+}
+.sub-tree.open{ grid-template-rows: 1fr; }
+.sub-inner{ min-height: 0; overflow: hidden; }
+.sub-tree > .sub-inner::before{
+  content:''; position: absolute;
+  left: 25px; top: 0; bottom: 6px;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--hair-strong) 0%, var(--hair) 70%, transparent 100%);
+}
+.sub-tree .dep-node{ position: relative; }
+.sub-tree .dep-row::before{
+  content:''; position: absolute;
+  left: -16px; top: 50%;
+  width: 14px; height: 1px;
+  background: var(--hair-strong);
+}
+
+/* empty / err children */
+.tree-msg{
+  padding: 10px 14px 10px 38px;
+  font: 400 12.5px/1.4 var(--font-sans);
+  color: var(--ink-3); font-style: italic;
+}
+.tree-msg.err{ color: var(--red); font-style: normal; }
+
+/* ============================================================
+   INFO TAB / VERSIONS TAB
+============================================================ */
+.panel{
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-14);
+  padding: 24px;
+  box-shadow: var(--e1);
+  display: none;
+}
+.panel.active{ display: block; animation: fadeUp 240ms var(--ease-emph); }
+.panel h3{
+  font: 600 16px/1.2 var(--font-sans); letter-spacing:-0.01em;
+  color: var(--ink); margin-bottom: 12px;
+}
+.panel p{
+  font: 400 14px/1.6 var(--font-sans);
+  color: var(--ink-2); margin-bottom: 14px;
+}
+.panel .desc{ white-space: pre-wrap; }
+
+.info-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+.info-tile{
+  padding: 14px;
+  border-radius: var(--r-10);
+  background: var(--surface-2);
+  border: 1px solid var(--hair);
+}
+.info-tile .k{
+  font: 500 11px/1 var(--font-sans);
+  color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+.info-tile .v{
+  font: 500 14px/1.4 var(--font-sans);
+  color: var(--ink); word-break: break-word;
+}
+.info-tile .v a{ color: var(--blue); text-decoration: none; }
+.info-tile .v a:hover{ text-decoration: underline; }
+
+.tag-list{ display:flex; flex-wrap:wrap; gap: 6px; margin-top: 4px; }
+.tag{
+  font: 500 11.5px/1 var(--font-sans);
+  color: var(--ink-2);
+  background: var(--surface-3); border: 1px solid var(--hair);
+  padding: 5px 9px; border-radius: var(--r-full);
+}
+.classifier{ color: var(--ink-3); font-size: 12.5px; line-height: 1.5; padding: 2px 0; }
+
+/* Versions */
+.versions{
+  display:grid; gap: 6px; margin-top: 8px;
+  max-height: 600px; overflow-y: auto;
+}
+.version-row{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 10px 14px;
+  border-radius: var(--r-10);
+  background: var(--surface-2);
+  border: 1px solid var(--hair);
+  transition: all var(--dur-1) var(--ease);
+}
+.version-row:hover{ background: var(--surface-3); border-color: var(--hair-strong); }
+.version-row.current{ background: var(--blue-wash); border-color: var(--blue-soft); }
+.version-num{
+  font: 600 13px/1 var(--font-mono); color: var(--ink);
+  display:flex; align-items:center; gap: 8px;
+}
+.version-tag{
+  font: 500 10px/1 var(--font-sans); text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 3px 7px; border-radius: var(--r-full);
+}
+.version-tag.stable{ color: var(--green); background: var(--green-wash); }
+.version-tag.pre{ color: var(--orange); background: var(--orange-wash); }
+.version-tag.current{ color: var(--blue); background: var(--surface); border: 1px solid var(--blue-soft); }
+.version-load{
+  font: 500 12px/1 var(--font-sans);
+  color: var(--blue); background: transparent;
+  border: 1px solid var(--blue-soft);
+  padding: 6px 10px; border-radius: var(--r-full);
+  cursor: pointer;
+  transition: all var(--dur-1) var(--ease);
+}
+.version-load:hover{ background: var(--blue); color: #fff; }
+
+/* ============================================================
+   STATES (loader, error, empty)
+============================================================ */
+.loader{
+  display: none;
+  flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 24px;
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-14);
+  margin-top: 40px;
+}
+.loader.visible{ display: flex; }
+.loader-ring{
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 3px solid var(--surface-3);
+  border-top-color: var(--blue);
+  animation: spin 0.85s linear infinite;
+}
+.loader-text{ font-size: 13px; color: var(--ink-3); margin-top: 14px; }
+
+.error{
+  display:none;
+  margin-top: 40px;
+  padding: 18px 22px;
+  background: var(--red-wash);
+  border: 1px solid var(--red);
+  border-radius: var(--r-12);
+  color: var(--red);
+  font-size: 13.5px; font-weight: 500;
+  display:none; align-items:center; gap: 12px;
+}
+.error.visible{ display:flex; }
+.error svg{ width: 20px; height: 20px; flex-shrink: 0; }
+
+.empty-pkg{
+  margin-top: 40px;
+  padding: 60px 24px;
+  background: var(--surface);
+  border: 1px dashed var(--hair-strong);
+  border-radius: var(--r-14);
+  text-align: center;
+  color: var(--ink-3);
+}
+.empty-pkg svg{ width: 48px; height: 48px; color: var(--ink-5); margin-bottom: 14px; }
+.empty-pkg h4{ font: 600 16px/1.3 var(--font-sans); color: var(--ink); margin-bottom: 6px; }
+.empty-pkg p{ font-size: 14px; }
+
+/* No deps subtree */
+.no-deps-pill{
+  display:inline-flex; align-items:center; gap: 6px;
+  font: 500 12px/1 var(--font-sans);
+  color: var(--green); padding: 6px 10px;
+  background: var(--green-wash); border-radius: var(--r-full);
+}
+.no-deps-pill svg{ width: 13px; height: 13px; }
+
+/* Toast (copy feedback) */
+.toast{
+  position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: #fff;
+  padding: 10px 18px;
+  border-radius: var(--r-full);
+  font: 500 13px/1 var(--font-sans);
+  box-shadow: var(--e3);
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--dur-2) var(--ease), transform var(--dur-2) var(--ease-emph);
+  z-index: 1000;
+  display:flex; align-items:center; gap: 8px;
+}
+.toast svg{ width: 14px; height: 14px; color: var(--green); }
+.toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+html[data-theme="dark"] .toast{ background: var(--surface); color: var(--ink); border:1px solid var(--hair); }
+
+/* Footer */
+footer{
+  margin-top: 64px;
+  padding: 32px 24px;
+  border-top: 1px solid var(--hair);
+  text-align: center;
+  color: var(--ink-3); font-size: 12.5px;
+}
+footer a{ color: var(--blue); text-decoration: none; }
+
+/* Highlight when filtering tree */
+.dep-name mark{
+  background: var(--yellow-wash);
+  color: var(--ink);
+  padding: 0 2px; border-radius: 3px;
+}
+.dep-node.dimmed{ display: none; }
+
+@media (max-width: 600px){
+  .shell{ padding: 36px 16px 64px; }
+  .search{ padding: 6px; padding-left: 14px; flex-wrap: wrap; }
+  .search input[type=text]{ flex: 1 1 100%; padding: 10px 4px; }
+  .search .divider{ display: none; }
+  .search .ver{ width: 90px; }
+  .nav-pill{ display: none; }
+  .pkg-card{ position: static; }
+}
+</style>
 </head>
 <body>
 
-<!-- Animated background -->
-<div class="bg-canvas" aria-hidden="true">
-    <div class="bg-orb"></div>
-    <div class="bg-orb"></div>
-    <div class="bg-orb"></div>
-</div>
-
-<div class="app">
-    <!-- Header -->
-    <header class="header">
-        <div class="logo" aria-label="PyDep Explorer">
-            <span>P</span><span>y</span><span>D</span><span>e</span><span>p</span>
-        </div>
-        <p class="tagline">Python Dependency Explorer</p>
-    </header>
-
-    <!-- Search -->
-    <div class="container">
-        <div class="search-wrapper">
-            <form id="search-form" class="search-bar glass" autocomplete="off">
-                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="text" id="pkg-name" class="search-input" placeholder="Search a Python package..." required aria-label="Package name">
-                <input type="text" id="pkg-version" class="version-input" placeholder="latest" aria-label="Version">
-                <button type="submit" class="search-btn" title="Search" aria-label="Search">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                </button>
-            </form>
-            <!-- Autocomplete -->
-            <div id="autocomplete" class="autocomplete-dropdown glass" role="listbox"></div>
-        </div>
-
-        <!-- Stats -->
-        <div id="stats-bar" class="stats-bar" style="display:none;">
-            <div class="stat-item">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-                <span><span id="stat-direct" class="stat-value">0</span> direct</span>
-            </div>
-            <div class="stat-item">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                <span><span id="stat-total" class="stat-value">0</span> total loaded</span>
-            </div>
-        </div>
-
-        <!-- Loading -->
-        <div id="loader" class="loader-overlay">
-            <div class="loader-ring"></div>
-            <span class="loader-text">Resolving dependencies...</span>
-        </div>
-
-        <!-- Error -->
-        <div id="error" class="error-card"></div>
-
-        <!-- Results -->
-        <div id="results" class="results-section">
-            <div class="results-header">
-                <span class="results-title">Dependencies for <strong id="pkg-display"></strong></span>
-                <span id="dep-count" class="results-count"></span>
-            </div>
-            <ul id="dep-tree" class="dep-tree" role="tree"></ul>
-            <p id="empty-msg" class="empty-state">This package has no dependencies.</p>
-        </div>
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </span>
+      PyDep
+    </a>
+    <div class="nav-links">
+      <a class="nav-pill" href="https://pypi.org" target="_blank" rel="noopener">PyPI</a>
+      <a class="nav-pill" href="https://docs.python.org" target="_blank" rel="noopener">Docs</a>
+      <a class="nav-pill" href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+      <button class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
     </div>
+  </div>
+</nav>
+
+<div class="shell">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="eyebrow"><span class="dot"></span>Live PyPI data</div>
+    <h1>Explore the <span class="grad">dependency graph</span><br />of any Python package.</h1>
+    <p class="lede">Search PyPI, browse rich package metadata, and expand the full transitive dependency tree — interactively.</p>
+
+    <div class="search-stage">
+      <form class="search" id="search-form" autocomplete="off">
+        <svg class="search-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="pkg-name" placeholder="Search a Python package…" aria-label="Package name" required />
+        <span class="divider"></span>
+        <input type="text" id="pkg-version" class="ver" placeholder="latest" aria-label="Version" />
+        <button type="submit" class="go" aria-label="Search">
+          <span>Explore</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </form>
+      <div class="ac" id="ac" role="listbox"></div>
+
+      <div class="quick">
+        <button class="chip" data-pkg="fastapi">
+          <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          fastapi
+        </button>
+        <button class="chip" data-pkg="django">
+          <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          django
+        </button>
+        <button class="chip" data-pkg="numpy">
+          <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          numpy
+        </button>
+        <button class="chip" data-pkg="pandas">
+          <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          pandas
+        </button>
+        <button class="chip" data-pkg="requests">
+          <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          requests
+        </button>
+        <button class="chip" data-pkg="flask">
+          <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6l2 3h8v11a2 2 0 0 1-2 2H4z"/></svg>
+          flask
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOADER -->
+  <div class="loader" id="loader">
+    <div class="loader-ring"></div>
+    <div class="loader-text">Resolving from PyPI…</div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error" id="error">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="error-msg"></span>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-pkg" id="welcome">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <h4>Start typing to explore</h4>
+    <p>Try one of the popular packages above, or search for any package on PyPI.</p>
+  </div>
+
+  <!-- RESULTS -->
+  <section class="results" id="results">
+    <!-- LEFT: package card -->
+    <aside class="pkg-card" id="pkg-card">
+      <div class="pkg-head">
+        <div class="pkg-avatar" id="pkg-avatar">?</div>
+        <div style="min-width:0; flex:1;">
+          <div class="pkg-title" id="pkg-title">—</div>
+          <div class="pkg-version-row">
+            <span class="pkg-ver" id="pkg-ver-pill">—</span>
+            <span class="pkg-pyver" id="pkg-pyver" style="display:none;"></span>
+          </div>
+        </div>
+      </div>
+      <div class="pkg-summary" id="pkg-summary"></div>
+
+      <div class="install">
+        <span class="prompt">$</span>
+        <span class="cmd" id="pip-cmd">pip install —</span>
+        <button class="copy" id="copy-pip" title="Copy">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+
+      <div class="meta">
+        <div class="meta-row">
+          <span class="meta-key"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Author</span>
+          <span class="meta-val" id="meta-author">—</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>License</span>
+          <span class="meta-val" id="meta-license">—</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Homepage</span>
+          <span class="meta-val" id="meta-home">—</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Released</span>
+          <span class="meta-val" id="meta-released">—</span>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="stat-num" id="stat-direct">0</div><div class="stat-lbl">Direct deps</div></div>
+        <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Loaded</div></div>
+      </div>
+    </aside>
+
+    <!-- RIGHT: tabs + content -->
+    <div class="right-col">
+      <div class="tabs" id="tabs">
+        <button class="tab active" data-tab="deps">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          Dependencies <span class="count" id="tab-count">0</span>
+        </button>
+        <button class="tab" data-tab="info">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Info
+        </button>
+        <button class="tab" data-tab="versions">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+          Versions <span class="count" id="tab-count-vers">0</span>
+        </button>
+      </div>
+
+      <!-- DEPS TAB -->
+      <div class="panel active" id="panel-deps" style="padding: 0; background: transparent; border: none; box-shadow: none;">
+        <div class="tree-toolbar">
+          <div class="tree-actions">
+            <button class="tree-action" id="expand-all">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              Expand all
+            </button>
+            <button class="tree-action" id="collapse-all">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+              Collapse all
+            </button>
+            <button class="tree-action toggle" id="toggle-conditional">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Conditional
+            </button>
+          </div>
+          <div class="tree-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="tree-filter" placeholder="Filter…" />
+          </div>
+        </div>
+        <div class="tree-pane">
+          <ul class="dep-tree" id="dep-tree" role="tree"></ul>
+          <div id="empty-deps" class="tree-msg" style="text-align:center; padding: 30px; font-style: italic; display:none;">
+            This package has no declared dependencies. 🎉
+          </div>
+        </div>
+      </div>
+
+      <!-- INFO TAB -->
+      <div class="panel" id="panel-info">
+        <h3>About</h3>
+        <p class="desc" id="info-desc">—</p>
+        <div class="info-grid" id="info-grid"></div>
+        <h3 style="margin-top: 24px;">Classifiers</h3>
+        <div id="info-classifiers" style="margin-top: 8px;"></div>
+      </div>
+
+      <!-- VERSIONS TAB -->
+      <div class="panel" id="panel-versions">
+        <h3>Release history</h3>
+        <p style="margin-bottom: 8px;">Click any version to load its dependency tree.</p>
+        <div class="versions" id="versions-list"></div>
+      </div>
+    </div>
+  </section>
 </div>
 
 <footer>
-    &copy; 2025 Peter Aldrich Jr. All rights reserved. &mdash; Powered by <a href="https://pypi.org" target="_blank" rel="noopener noreferrer">PyPI</a>
+  &copy; 2026 PyDep — Powered by <a href="https://pypi.org" target="_blank" rel="noopener">PyPI</a>
 </footer>
 
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toast-msg">Copied</span>
+</div>
+
 <script>
-    /* ================================================================
-       STATE & CONFIG
-       ================================================================ */
-    const MAX_DEPTH = 10;
-    const AUTOCOMPLETE_DELAY = 300;
-    const activeFetches = new Set();
-    let totalNodesLoaded = 0;
-    let autocompleteTimer = null;
-    let autocompleteIndex = -1;
-    let autocompleteResults = [];
+/* =========================================================
+   THEME
+========================================================= */
+(function(){
+  const saved = localStorage.getItem('pydep-theme');
+  if(saved === 'dark') document.documentElement.setAttribute('data-theme','dark');
+  else if(saved === 'light') document.documentElement.setAttribute('data-theme','light');
+  else if(window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.setAttribute('data-theme','dark');
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    localStorage.setItem('pydep-theme', isDark ? 'light' : 'dark');
+  });
+})();
 
-    /* ================================================================
-       DOM REFS
-       ================================================================ */
-    const $ = (sel) => document.querySelector(sel);
-    const form = $('#search-form');
-    const nameInput = $('#pkg-name');
-    const versionInput = $('#pkg-version');
-    const loader = $('#loader');
-    const errorCard = $('#error');
-    const results = $('#results');
-    const depTree = $('#dep-tree');
-    const pkgDisplay = $('#pkg-display');
-    const depCount = $('#dep-count');
-    const emptyMsg = $('#empty-msg');
-    const statsBar = $('#stats-bar');
-    const statDirect = $('#stat-direct');
-    const statTotal = $('#stat-total');
-    const acDropdown = $('#autocomplete');
+/* =========================================================
+   STATE
+========================================================= */
+const MAX_DEPTH = 12;
+const AVATAR_COLORS = ['avatar-blue','avatar-green','avatar-orange','avatar-purple','avatar-pink','avatar-teal','avatar-red','avatar-indigo'];
+const activeFetches = new Set();
+const fetchCache = new Map();
+let totalNodesLoaded = 0;
+let showConditional = true;
+let currentPkg = null;
 
-    /* ================================================================
-       SVG ICONS (inline for no external deps)
-       ================================================================ */
-    const ICONS = {
-        package: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 9.4l-9-5.19"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
-        chevron: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`,
-        spinner: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>`,
-        check: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
-        alert: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
-        leaf: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66L7 18"/><path d="M17 8c3-1.5 5-3 5-3s-2 3.17-3.5 6c-1.5 2.83-3.5 5-3.5 5"/><path d="M17 8l-4 4"/></svg>`,
+/* =========================================================
+   DOM
+========================================================= */
+const $ = (s, ctx=document) => ctx.querySelector(s);
+const $$ = (s, ctx=document) => Array.from(ctx.querySelectorAll(s));
+
+const form = $('#search-form');
+const nameInput = $('#pkg-name');
+const verInput = $('#pkg-version');
+const loader = $('#loader');
+const errorEl = $('#error');
+const errorMsg = $('#error-msg');
+const welcome = $('#welcome');
+const results = $('#results');
+const depTree = $('#dep-tree');
+const emptyDeps = $('#empty-deps');
+
+const ac = $('#ac');
+
+const pkgAvatar = $('#pkg-avatar');
+const pkgTitle = $('#pkg-title');
+const pkgVerPill = $('#pkg-ver-pill');
+const pkgPyver = $('#pkg-pyver');
+const pkgSummary = $('#pkg-summary');
+const pipCmd = $('#pip-cmd');
+const metaAuthor = $('#meta-author');
+const metaLicense = $('#meta-license');
+const metaHome = $('#meta-home');
+const metaReleased = $('#meta-released');
+const statDirect = $('#stat-direct');
+const statTotal = $('#stat-total');
+const tabCount = $('#tab-count');
+const tabCountVers = $('#tab-count-vers');
+
+const infoDesc = $('#info-desc');
+const infoGrid = $('#info-grid');
+const infoClassifiers = $('#info-classifiers');
+const versionsList = $('#versions-list');
+
+const toast = $('#toast');
+const toastMsg = $('#toast-msg');
+
+/* =========================================================
+   ICONS (inline)
+========================================================= */
+const ICON = {
+  chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+  spinner: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>',
+  dot: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3"/></svg>',
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+  ext: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+};
+
+/* =========================================================
+   HELPERS
+========================================================= */
+function escapeHtml(s){
+  const d = document.createElement('div'); d.textContent = String(s ?? ''); return d.innerHTML;
+}
+function showToast(msg){
+  toastMsg.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=> toast.classList.remove('show'), 1800);
+}
+function avatarFor(name){
+  let h = 0;
+  for(let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return AVATAR_COLORS[h % AVATAR_COLORS.length];
+}
+function relativeDate(iso){
+  if(!iso) return '—';
+  const t = new Date(iso); const now = new Date();
+  const diff = (now - t) / 1000;
+  const map = [['year',31536000],['month',2592000],['week',604800],['day',86400],['hour',3600],['minute',60]];
+  for(const [unit, sec] of map){
+    const v = Math.floor(diff / sec);
+    if(v >= 1) return `${v} ${unit}${v>1?'s':''} ago`;
+  }
+  return 'just now';
+}
+async function cachedFetch(url){
+  if(fetchCache.has(url)) return fetchCache.get(url);
+  const p = fetch(url).then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)));
+  fetchCache.set(url, p);
+  try{ return await p; } catch(e){ fetchCache.delete(url); throw e; }
+}
+
+/* =========================================================
+   AUTOCOMPLETE
+========================================================= */
+const POPULAR = [
+  {name:'fastapi', desc:'FastAPI framework, high performance, easy to learn'},
+  {name:'django', desc:'A high-level Python Web framework'},
+  {name:'flask', desc:'A simple framework for building complex web applications'},
+  {name:'numpy', desc:'Fundamental package for array computing in Python'},
+  {name:'pandas', desc:'Powerful data structures for data analysis'},
+  {name:'requests', desc:'Python HTTP for Humans'},
+  {name:'pytest', desc:'pytest: simple powerful testing with Python'},
+  {name:'pydantic', desc:'Data validation using Python type hints'},
+  {name:'sqlalchemy', desc:'Database Abstraction Library'},
+  {name:'matplotlib', desc:'Python plotting package'},
+  {name:'scipy', desc:'Fundamental algorithms for scientific computing'},
+  {name:'scikit-learn', desc:'A set of python modules for machine learning'},
+  {name:'tensorflow', desc:'An Open Source Machine Learning Framework'},
+  {name:'torch', desc:'Tensors and Dynamic neural networks in Python'},
+  {name:'transformers', desc:'State-of-the-art Machine Learning for JAX, PyTorch and TensorFlow'},
+  {name:'openai', desc:'The official Python library for the OpenAI API'},
+  {name:'anthropic', desc:'The official Python library for the Anthropic API'},
+  {name:'langchain', desc:'Building applications with LLMs through composability'},
+  {name:'beautifulsoup4', desc:'Screen-scraping library'},
+  {name:'lxml', desc:'Powerful and Pythonic XML processing library'},
+  {name:'pillow', desc:'Python Imaging Library (Fork)'},
+  {name:'click', desc:'Composable command line interface toolkit'},
+  {name:'rich', desc:'Render rich text, tables, progress bars to the terminal'},
+  {name:'httpx', desc:'The next generation HTTP client'},
+  {name:'aiohttp', desc:'Async http client/server framework'},
+  {name:'celery', desc:'Distributed Task Queue'},
+  {name:'redis', desc:'Python client for Redis database'},
+  {name:'boto3', desc:'The AWS SDK for Python'},
+  {name:'uvicorn', desc:'The lightning-fast ASGI server'},
+  {name:'starlette', desc:'The little ASGI library that shines'},
+  {name:'jinja2', desc:'A very fast and expressive template engine'},
+  {name:'python-dotenv', desc:'Read key-value pairs from a .env file'},
+  {name:'pyyaml', desc:'YAML parser and emitter for Python'},
+  {name:'cryptography', desc:'cryptography is a package which provides cryptographic recipes'},
+  {name:'urllib3', desc:'HTTP library with thread-safe connection pooling'},
+  {name:'setuptools', desc:'Easily download, build, install, upgrade Python packages'},
+  {name:'wheel', desc:'A built-package format for Python'},
+  {name:'poetry', desc:'Python dependency management and packaging made easy'},
+  {name:'black', desc:'The uncompromising code formatter'},
+  {name:'ruff', desc:'An extremely fast Python linter, written in Rust'},
+  {name:'mypy', desc:'Optional static typing for Python'},
+];
+let acTimer = null;
+let acIndex = -1;
+let acResults = [];
+
+nameInput.addEventListener('input', () => {
+  clearTimeout(acTimer);
+  const q = nameInput.value.trim().toLowerCase();
+  if(q.length < 1){ hideAc(); return; }
+  // Instant local results
+  const local = POPULAR
+    .filter(p => p.name.toLowerCase().includes(q))
+    .sort((a,b) => {
+      const aStarts = a.name.toLowerCase().startsWith(q) ? 0 : 1;
+      const bStarts = b.name.toLowerCase().startsWith(q) ? 0 : 1;
+      return aStarts - bStarts;
+    })
+    .slice(0, 8);
+  renderAc(local);
+  // Then try fetching exact match for richer info
+  acTimer = setTimeout(() => fetchExactMatch(q), 320);
+});
+nameInput.addEventListener('focus', () => {
+  if(nameInput.value.trim().length >= 1) nameInput.dispatchEvent(new Event('input'));
+});
+nameInput.addEventListener('blur', () => setTimeout(hideAc, 180));
+nameInput.addEventListener('keydown', (e) => {
+  if(!ac.classList.contains('visible')) return;
+  if(e.key === 'ArrowDown'){ e.preventDefault(); acIndex = Math.min(acIndex+1, acResults.length-1); highlightAc(); }
+  else if(e.key === 'ArrowUp'){ e.preventDefault(); acIndex = Math.max(acIndex-1, 0); highlightAc(); }
+  else if(e.key === 'Enter' && acIndex >= 0){ e.preventDefault(); pickAc(acResults[acIndex]); }
+  else if(e.key === 'Escape'){ hideAc(); }
+});
+
+async function fetchExactMatch(q){
+  try{
+    const data = await cachedFetch(`https://pypi.org/pypi/${encodeURIComponent(q)}/json`);
+    const exact = { name: data.info.name, desc: data.info.summary || '', version: data.info.version };
+    // Add to results if not already
+    const existing = acResults.find(r => r.name.toLowerCase() === exact.name.toLowerCase());
+    if(!existing){
+      acResults.unshift(exact);
+      renderAcDom(acResults);
+    } else if(!existing.version){
+      existing.version = exact.version; existing.desc = existing.desc || exact.desc;
+      renderAcDom(acResults);
+    }
+  }catch(e){ /* ignore */ }
+}
+function renderAc(list){
+  acResults = list.map(p => ({name:p.name, desc:p.desc||'', version:p.version||''}));
+  renderAcDom(acResults);
+}
+function renderAcDom(list){
+  ac.innerHTML = '';
+  acIndex = -1;
+  if(list.length === 0){
+    ac.innerHTML = `<div class="ac-empty">No matches. Press Explore to search PyPI directly.</div>`;
+    ac.classList.add('visible');
+    return;
+  }
+  list.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'ac-item';
+    div.innerHTML = `
+      <div class="ac-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+      <div class="ac-body">
+        <div class="ac-name">${escapeHtml(p.name)}</div>
+        ${p.desc ? `<div class="ac-desc">${escapeHtml(p.desc)}</div>` : ''}
+      </div>
+      ${p.version ? `<div class="ac-ver">${escapeHtml(p.version)}</div>` : ''}
+    `;
+    div.addEventListener('mousedown', (e) => { e.preventDefault(); pickAc(p); });
+    ac.appendChild(div);
+  });
+  ac.classList.add('visible');
+}
+function highlightAc(){
+  const items = $$('.ac-item', ac);
+  items.forEach((el, i) => el.classList.toggle('active', i === acIndex));
+  if(items[acIndex]) items[acIndex].scrollIntoView({block:'nearest'});
+}
+function pickAc(item){
+  nameInput.value = item.name;
+  hideAc();
+  form.dispatchEvent(new Event('submit'));
+}
+function hideAc(){
+  ac.classList.remove('visible');
+  ac.innerHTML='';
+  acResults = [];
+  acIndex = -1;
+}
+
+/* =========================================================
+   QUICK CHIPS
+========================================================= */
+$$('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    nameInput.value = chip.dataset.pkg;
+    verInput.value = '';
+    form.dispatchEvent(new Event('submit'));
+  });
+});
+
+/* =========================================================
+   TABS
+========================================================= */
+$$('#tabs .tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    $$('#tabs .tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const tabName = tab.dataset.tab;
+    $$('.panel').forEach(p => p.classList.remove('active'));
+    $(`#panel-${tabName}`).classList.add('active');
+  });
+});
+
+/* =========================================================
+   FILTER / EXPAND-ALL / COLLAPSE-ALL / CONDITIONAL
+========================================================= */
+$('#expand-all').addEventListener('click', async () => {
+  const chevrons = $$('.chevron', depTree);
+  for(const c of chevrons){
+    if(!c.classList.contains('open') && !c.classList.contains('leaf')){
+      c.click();
+      await new Promise(r => setTimeout(r, 60));
+    }
+  }
+});
+$('#collapse-all').addEventListener('click', () => {
+  $$('.chevron.open', depTree).forEach(c => c.click());
+});
+const condBtn = $('#toggle-conditional');
+condBtn.classList.add('on');
+condBtn.addEventListener('click', () => {
+  showConditional = !showConditional;
+  condBtn.classList.toggle('on', showConditional);
+  document.documentElement.style.setProperty('--cond-display', showConditional ? '' : 'none');
+  $$('.dep-node[data-conditional="true"]').forEach(n => {
+    n.style.display = showConditional ? '' : 'none';
+  });
+});
+
+const treeFilter = $('#tree-filter');
+treeFilter.addEventListener('input', () => {
+  const q = treeFilter.value.trim().toLowerCase();
+  $$('.dep-node', depTree).forEach(node => {
+    const name = (node.dataset.name || '').toLowerCase();
+    const match = !q || name.includes(q);
+    node.classList.toggle('dimmed', !match && !nodeHasMatchingDescendant(node, q));
+    // highlight
+    const link = $('.dep-name', node);
+    if(link){
+      const orig = node.dataset.name || link.textContent;
+      if(q && name.includes(q)){
+        const i = name.indexOf(q);
+        link.innerHTML = escapeHtml(orig.substring(0,i)) + '<mark>' + escapeHtml(orig.substring(i, i+q.length)) + '</mark>' + escapeHtml(orig.substring(i+q.length));
+      } else {
+        link.textContent = orig;
+      }
+    }
+  });
+});
+function nodeHasMatchingDescendant(node, q){
+  if(!q) return true;
+  return $$('.dep-node', node).some(c => (c.dataset.name||'').toLowerCase().includes(q));
+}
+
+/* =========================================================
+   COPY PIP COMMAND
+========================================================= */
+$('#copy-pip').addEventListener('click', async (e) => {
+  const btn = e.currentTarget;
+  try{
+    await navigator.clipboard.writeText(pipCmd.textContent);
+    btn.classList.add('copied');
+    btn.innerHTML = ICON.check;
+    showToast('Copied to clipboard');
+    setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = ICON.copy; }, 1600);
+  }catch(e){ showToast('Copy failed'); }
+});
+
+/* =========================================================
+   PARSE DEP STRING
+========================================================= */
+const DEP_REGEX = /^([A-Za-z0-9][A-Za-z0-9._-]*)(?:\[([^\]]*)\])?\s*(.*?)(?:\s*;\s*(.+))?$/;
+function parseDep(raw){
+  const m = String(raw).match(DEP_REGEX);
+  if(m){
+    const constraint = (m[3] || '').trim().replace(/^\(|\)$/g,'').trim();
+    return { name: m[1], extras: m[2] || '', constraint, condition: m[4] || '' };
+  }
+  const name = raw.split(/[=<>!~\s[(;]/)[0].trim();
+  return { name, extras:'', constraint:'', condition:'' };
+}
+
+/* =========================================================
+   MAIN SEARCH HANDLER
+========================================================= */
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = nameInput.value.trim();
+  const ver = verInput.value.trim() || 'latest';
+  if(!name) return;
+
+  hideAc();
+  resetResults();
+  showLoader(true);
+
+  try{
+    totalNodesLoaded = 0;
+    const data = await fetchPackage(name, ver);
+    renderPackageCard(data);
+    renderInfoTab(data);
+    renderVersionsTab(data);
+    // Render dependency tree (level 0)
+    const deps = data.info.requires_dist || [];
+    if(deps.length === 0){
+      emptyDeps.style.display = 'block';
+      tabCount.textContent = '0';
+      statDirect.textContent = '0';
+    } else {
+      emptyDeps.style.display = 'none';
+      renderNodes(deps, depTree, 0);
+      const direct = depTree.children.length;
+      tabCount.textContent = direct;
+      statDirect.textContent = direct;
+    }
+    statTotal.textContent = totalNodesLoaded;
+    welcome.style.display = 'none';
+    results.classList.add('visible');
+  }catch(err){
+    showError(err.message || 'Something went wrong.');
+  }finally{
+    showLoader(false);
+  }
+});
+
+async function fetchPackage(name, ver){
+  if(ver === 'latest' || ver === '' || ver === undefined){
+    return await cachedFetch(`https://pypi.org/pypi/${encodeURIComponent(name)}/json`);
+  }
+  return await cachedFetch(`https://pypi.org/pypi/${encodeURIComponent(name)}/${encodeURIComponent(ver)}/json`);
+}
+
+/* =========================================================
+   RENDER PACKAGE CARD
+========================================================= */
+function renderPackageCard(data){
+  const info = data.info;
+  currentPkg = info;
+  const letter = info.name[0].toUpperCase();
+  pkgAvatar.textContent = letter;
+  pkgTitle.textContent = info.name;
+  pkgVerPill.textContent = info.version;
+  pipCmd.textContent = `pip install ${info.name}==${info.version}`;
+  pkgSummary.textContent = info.summary || '';
+
+  if(info.requires_python){
+    pkgPyver.style.display = 'inline-flex';
+    pkgPyver.textContent = `Python ${info.requires_python}`;
+  } else pkgPyver.style.display = 'none';
+
+  // Author
+  const author = info.author || info.author_email?.replace(/<.+>/,'').trim() || info.maintainer || '—';
+  metaAuthor.textContent = author || '—';
+  metaAuthor.title = author;
+
+  // License
+  metaLicense.textContent = (info.license || '').slice(0, 30) || '—';
+  metaLicense.title = info.license || '';
+
+  // Home
+  const home = info.home_page || (info.project_urls && (info.project_urls.Homepage || info.project_urls.Source || Object.values(info.project_urls)[0])) || '';
+  if(home){
+    metaHome.innerHTML = `<a href="${escapeHtml(home)}" target="_blank" rel="noopener">${escapeHtml(home.replace(/^https?:\/\//,''))}</a>`;
+  } else metaHome.textContent = '—';
+
+  // Released
+  const releases = data.releases || {};
+  const versionData = releases[info.version];
+  if(versionData && versionData[0] && versionData[0].upload_time){
+    metaReleased.textContent = relativeDate(versionData[0].upload_time);
+    metaReleased.title = versionData[0].upload_time;
+  } else metaReleased.textContent = '—';
+}
+
+/* =========================================================
+   RENDER INFO TAB
+========================================================= */
+function renderInfoTab(data){
+  const info = data.info;
+  infoDesc.textContent = info.summary || 'No summary available.';
+  infoGrid.innerHTML = '';
+  const tiles = [];
+  if(info.project_urls){
+    Object.entries(info.project_urls).forEach(([k,v]) => {
+      if(v && /^https?:\/\//.test(v)){
+        tiles.push({k, v: `<a href="${escapeHtml(v)}" target="_blank" rel="noopener">${escapeHtml(v.replace(/^https?:\/\//,'').slice(0,40))}</a>`});
+      }
+    });
+  }
+  if(info.keywords){
+    tiles.push({k:'Keywords', v: keywordTags(info.keywords)});
+  }
+  if(info.requires_python) tiles.push({k:'Requires Python', v: escapeHtml(info.requires_python)});
+  tiles.forEach(t => {
+    const d = document.createElement('div');
+    d.className = 'info-tile';
+    d.innerHTML = `<div class="k">${escapeHtml(t.k)}</div><div class="v">${t.v}</div>`;
+    infoGrid.appendChild(d);
+  });
+  // Classifiers
+  infoClassifiers.innerHTML = '';
+  (info.classifiers || []).forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'classifier';
+    d.textContent = c;
+    infoClassifiers.appendChild(d);
+  });
+  if(!info.classifiers || info.classifiers.length === 0){
+    infoClassifiers.innerHTML = '<div class="classifier">No classifiers.</div>';
+  }
+}
+function keywordTags(kw){
+  const parts = String(kw).split(/[,\s]+/).filter(Boolean).slice(0, 20);
+  return '<div class="tag-list">' + parts.map(p => `<span class="tag">${escapeHtml(p)}</span>`).join('') + '</div>';
+}
+
+/* =========================================================
+   VERSIONS TAB
+========================================================= */
+function renderVersionsTab(data){
+  const releases = data.releases || {};
+  const current = data.info.version;
+  const entries = Object.keys(releases)
+    .map(v => {
+      const meta = releases[v];
+      const upload = meta && meta[0] && meta[0].upload_time;
+      return { v, upload };
+    })
+    .filter(e => e.upload)
+    .sort((a,b) => new Date(b.upload) - new Date(a.upload))
+    .slice(0, 80);
+
+  tabCountVers.textContent = entries.length;
+  versionsList.innerHTML = '';
+  entries.forEach(e => {
+    const isPre = /[a-z]/i.test(e.v) && !/post/i.test(e.v);
+    const isCurrent = e.v === current;
+    const row = document.createElement('div');
+    row.className = 'version-row' + (isCurrent ? ' current' : '');
+    row.innerHTML = `
+      <div class="version-num">
+        <span>${escapeHtml(e.v)}</span>
+        ${isCurrent ? '<span class="version-tag current">Current</span>' : isPre ? '<span class="version-tag pre">Pre</span>' : '<span class="version-tag stable">Stable</span>'}
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span style="font-size:12px; color: var(--ink-3);">${escapeHtml(relativeDate(e.upload))}</span>
+        <button class="version-load" data-v="${escapeHtml(e.v)}">Load</button>
+      </div>
+    `;
+    versionsList.appendChild(row);
+  });
+  versionsList.querySelectorAll('.version-load').forEach(b => {
+    b.addEventListener('click', () => {
+      verInput.value = b.dataset.v;
+      form.dispatchEvent(new Event('submit'));
+    });
+  });
+}
+
+/* =========================================================
+   RENDER DEP TREE NODES
+========================================================= */
+function renderNodes(deps, parentUl, depth){
+  deps.forEach((rawDep, idx) => {
+    const d = parseDep(rawDep);
+    if(!d.name) return;
+    totalNodesLoaded++;
+
+    const li = document.createElement('li');
+    li.className = 'dep-node';
+    li.dataset.name = d.name;
+    li.dataset.conditional = d.condition ? 'true' : 'false';
+    li.setAttribute('role','treeitem');
+    if(depth <= 1) li.style.animationDelay = `${Math.min(idx, 14)*30}ms`;
+    else li.style.animation = 'none';
+
+    const row = document.createElement('div');
+    row.className = 'dep-row expandable';
+
+    // Chevron
+    const chev = document.createElement('button');
+    chev.className = 'chevron';
+    chev.innerHTML = ICON.chevron;
+    chev.setAttribute('aria-label', `Expand ${d.name}`);
+
+    // Avatar
+    const av = document.createElement('div');
+    av.className = `dep-avatar ${avatarFor(d.name)}`;
+    av.textContent = d.name[0].toUpperCase();
+
+    // Info
+    const info = document.createElement('div');
+    info.className = 'dep-info';
+
+    const nameRow = document.createElement('div');
+    nameRow.className = 'dep-name-row';
+    const nameLink = document.createElement('a');
+    nameLink.className = 'dep-name';
+    nameLink.href = `https://pypi.org/project/${encodeURIComponent(d.name)}/`;
+    nameLink.target = '_blank';
+    nameLink.rel = 'noopener noreferrer';
+    nameLink.textContent = d.name;
+    nameLink.addEventListener('click', e => e.stopPropagation());
+    nameRow.appendChild(nameLink);
+    if(d.extras){
+      const ex = document.createElement('span');
+      ex.className = 'dep-extras';
+      ex.textContent = `[${d.extras}]`;
+      ex.title = `Extras: ${d.extras}`;
+      nameRow.appendChild(ex);
+    }
+    info.appendChild(nameRow);
+
+    const sub = document.createElement('div');
+    sub.className = 'dep-sub';
+    const constraintEl = document.createElement('span');
+    constraintEl.className = 'dep-constraint';
+    constraintEl.textContent = d.constraint || 'any version';
+    sub.appendChild(constraintEl);
+    if(d.condition){
+      const c = document.createElement('span');
+      c.className = 'dep-condition';
+      c.innerHTML = ICON.warn + `<span>${escapeHtml(prettifyCondition(d.condition))}</span>`;
+      c.title = `Marker: ${d.condition}`;
+      sub.appendChild(c);
+    }
+    info.appendChild(sub);
+
+    // Actions
+    const actions = document.createElement('div');
+    actions.className = 'dep-actions';
+
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'icon-btn';
+    copyBtn.title = 'Copy pip install';
+    copyBtn.innerHTML = ICON.copy;
+    copyBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const cmd = `pip install "${rawDep}"`;
+      try{ await navigator.clipboard.writeText(cmd); showToast(`Copied: ${cmd}`);} catch(_){}
+    });
+    const extBtn = document.createElement('a');
+    extBtn.className = 'icon-btn';
+    extBtn.title = 'View on PyPI';
+    extBtn.href = `https://pypi.org/project/${encodeURIComponent(d.name)}/`;
+    extBtn.target = '_blank';
+    extBtn.rel = 'noopener noreferrer';
+    extBtn.innerHTML = ICON.ext;
+    extBtn.addEventListener('click', e => e.stopPropagation());
+    actions.appendChild(copyBtn);
+    actions.appendChild(extBtn);
+
+    row.appendChild(chev);
+    row.appendChild(av);
+    row.appendChild(info);
+    row.appendChild(actions);
+
+    // Sub tree
+    const subUl = document.createElement('ul');
+    subUl.className = 'sub-tree';
+    subUl.setAttribute('role','group');
+    const subInner = document.createElement('div');
+    subInner.className = 'sub-inner';
+    subUl.appendChild(subInner);
+
+    let loaded = false;
+    const expand = async () => {
+      if(chev.classList.contains('leaf')) return;
+      const isOpen = chev.classList.contains('open');
+      if(isOpen){
+        chev.classList.remove('open');
+        subUl.classList.remove('open');
+        return;
+      }
+      if(!loaded){
+        chev.classList.add('loading');
+        chev.innerHTML = ICON.spinner;
+        try{
+          const childDeps = await fetchDepsFor(d.name);
+          loaded = true;
+          chev.classList.remove('loading');
+          chev.innerHTML = ICON.chevron;
+          if(!childDeps || childDeps.length === 0){
+            chev.classList.add('leaf');
+            chev.innerHTML = ICON.dot;
+            chev.title = `${d.name} has no further dependencies`;
+            const msg = document.createElement('div');
+            msg.className = 'tree-msg';
+            msg.innerHTML = `<span class="no-deps-pill">${ICON.check}<span>No further dependencies</span></span>`;
+            subInner.appendChild(msg);
+          } else {
+            renderNodes(childDeps, subInner, depth + 1);
+            statTotal.textContent = totalNodesLoaded;
+          }
+        }catch(err){
+          chev.classList.remove('loading');
+          chev.classList.add('err');
+          chev.innerHTML = ICON.alert;
+          chev.title = err.message || 'Failed to load';
+          const msg = document.createElement('div');
+          msg.className = 'tree-msg err';
+          msg.textContent = err.message || 'Failed to load dependencies.';
+          subInner.appendChild(msg);
+        }
+      }
+      chev.classList.add('open');
+      subUl.classList.add('open');
     };
 
-    /* ================================================================
-       AUTOCOMPLETE (using PyPI simple search)
-       ================================================================ */
-    nameInput.addEventListener('input', () => {
-        clearTimeout(autocompleteTimer);
-        const query = nameInput.value.trim();
-        if (query.length < 2) {
-            hideAutocomplete();
-            return;
-        }
-        autocompleteTimer = setTimeout(() => fetchAutocomplete(query), AUTOCOMPLETE_DELAY);
-    });
+    row.addEventListener('click', expand);
+    chev.addEventListener('click', (e) => { e.stopPropagation(); expand(); });
 
-    nameInput.addEventListener('keydown', (e) => {
-        if (!acDropdown.classList.contains('visible')) return;
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            autocompleteIndex = Math.min(autocompleteIndex + 1, autocompleteResults.length - 1);
-            highlightAcItem();
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            autocompleteIndex = Math.max(autocompleteIndex - 1, 0);
-            highlightAcItem();
-        } else if (e.key === 'Enter' && autocompleteIndex >= 0) {
-            e.preventDefault();
-            selectAcItem(autocompleteResults[autocompleteIndex]);
-        } else if (e.key === 'Escape') {
-            hideAutocomplete();
-        }
-    });
+    li.appendChild(row);
+    li.appendChild(subUl);
+    parentUl.appendChild(li);
+  });
+}
 
-    nameInput.addEventListener('blur', () => {
-        // Delay to allow click on autocomplete item
-        setTimeout(hideAutocomplete, 200);
-    });
+async function fetchDepsFor(name, depth=0){
+  if(depth > MAX_DEPTH) return [];
+  try{
+    const data = await cachedFetch(`https://pypi.org/pypi/${encodeURIComponent(name)}/json`);
+    return data.info.requires_dist || [];
+  }catch(e){
+    throw new Error(`Couldn't fetch "${name}" from PyPI.`);
+  }
+}
 
-    async function fetchAutocomplete(query) {
-        try {
-            // Use PyPI search JSON endpoint (XMLRPC is deprecated, use warehouse search)
-            const resp = await fetch(`https://pypi.org/pypi/${encodeURIComponent(query)}/json`);
-            if (resp.ok) {
-                const data = await resp.json();
-                // Single exact match
-                autocompleteResults = [{ name: data.info.name, version: data.info.version }];
-                renderAutocomplete();
-                return;
-            }
-        } catch (e) { /* ignore */ }
+function prettifyCondition(c){
+  // Make common markers more readable
+  let s = c
+    .replace(/python_version\s*([<>=!]+)\s*["']([\d.]+)["']/g, 'Python $1 $2')
+    .replace(/sys_platform\s*==\s*["'](\w+)["']/g, 'on $1')
+    .replace(/extra\s*==\s*["']([^"']+)["']/g, 'extra: $1')
+    .replace(/platform_python_implementation\s*==\s*["'](\w+)["']/g, '$1')
+    .replace(/\s+and\s+/g, ' & ')
+    .replace(/\s+or\s+/g, ' | ');
+  return s.length > 50 ? s.slice(0, 47) + '…' : s;
+}
 
-        // Fallback: try a search-style approach by looking up common variations
-        const variations = [query, query.replace(/-/g, '_'), query.replace(/_/g, '-')];
-        const uniqueResults = new Map();
-        const promises = variations.map(async (v) => {
-            try {
-                const r = await fetch(`https://pypi.org/pypi/${encodeURIComponent(v)}/json`);
-                if (r.ok) {
-                    const d = await r.json();
-                    uniqueResults.set(d.info.name.toLowerCase(), { name: d.info.name, version: d.info.version });
-                }
-            } catch (e) { /* ignore */ }
-        });
-        await Promise.all(promises);
-        autocompleteResults = Array.from(uniqueResults.values()).slice(0, 8);
-        if (autocompleteResults.length > 0) {
-            renderAutocomplete();
-        } else {
-            hideAutocomplete();
-        }
-    }
-
-    function renderAutocomplete() {
-        acDropdown.innerHTML = '';
-        autocompleteIndex = -1;
-        autocompleteResults.forEach((item, i) => {
-            const div = document.createElement('div');
-            div.className = 'autocomplete-item';
-            div.setAttribute('role', 'option');
-            div.innerHTML = `<span class="ac-name">${escapeHtml(item.name)}</span><span class="ac-version">${escapeHtml(item.version)}</span>`;
-            div.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                selectAcItem(item);
-            });
-            acDropdown.appendChild(div);
-        });
-        acDropdown.classList.add('visible');
-    }
-
-    function highlightAcItem() {
-        const items = acDropdown.querySelectorAll('.autocomplete-item');
-        items.forEach((el, i) => el.classList.toggle('active', i === autocompleteIndex));
-    }
-
-    function selectAcItem(item) {
-        nameInput.value = item.name;
-        hideAutocomplete();
-        nameInput.focus();
-    }
-
-    function hideAutocomplete() {
-        acDropdown.classList.remove('visible');
-        acDropdown.innerHTML = '';
-        autocompleteResults = [];
-        autocompleteIndex = -1;
-    }
-
-    /* ================================================================
-       SEARCH HANDLER
-       ================================================================ */
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const name = nameInput.value.trim();
-        const version = versionInput.value.trim() || 'latest';
-        if (!name) return;
-
-        hideAutocomplete();
-        resetUI();
-        showLoader(true);
-
-        try {
-            totalNodesLoaded = 0;
-            await fetchDeps(name, version, depTree, 0);
-            const directCount = depTree.children.length;
-            statDirect.textContent = directCount;
-            statTotal.textContent = totalNodesLoaded;
-            depCount.textContent = `${directCount} dep${directCount !== 1 ? 's' : ''}`;
-            statsBar.style.display = 'flex';
-            results.classList.add('visible');
-        } catch (err) {
-            showError(err.message);
-        } finally {
-            showLoader(false);
-        }
-    });
-
-    /* ================================================================
-       FETCH DEPENDENCIES
-       ================================================================ */
-    async function fetchDeps(packageName, packageVersion, parentUl, depth) {
-        const key = `${packageName}@${packageVersion}:${depth}`;
-        if (activeFetches.has(key) || depth > MAX_DEPTH) return;
-        activeFetches.add(key);
-
-        try {
-            let versionToFetch = packageVersion;
-
-            // Resolve "latest"
-            if (versionToFetch.toLowerCase() === 'latest') {
-                const latestData = await apiFetch(`https://pypi.org/pypi/${encodeURIComponent(packageName)}/json`, packageName, 'latest');
-                versionToFetch = latestData.info?.version;
-                if (!versionToFetch) throw new Error(`Cannot determine latest version for "${packageName}".`);
-                if (depth === 0) {
-                    pkgDisplay.textContent = `${latestData.info.name} ${versionToFetch}`;
-                }
-            }
-
-            // Fetch specific version
-            const data = await apiFetch(`https://pypi.org/pypi/${encodeURIComponent(packageName)}/${encodeURIComponent(versionToFetch)}/json`, packageName, versionToFetch);
-
-            if (depth === 0 && !pkgDisplay.textContent) {
-                pkgDisplay.textContent = `${data.info.name} ${data.info.version}`;
-            }
-
-            const deps = data.info?.requires_dist || [];
-
-            if (deps.length === 0) {
-                if (depth === 0) {
-                    emptyMsg.classList.add('visible');
-                }
-                return deps;
-            }
-
-            emptyMsg.classList.remove('visible');
-            renderNodes(deps, parentUl, depth + 1);
-            return deps;
-        } finally {
-            activeFetches.delete(key);
-        }
-    }
-
-    async function apiFetch(url, name, version) {
-        const resp = await fetch(url);
-        if (resp.status === 404) {
-            throw new Error(version === 'latest'
-                ? `Package "${name}" not found on PyPI.`
-                : `"${name}" version ${version} not found on PyPI.`
-            );
-        }
-        if (!resp.ok) {
-            throw new Error(`PyPI API error (${resp.status}) for "${name}".`);
-        }
-        return resp.json();
-    }
-
-    /* ================================================================
-       RENDER DEPENDENCY NODES
-       ================================================================ */
-    const DEP_REGEX = /^([a-zA-Z0-9][a-zA-Z0-9._-]*)(?:\[([^\]]*)\])?\s*(?:\(([^)]*)\))?(?:\s*;.*)?$/;
-
-    function parseDep(raw) {
-        const hasCondition = raw.includes(';');
-        const mainPart = hasCondition ? raw.split(';')[0].trim() : raw.trim();
-        const condition = hasCondition ? raw.split(';').slice(1).join(';').trim() : '';
-
-        const match = mainPart.match(DEP_REGEX);
-        if (match) {
-            return {
-                name: match[1],
-                extras: match[2] || '',
-                version: match[3] || '',
-                condition,
-                raw,
-                expandable: true,
-            };
-        }
-        // Fallback: extract name
-        const fallbackName = mainPart.split(/[=<>!~\s[(]/)[0].trim();
-        return {
-            name: fallbackName,
-            extras: '',
-            version: '',
-            condition,
-            raw,
-            expandable: !!fallbackName,
-        };
-    }
-
-    function renderNodes(deps, parentUl, depth) {
-        deps.forEach((rawDep, idx) => {
-            const dep = parseDep(rawDep);
-            if (!dep.name) return;
-
-            totalNodesLoaded++;
-
-            const li = document.createElement('li');
-            li.className = 'dep-node glass';
-            li.setAttribute('role', 'treeitem');
-            if (depth <= 1) li.style.animationDelay = `${idx * 0.04}s`;
-            else { li.style.animation = 'none'; li.style.opacity = '1'; }
-
-            const row = document.createElement('div');
-            row.className = 'dep-row';
-
-            // Icon
-            const icon = document.createElement('div');
-            icon.className = 'dep-icon';
-            icon.innerHTML = ICONS.package;
-
-            // Info
-            const info = document.createElement('div');
-            info.className = 'dep-info';
-
-            const nameEl = document.createElement('a');
-            nameEl.className = 'dep-name';
-            nameEl.href = `https://pypi.org/project/${encodeURIComponent(dep.name)}/`;
-            nameEl.target = '_blank';
-            nameEl.rel = 'noopener noreferrer';
-            nameEl.textContent = dep.name;
-
-            const versionLabel = [dep.extras ? `[${dep.extras}]` : '', dep.version ? `(${dep.version})` : ''].filter(Boolean).join(' ') || 'any';
-            const versionEl = document.createElement('span');
-            versionEl.className = 'dep-version';
-            versionEl.textContent = versionLabel;
-            versionEl.title = rawDep;
-
-            info.appendChild(nameEl);
-            info.appendChild(versionEl);
-
-            if (dep.condition) {
-                const badge = document.createElement('span');
-                badge.className = 'dep-badge conditional';
-                badge.textContent = 'conditional';
-                badge.title = dep.condition;
-                info.appendChild(badge);
-            }
-
-            row.appendChild(icon);
-            row.appendChild(info);
-
-            // Sub-tree
-            const subUl = document.createElement('ul');
-            subUl.className = 'sub-tree';
-            subUl.setAttribute('role', 'group');
-
-            if (dep.expandable) {
-                const btn = document.createElement('button');
-                btn.className = 'expand-btn';
-                btn.innerHTML = ICONS.chevron;
-                btn.title = `Expand ${dep.name}`;
-                btn.setAttribute('aria-label', `Expand dependencies for ${dep.name}`);
-
-                let loaded = false;
-
-                btn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-
-                    if (btn.classList.contains('no-deps')) return;
-
-                    const isExpanded = btn.classList.contains('expanded');
-
-                    if (isExpanded) {
-                        // Collapse
-                        btn.classList.remove('expanded');
-                        subUl.style.maxHeight = '0';
-                        subUl.classList.remove('visible');
-                        return;
-                    }
-
-                    // Expand
-                    btn.classList.add('expanded');
-
-                    if (!loaded) {
-                        btn.classList.add('loading');
-                        btn.innerHTML = ICONS.spinner;
-                        btn.disabled = true;
-
-                        try {
-                            const result = await fetchDeps(dep.name, 'latest', subUl, depth);
-                            loaded = true;
-
-                            if (!result || result.length === 0) {
-                                btn.classList.add('no-deps');
-                                btn.innerHTML = ICONS.leaf;
-                                btn.title = `${dep.name} has no dependencies`;
-                                const noDepMsg = document.createElement('li');
-                                noDepMsg.className = 'dep-node';
-                                noDepMsg.style.cssText = 'background:none;border:none;box-shadow:none;animation:none;opacity:1;';
-                                noDepMsg.innerHTML = `<div class="dep-row" style="justify-content:center;padding:8px;"><span style="color:var(--text-muted);font-size:0.8rem;font-style:italic;">No further dependencies</span></div>`;
-                                subUl.appendChild(noDepMsg);
-                            } else {
-                                btn.innerHTML = ICONS.chevron;
-                                // Update totals
-                                statTotal.textContent = totalNodesLoaded;
-                            }
-                        } catch (err) {
-                            btn.innerHTML = ICONS.alert;
-                            btn.title = err.message;
-                            btn.classList.remove('expanded');
-                            const errLi = document.createElement('li');
-                            errLi.className = 'dep-node';
-                            errLi.style.cssText = 'background:none;border:none;box-shadow:none;animation:none;opacity:1;';
-                            errLi.innerHTML = `<div class="dep-row" style="justify-content:center;padding:8px;"><span style="color:#ff6b6b;font-size:0.8rem;">${escapeHtml(err.message)}</span></div>`;
-                            subUl.appendChild(errLi);
-                        } finally {
-                            btn.classList.remove('loading');
-                            btn.disabled = false;
-                        }
-                    } else {
-                        btn.innerHTML = ICONS.chevron;
-                    }
-
-                    // Show sub-tree
-                    subUl.classList.add('visible');
-                    subUl.style.maxHeight = subUl.scrollHeight + 'px';
-
-                    // Update parent heights (for nested trees)
-                    updateParentHeights(subUl);
-                });
-
-                row.appendChild(btn);
-            }
-
-            li.appendChild(row);
-            li.appendChild(subUl);
-            parentUl.appendChild(li);
-        });
-    }
-
-    /* Recalculate max-height of ancestor sub-trees when a nested tree expands */
-    function updateParentHeights(el) {
-        let node = el.parentElement;
-        while (node) {
-            if (node.classList && node.classList.contains('sub-tree') && node.classList.contains('visible')) {
-                node.style.maxHeight = node.scrollHeight + 'px';
-            }
-            node = node.parentElement;
-        }
-    }
-
-    /* ================================================================
-       UI HELPERS
-       ================================================================ */
-    function showLoader(show) {
-        loader.classList.toggle('visible', show);
-    }
-
-    function showError(msg) {
-        errorCard.textContent = msg;
-        errorCard.classList.add('visible');
-        results.classList.remove('visible');
-    }
-
-    function resetUI() {
-        depTree.innerHTML = '';
-        errorCard.classList.remove('visible');
-        errorCard.textContent = '';
-        results.classList.remove('visible');
-        emptyMsg.classList.remove('visible');
-        statsBar.style.display = 'none';
-        activeFetches.clear();
-        totalNodesLoaded = 0;
-    }
-
-    function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.appendChild(document.createTextNode(str));
-        return div.innerHTML;
-    }
+/* =========================================================
+   UI STATE HELPERS
+========================================================= */
+function resetResults(){
+  depTree.innerHTML = '';
+  emptyDeps.style.display = 'none';
+  errorEl.classList.remove('visible');
+  errorMsg.textContent = '';
+  totalNodesLoaded = 0;
+  activeFetches.clear();
+  if(treeFilter) treeFilter.value = '';
+  // reset to deps tab
+  $$('#tabs .tab').forEach(t => t.classList.remove('active'));
+  $('#tabs .tab[data-tab="deps"]').classList.add('active');
+  $$('.panel').forEach(p => p.classList.remove('active'));
+  $('#panel-deps').classList.add('active');
+}
+function showLoader(v){
+  loader.classList.toggle('visible', v);
+  if(v){
+    welcome.style.display = 'none';
+    results.classList.remove('visible');
+  }
+}
+function showError(msg){
+  errorMsg.textContent = msg;
+  errorEl.classList.add('visible');
+  welcome.style.display = 'none';
+}
 </script>
 </body>
 </html>
