@@ -2,7 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="PyDep" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="description" content="PyDep — Python Package Search Engine. Browse PyPI, explore dependency graphs, and bundle packages with all their dependencies." />
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%233b82f6'/><stop offset='1' stop-color='%231d4ed8'/></linearGradient></defs><rect width='180' height='180' rx='40' fill='url(%23g)'/><g fill='none' stroke='white' stroke-width='10' stroke-linecap='round'><circle cx='80' cy='80' r='42'/><line x1='112' y1='112' x2='148' y2='148'/></g><g fill='white' stroke='white' stroke-width='6' stroke-linecap='round'><circle cx='80' cy='60' r='6'/><circle cx='62' cy='96' r='6'/><circle cx='98' cy='96' r='6'/><line x1='80' y1='66' x2='64' y2='92'/><line x1='80' y1='66' x2='96' y2='92'/></g></svg>" />
 <title>PyDep — Python Dependency Explorer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -126,7 +134,6 @@ body{
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   letter-spacing: -0.005em;
-  min-height: 100vh;
 }
 
 /* ============================================================
@@ -182,9 +189,180 @@ html[data-theme="dark"] .theme-toggle .icon-moon{ display:none; }
 ============================================================ */
 .shell{
   max-width: 1180px; margin: 0 auto;
-  padding: 56px 24px 96px;
+  padding: 40px 24px 32px;
+  transition: padding var(--dur-3) var(--ease-emph);
 }
 .hero{ text-align:center; margin-bottom: 36px; }
+
+/* Landing layout: minimal, vertically centered */
+body[data-view="landing"]{
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+body[data-view="landing"] .shell{
+  padding-top: 0;
+  padding-bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+body[data-view="landing"] footer{
+  margin-top: 0;
+  padding: 14px 16px;
+  font-size: 12px;
+  flex-shrink: 0;
+  border-top: none;
+}
+body[data-view="landing"] .hero{
+  margin-bottom: 0;
+  padding: 24px 0 48px;
+}
+body[data-view="landing"] .search-stage{
+  max-width: 580px;
+}
+body[data-view="landing"] .quick{
+  max-width: 580px;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* Landing: strip nav down to just the theme toggle */
+body[data-view="landing"] .nav{
+  background: transparent;
+  border-bottom: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+body[data-view="landing"] .brand,
+body[data-view="landing"] .nav-pill{
+  display: none;
+}
+body[data-view="landing"] .nav-inner{
+  justify-content: flex-end;
+  padding: 0 20px;
+}
+
+/* Wordmark on landing — vertical stack */
+.hero-text{ display: flex; flex-direction: column; align-items: center; }
+.wordmark{
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-bottom: 18px;
+  user-select: none;
+}
+.wordmark-mark{
+  width: 72px; height: 72px; border-radius: 20px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  display: grid; place-items: center; color: #fff;
+  box-shadow: 0 12px 32px rgba(29,78,216,0.32), inset 0 1px 0 rgba(255,255,255,0.3);
+  position: relative;
+  overflow: hidden;
+}
+.wordmark-mark::after{
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.35), transparent 55%);
+  pointer-events: none;
+}
+.wordmark-mark svg{ width: 42px; height: 42px; position: relative; z-index: 1; }
+.wordmark-text{
+  font: 700 48px/1 var(--font-sans);
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.tagline{
+  font: 500 14px/1.4 var(--font-sans);
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+}
+@media (max-width: 560px){
+  .wordmark{ margin-bottom: 14px; }
+  .wordmark-mark{ width: 60px; height: 60px; border-radius: 16px; }
+  .wordmark-mark svg{ width: 34px; height: 34px; }
+  .wordmark-text{ font-size: 38px; }
+  .tagline{ font-size: 12px; margin-bottom: 32px; }
+}
+
+/* Results layout: hide hero, dock search into nav */
+body[data-view="results"] .hero-text,
+body[data-view="results"] .quick,
+body[data-view="results"] #welcome,
+body[data-view="landing"] #welcome{
+  display: none;
+}
+body[data-view="results"] .hero{
+  margin-bottom: 0;
+  padding: 0;
+  min-height: 0;
+}
+body[data-view="results"] #hero-search-mount{
+  display: none;
+}
+
+/* Nav search dock */
+.nav-search-mount{
+  flex: 1;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: none;
+  min-width: 0;
+}
+body[data-view="results"] .nav-search-mount:not(:empty){ display: block; }
+.nav-search-mount .search-stage{ margin: 0; max-width: 100%; }
+.nav-search-mount .search{
+  padding: 4px 4px 4px 14px;
+  border-radius: var(--r-12);
+  box-shadow: var(--e1);
+  animation: dockIn 280ms var(--ease-emph);
+}
+@keyframes dockIn{
+  from{ opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to{ opacity: 1; transform: translateY(0) scale(1); }
+}
+.nav-search-mount .search svg.search-glyph{ width: 16px; height: 16px; }
+.nav-search-mount .search input[type=text]{
+  font-size: 14px;
+  padding: 9px 6px;
+}
+.nav-search-mount .search .ver{
+  width: 80px;
+  font-size: 12.5px;
+  padding: 9px 8px;
+}
+.nav-search-mount .search .divider{ height: 20px; }
+.nav-search-mount .search button.go{
+  height: 36px;
+  min-width: 36px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+.nav-search-mount .search button.go svg{ width: 14px; height: 14px; }
+.nav-search-mount .quick{ display: none; }
+.nav-search-mount .ac{
+  top: calc(100% + 6px);
+  max-height: 320px;
+}
+.brand{ flex-shrink: 0; }
+.brand .brand-text{ transition: opacity var(--dur-2) var(--ease); }
+@media (max-width: 860px){
+  body[data-view="results"] .brand .brand-text{ display: none; }
+  .nav-search-mount{ padding: 0 8px; }
+}
+@media (max-width: 560px){
+  .nav-search-mount .search .ver{ width: 60px; }
+  .nav-search-mount .search button.go span{ display: none; }
+  .nav-search-mount .search button.go{ padding: 0; width: 36px; }
+}
 .eyebrow{
   display:inline-flex; align-items:center; gap:8px;
   font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase;
@@ -362,7 +540,6 @@ h1 .grad{
   border: 1px solid var(--hair);
   box-shadow: var(--e1);
   padding: 24px;
-  position: sticky; top: 76px;
   align-self: start;
 }
 .pkg-head{ display:flex; gap:14px; align-items:flex-start; margin-bottom: 14px; }
@@ -892,6 +1069,145 @@ html[data-theme="dark"] .dl-select select{ background-image: url("data:image/svg
   text-transform: none; letter-spacing: 0;
 }
 
+/* No results / did-you-mean */
+.no-results{
+  display: none;
+  margin-top: 32px;
+  padding: 56px 24px 64px;
+  text-align: center;
+}
+.no-results.visible{ display: block; animation: fadeUp 320ms var(--ease-emph); }
+.nr-icon{
+  width: 76px; height: 76px;
+  margin: 0 auto 24px;
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  color: var(--ink-3);
+  box-shadow: var(--e1);
+}
+.nr-icon svg{ width: 32px; height: 32px; }
+.no-results h2{
+  font: 700 22px/1.3 var(--font-sans);
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+.no-results h2 .q{
+  color: var(--blue);
+  font-family: var(--font-mono);
+  font-size: 20px;
+}
+.no-results .nr-lede{
+  color: var(--ink-3);
+  font: 400 14px/1.5 var(--font-sans);
+  margin-bottom: 32px;
+  max-width: 460px;
+  margin-left: auto; margin-right: auto;
+}
+.nr-section-label{
+  font: 600 11px/1 var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-4);
+  margin: 0 auto 12px;
+  max-width: 480px;
+  text-align: left;
+  padding: 0 4px;
+}
+.nr-suggestions{
+  display: grid;
+  gap: 8px;
+  max-width: 480px;
+  margin: 0 auto 28px;
+}
+.nr-suggestion{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-12);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-sans);
+  transition: all var(--dur-1) var(--ease);
+}
+.nr-suggestion:hover{
+  border-color: var(--blue-soft);
+  background: var(--blue-wash);
+  transform: translateY(-1px);
+  box-shadow: var(--e1);
+}
+.nr-suggestion .nr-ico{
+  width: 36px; height: 36px;
+  border-radius: var(--r-8);
+  background: var(--blue-wash);
+  color: var(--blue);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.nr-suggestion .nr-ico svg{ width: 18px; height: 18px; }
+.nr-suggestion .nr-body{ flex: 1; min-width: 0; }
+.nr-suggestion .nr-name{
+  font: 600 14px/1.3 var(--font-sans);
+  color: var(--ink);
+}
+.nr-suggestion .nr-name mark{
+  background: var(--yellow-wash);
+  color: var(--ink);
+  padding: 0 2px; border-radius: 3px;
+}
+.nr-suggestion .nr-desc{
+  font: 400 12.5px/1.4 var(--font-sans);
+  color: var(--ink-3);
+  margin-top: 2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.nr-suggestion .nr-arrow{
+  color: var(--ink-4);
+  flex-shrink: 0;
+  width: 16px; height: 16px;
+  transition: transform var(--dur-1) var(--ease);
+}
+.nr-suggestion:hover .nr-arrow{ transform: translateX(2px); color: var(--blue); }
+.nr-actions{
+  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+}
+.nr-pypi-link{
+  display: inline-flex; align-items: center; gap: 8px;
+  font: 500 13px/1 var(--font-sans);
+  color: var(--blue);
+  padding: 10px 16px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--blue-soft);
+  text-decoration: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--dur-1) var(--ease);
+}
+.nr-pypi-link:hover{ background: var(--blue-wash); }
+.nr-pypi-link svg{ width: 14px; height: 14px; }
+.nr-retry{
+  display: inline-flex; align-items: center; gap: 8px;
+  font: 500 13px/1 var(--font-sans);
+  color: var(--ink-2);
+  padding: 10px 16px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--hair);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all var(--dur-1) var(--ease);
+}
+.nr-retry:hover{ border-color: var(--hair-strong); background: var(--surface-3); }
+.nr-retry svg{ width: 13px; height: 13px; }
+
 /* Bundle modal */
 .modal-bg{
   position: fixed; inset: 0;
@@ -1062,7 +1378,6 @@ html[data-theme="dark"] .dl-select select{ background-image: url("data:image/svg
 /* Versions */
 .versions{
   display:grid; gap: 6px; margin-top: 8px;
-  max-height: 600px; overflow-y: auto;
 }
 .version-row{
   display:flex; align-items:center; justify-content:space-between;
@@ -1172,8 +1487,8 @@ html[data-theme="dark"] .toast{ background: var(--surface); color: var(--ink); b
 
 /* Footer */
 footer{
-  margin-top: 64px;
-  padding: 32px 24px;
+  margin-top: 32px;
+  padding: 20px 24px;
   border-top: 1px solid var(--hair);
   text-align: center;
   color: var(--ink-3); font-size: 12.5px;
@@ -1188,29 +1503,281 @@ footer a{ color: var(--blue); text-decoration: none; }
 }
 .dep-node.dimmed{ display: none; }
 
-@media (max-width: 600px){
-  .shell{ padding: 36px 16px 64px; }
-  .search{ padding: 6px; padding-left: 14px; flex-wrap: wrap; }
-  .search input[type=text]{ flex: 1 1 100%; padding: 10px 4px; }
-  .search .divider{ display: none; }
-  .search .ver{ width: 90px; }
-  .nav-pill{ display: none; }
-  .pkg-card{ position: static; }
+/* ============================================================
+   MOBILE / APP-LIKE OPTIMIZATIONS
+============================================================ */
+@media (max-width: 768px){
+  /* Global polish */
+  html{ -webkit-text-size-adjust: 100%; }
+  *{ -webkit-tap-highlight-color: transparent; }
+  body{
+    overscroll-behavior-y: contain;
+    background-attachment: scroll; /* fixed bg is laggy on iOS */
+  }
+
+  /* Safe-area aware nav + footer */
+  .nav{ padding-top: env(safe-area-inset-top); height: auto; min-height: 52px; }
+  .nav-inner{ padding: 0 12px; height: 52px; }
+  footer{ padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+
+  /* Touch targets */
+  button, a.btn, .chip, .tab, .tree-action, .icon-btn, .chevron,
+  .ac-item, .nr-suggestion, .version-load, .file-dl, .nav-pill,
+  .theme-toggle, .copy, .modal-close{
+    -webkit-tap-highlight-color: transparent;
+  }
+  .theme-toggle{ width: 38px; height: 38px; }
+
+  /* ----- LANDING ----- */
+  body[data-view="landing"] .shell{ padding: 0 16px; }
+  .wordmark{ margin-bottom: 14px; }
+  .wordmark-mark{ width: 64px; height: 64px; border-radius: 18px; }
+  .wordmark-mark svg{ width: 36px; height: 36px; }
+  .wordmark-text{ font-size: 42px; margin-bottom: 6px; }
+  .tagline{ font-size: 11.5px; margin-bottom: 28px; }
+
+  body[data-view="landing"] .search-stage,
+  body[data-view="landing"] .quick{ max-width: 100%; }
+
+  /* Search bar */
+  .search{
+    padding: 4px 4px 4px 14px;
+    border-radius: 16px;
+    box-shadow: var(--e1);
+  }
+  .search svg.search-glyph{ width: 18px; height: 18px; }
+  .search input[type=text]{
+    font-size: 16px; /* prevents iOS zoom-on-focus */
+    padding: 12px 6px;
+  }
+  .search .ver{ width: 72px; font-size: 13px; padding: 12px 6px; }
+  .search .divider{ height: 22px; }
+  .search button.go{
+    height: 40px; min-width: 40px; width: 40px;
+    padding: 0;
+    border-radius: 999px;
+  }
+  .search button.go span{ display: none; }
+  .search button.go svg{ width: 16px; height: 16px; }
+
+  .quick{ margin-top: 16px; gap: 6px; }
+  .chip{
+    padding: 10px 14px; font-size: 13px;
+    border-radius: 999px;
+  }
+  .chip .glyph{ width: 14px; height: 14px; }
+
+  /* ----- NAV (results mode) ----- */
+  body[data-view="results"] .brand .brand-text{ display: none; }
+  body[data-view="results"] .brand-mark{ width: 32px; height: 32px; border-radius: 9px; }
+  body[data-view="results"] .brand-mark svg{ width: 18px; height: 18px; }
+  body[data-view="results"] .nav-pill{ display: none; }
+  body[data-view="results"] .nav-inner{ gap: 8px; }
+
+  .nav-search-mount{ padding: 0; max-width: 100%; }
+  .nav-search-mount .search{ padding: 3px 3px 3px 12px; border-radius: 12px; }
+  .nav-search-mount .search svg.search-glyph{ width: 16px; height: 16px; }
+  .nav-search-mount .search input[type=text]{
+    font-size: 16px;
+    padding: 8px 4px;
+  }
+  .nav-search-mount .search .ver{
+    width: 60px; font-size: 12px;
+    padding: 8px 4px;
+  }
+  .nav-search-mount .search .divider{ display: none; }
+  .nav-search-mount .search button.go{
+    height: 32px; width: 32px; min-width: 32px;
+  }
+  .nav-search-mount .search button.go svg{ width: 14px; height: 14px; }
+  .nav-search-mount .ac{ left: 0; right: 0; }
+
+  /* ----- RESULTS LAYOUT ----- */
+  .shell{ padding: 20px 12px 24px; }
+  .results{ grid-template-columns: 1fr; gap: 14px; margin-top: 16px; }
+
+  .pkg-card{ padding: 18px; border-radius: 14px; }
+  .pkg-head{ gap: 12px; margin-bottom: 12px; }
+  .pkg-avatar{ width: 44px; height: 44px; font-size: 18px; border-radius: 11px; }
+  .pkg-title{ font-size: 20px; }
+  .pkg-version-row{ gap: 6px; }
+  .pkg-summary{ font-size: 13.5px; margin: 12px 0 14px; }
+
+  .install{ padding: 9px 10px; font-size: 12px; }
+  .install button.copy{ width: 34px; height: 34px; }
+
+  .dl-selectors{ grid-template-columns: 1fr; gap: 8px; }
+  .dl-select{ padding: 8px 12px; }
+  .dl-btn{ min-height: 48px; padding: 12px 14px; }
+  .bundle-cta{
+    padding: 14px 12px; font-size: 12.5px;
+    line-height: 1.3;
+  }
+  .dl-hint{ font-size: 11.5px; }
+
+  .meta-row{ font-size: 12.5px; padding: 9px 0; }
+  .meta-key{ width: 78px; gap: 6px; font-size: 12px; }
+  .meta-val{ font-size: 13px; }
+
+  .stats{ grid-template-columns: repeat(2, 1fr); gap: 8px; padding-top: 14px; margin-top: 14px; }
+  .stat{ padding: 10px; }
+  .stat-num{ font-size: 18px; }
+
+  /* ----- TABS (horizontal scroll) ----- */
+  .tabs{
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar{ display: none; }
+  .tab{
+    flex-shrink: 0;
+    font-size: 13px;
+    padding: 9px 12px;
+  }
+
+  /* ----- TREE ----- */
+  .panel{ padding: 16px; border-radius: 12px; }
+  .tree-toolbar{ padding: 10px; gap: 8px; flex-direction: column; align-items: stretch; }
+  .tree-actions{ display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; width: 100%; }
+  .tree-action{ font-size: 11.5px; padding: 9px 8px; justify-content: center; min-height: 36px; }
+  .tree-action svg{ width: 12px; height: 12px; }
+  .tree-search{ max-width: 100%; padding: 8px 12px; }
+  .tree-search input{ font-size: 14px; }
+
+  .tree-pane{ padding: 6px; }
+  .dep-row{
+    grid-template-columns: 30px 32px 1fr auto;
+    gap: 8px;
+    padding: 10px 10px;
+  }
+  .dep-avatar{ width: 30px; height: 30px; font-size: 12px; border-radius: 8px; }
+  .dep-name{ font-size: 13.5px; }
+  .dep-name-row{ gap: 6px; }
+  .dep-sub{ gap: 6px; flex-wrap: wrap; margin-top: 1px; }
+  .dep-constraint{ font-size: 10.5px; padding: 2px 6px; }
+  .dep-condition{ font-size: 10.5px; padding: 2px 6px; }
+  .dep-extras{ font-size: 10px; padding: 2px 5px; }
+
+  /* Action buttons always visible on touch */
+  .icon-btn{ width: 34px; height: 34px; opacity: 1; }
+  .icon-btn svg{ width: 14px; height: 14px; }
+  .dep-actions{ gap: 2px; }
+
+  .chevron{ width: 30px; height: 30px; }
+  .chevron svg{ width: 14px; height: 14px; }
+  .sub-tree{ padding-left: 20px; }
+  .sub-tree > .sub-inner::before{ left: 17px; }
+  .sub-tree .dep-row::before{ left: -12px; width: 10px; }
+
+  /* ----- FILES TAB ----- */
+  .file-row{
+    grid-template-columns: 32px 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 6px 10px;
+    padding: 10px 12px;
+  }
+  .file-row .file-icon{ grid-row: span 2; width: 32px; height: 32px; align-self: center; }
+  .file-row .file-icon svg{ width: 14px; height: 14px; }
+  .file-row > div:nth-child(2){ grid-column: 2 / 4; grid-row: 1; }
+  .file-row .file-name{ font-size: 12px; }
+  .file-row .file-meta{ font-size: 11px; flex-wrap: wrap; gap: 6px; }
+  .file-row .file-size{ grid-column: 2; grid-row: 2; justify-self: start; font-size: 11px; }
+  .file-row .file-dl{ grid-column: 3; grid-row: 2; align-self: end; }
+
+  /* ----- VERSIONS TAB ----- */
+  .version-row{ padding: 9px 12px; }
+  .version-num{ font-size: 12.5px; }
+  .version-load{ font-size: 11.5px; padding: 7px 10px; }
+
+  /* ----- INFO TAB ----- */
+  .info-grid{ grid-template-columns: 1fr; gap: 8px; }
+  .info-tile{ padding: 12px; }
+
+  /* ----- NO RESULTS ----- */
+  .no-results{ padding: 40px 16px 60px; }
+  .nr-icon{ width: 64px; height: 64px; margin-bottom: 18px; }
+  .nr-icon svg{ width: 28px; height: 28px; }
+  .no-results h2{ font-size: 19px; }
+  .nr-suggestion{ padding: 12px 14px; min-height: 56px; }
+
+  /* ----- MODAL (bundle) full-screen on phones ----- */
+  .modal-bg{ padding: 0; align-items: stretch; }
+  .modal{
+    border-radius: 0;
+    max-width: 100%;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    box-shadow: none;
+  }
+  .modal-head{
+    padding: calc(16px + env(safe-area-inset-top)) 20px 14px;
+  }
+  .modal-foot{
+    padding: 14px 20px calc(14px + env(safe-area-inset-bottom));
+  }
+  .modal-icon{ width: 36px; height: 36px; }
+  .modal-title{ font-size: 16px; }
+  .modal-sub{ font-size: 12.5px; }
+  .btn{ min-height: 44px; padding: 12px 16px; }
+
+  /* ----- TOAST ----- */
+  .toast{
+    left: 16px; right: 16px;
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    transform: translateY(20px);
+    width: max-content;
+    max-width: calc(100% - 32px);
+    margin: 0 auto;
+  }
+  .toast.show{ transform: translateY(0); }
+
+  /* ----- AUTOCOMPLETE ----- */
+  .ac-item{ padding: 12px 14px; min-height: 52px; }
+  .ac-name{ font-size: 13.5px; }
+  .ac-desc{ font-size: 12px; }
+}
+
+/* Standalone (PWA) mode tweaks */
+@media (display-mode: standalone){
+  .nav{ padding-top: env(safe-area-inset-top); }
+  footer{ padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+  body{ overscroll-behavior: none; }
+}
+
+/* iOS safari URL bar dynamic height handling */
+@supports (height: 100dvh){
+  body[data-view="landing"]{ height: 100dvh; }
+  body[data-view="landing"] .shell{ /* let flex distribute */ }
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
-<body>
+<body data-view="landing">
 
 <!-- NAV -->
 <nav class="nav">
   <div class="nav-inner">
     <a class="brand" href="#">
       <span class="brand-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <svg viewBox="0 0 24 24">
+          <circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+          <line x1="15.2" y1="15.2" x2="20.5" y2="20.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="10" y1="7.5" x2="7.2" y2="12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="10" y1="7.5" x2="12.8" y2="12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="10" cy="6.8" r="1.5" fill="currentColor"/>
+          <circle cx="7.2" cy="12.6" r="1.5" fill="currentColor"/>
+          <circle cx="12.8" cy="12.6" r="1.5" fill="currentColor"/>
+        </svg>
       </span>
-      PyDep
+      <span class="brand-text">PyDep</span>
     </a>
+    <div class="nav-search-mount" id="nav-search-mount"></div>
     <div class="nav-links">
       <a class="nav-pill" href="https://pypi.org" target="_blank" rel="noopener">PyPI</a>
       <a class="nav-pill" href="https://docs.python.org" target="_blank" rel="noopener">Docs</a>
@@ -1225,16 +1792,33 @@ footer a{ color: var(--blue); text-decoration: none; }
 <div class="shell">
   <!-- HERO -->
   <section class="hero">
-    <div class="eyebrow"><span class="dot"></span>Live PyPI data</div>
-    <h1>Explore the <span class="grad">dependency graph</span><br />of any Python package.</h1>
-    <p class="lede">Search PyPI, browse rich package metadata, and expand the full transitive dependency tree — interactively.</p>
+    <div class="hero-text">
+      <div class="wordmark">
+        <span class="wordmark-mark">
+          <svg viewBox="0 0 24 24">
+            <!-- Magnifier lens -->
+            <circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+            <!-- Handle -->
+            <line x1="15.2" y1="15.2" x2="20.5" y2="20.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Mini dependency tree inside the lens -->
+            <line x1="10" y1="7.5" x2="7.2" y2="12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            <line x1="10" y1="7.5" x2="12.8" y2="12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            <circle cx="10" cy="6.8" r="1.5" fill="currentColor"/>
+            <circle cx="7.2" cy="12.6" r="1.5" fill="currentColor"/>
+            <circle cx="12.8" cy="12.6" r="1.5" fill="currentColor"/>
+          </svg>
+        </span>
+      </div>
+      <div class="wordmark-text">Py<span class="grad">Dep</span></div>
+      <div class="tagline">Python Package Search Engine</div>
+    </div>
 
+    <div id="hero-search-mount">
     <div class="search-stage">
       <form class="search" id="search-form" autocomplete="off">
         <svg class="search-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="pkg-name" placeholder="Search a Python package…" aria-label="Package name" required />
-        <span class="divider"></span>
-        <input type="text" id="pkg-version" class="ver" placeholder="latest" aria-label="Version" />
+        <input type="hidden" id="pkg-version" />
         <button type="submit" class="go" aria-label="Search">
           <span>Explore</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -1269,6 +1853,7 @@ footer a{ color: var(--blue); text-decoration: none; }
         </button>
       </div>
     </div>
+    </div>
   </section>
 
   <!-- LOADER -->
@@ -1289,6 +1874,28 @@ footer a{ color: var(--blue); text-decoration: none; }
     <h4>Start typing to explore</h4>
     <p>Try one of the popular packages above, or search for any package on PyPI.</p>
   </div>
+
+  <!-- NO RESULTS / DID YOU MEAN -->
+  <section class="no-results" id="no-results">
+    <div class="nr-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="12"/><circle cx="11" cy="14.5" r="0.4" fill="currentColor"/></svg>
+    </div>
+    <h2>No results for <span class="q" id="nr-query"></span></h2>
+    <p class="nr-lede">We couldn't find a package by that name on PyPI. Did you mean one of these?</p>
+    <div class="nr-section-label" id="nr-section-label" style="display:none;">Did you mean</div>
+    <div class="nr-suggestions" id="nr-suggestions"></div>
+    <div class="nr-actions">
+      <a class="nr-pypi-link" id="nr-pypi-search" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Search PyPI directly
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+      <button class="nr-retry" id="nr-retry">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        Try a different name
+      </button>
+    </div>
+  </section>
 
   <!-- RESULTS -->
   <section class="results" id="results">
@@ -1559,6 +2166,13 @@ const versionsList = $('#versions-list');
 const toast = $('#toast');
 const toastMsg = $('#toast-msg');
 
+const noResults = $('#no-results');
+const nrQuery = $('#nr-query');
+const nrSuggestions = $('#nr-suggestions');
+const nrPypiSearch = $('#nr-pypi-search');
+const nrRetry = $('#nr-retry');
+const nrSectionLabel = $('#nr-section-label');
+
 const bundleBtn = $('#bundle-btn');
 const bundleModal = $('#bundle-modal');
 const bundleClose = $('#bundle-close');
@@ -1570,6 +2184,45 @@ const bundleProgress = $('#bundle-progress');
 const bundleLog = $('#bundle-log');
 const bundleTitle = $('#bundle-title');
 const bundleSub = $('#bundle-sub');
+
+/* =========================================================
+   VIEW MODES (landing / results)
+========================================================= */
+const heroMount = $('#hero-search-mount');
+const navMount = $('#nav-search-mount');
+const searchStage = $('.search-stage');
+
+function setView(mode){
+  if(mode === document.body.dataset.view) return;
+  document.body.dataset.view = mode;
+  if(mode === 'results'){
+    navMount.appendChild(searchStage);
+  } else {
+    heroMount.appendChild(searchStage);
+    results.classList.remove('visible');
+    errorEl.classList.remove('visible');
+    welcome.style.display = '';
+    depTree.innerHTML = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => nameInput.focus(), 280);
+  }
+}
+
+// Brand click → home
+$('.brand').addEventListener('click', (e) => {
+  e.preventDefault();
+  nameInput.value = '';
+  verInput.value = '';
+  hideAc();
+  setView('landing');
+});
+
+// Escape key goes home if in results mode
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape' && document.body.dataset.view === 'results' && document.activeElement !== nameInput && document.activeElement !== verInput){
+    setView('landing');
+  }
+});
 
 /* =========================================================
    ICONS (inline)
@@ -1743,6 +2396,8 @@ let acIndex = -1;
 let acResults = [];
 
 nameInput.addEventListener('input', () => {
+  // Typing a new package name resets the version to 'latest'
+  verInput.value = '';
   clearTimeout(acTimer);
   const q = nameInput.value.trim().toLowerCase();
   if(q.length < 1){ hideAc(); return; }
@@ -1937,6 +2592,102 @@ function parseDep(raw){
 /* =========================================================
    MAIN SEARCH HANDLER
 ========================================================= */
+
+/* ----- Fuzzy "did-you-mean" helpers ----- */
+function levenshtein(a, b){
+  a = a.toLowerCase(); b = b.toLowerCase();
+  const m = a.length, n = b.length;
+  if(m === 0) return n;
+  if(n === 0) return m;
+  let prev = new Array(n+1), curr = new Array(n+1);
+  for(let j=0;j<=n;j++) prev[j] = j;
+  for(let i=1;i<=m;i++){
+    curr[0] = i;
+    for(let j=1;j<=n;j++){
+      const cost = a[i-1] === b[j-1] ? 0 : 1;
+      curr[j] = Math.min(prev[j]+1, curr[j-1]+1, prev[j-1]+cost);
+    }
+    [prev, curr] = [curr, prev];
+  }
+  return prev[n];
+}
+function scoreMatch(q, name){
+  q = q.toLowerCase(); name = name.toLowerCase();
+  if(q === name) return 1000;
+  const qNoSep   = q.replace(/[-_.]/g, '');
+  const nameNoSep = name.replace(/[-_.]/g, '');
+  if(qNoSep === nameNoSep) return 900;
+  if(name.startsWith(q)) return 600 - (name.length - q.length);
+  if(nameNoSep.startsWith(qNoSep)) return 520 - Math.abs(nameNoSep.length - qNoSep.length);
+  if(name.includes(q)) return 400 - Math.abs(name.length - q.length);
+  if(nameNoSep.includes(qNoSep)) return 360 - Math.abs(nameNoSep.length - qNoSep.length);
+  const dist = levenshtein(qNoSep, nameNoSep);
+  if(dist <= 1) return 350;
+  if(dist <= 2) return 220;
+  if(dist <= 3 && name.length > 4) return 120;
+  if(dist <= 4 && name.length > 6) return 60;
+  return 0;
+}
+function findSuggestions(query, limit=6){
+  return POPULAR
+    .map(p => ({...p, _score: scoreMatch(query, p.name)}))
+    .filter(p => p._score > 0)
+    .sort((a, b) => b._score - a._score)
+    .slice(0, limit);
+}
+function highlightMatch(name, q){
+  if(!q) return escapeHtml(name);
+  const lower = name.toLowerCase();
+  const ql = q.toLowerCase();
+  const i = lower.indexOf(ql);
+  if(i < 0) return escapeHtml(name);
+  return escapeHtml(name.slice(0, i))
+       + '<mark>' + escapeHtml(name.slice(i, i+q.length)) + '</mark>'
+       + escapeHtml(name.slice(i+q.length));
+}
+function showNoResults(query){
+  results.classList.remove('visible');
+  errorEl.classList.remove('visible');
+  loader.classList.remove('visible');
+  emptyDeps.style.display = 'none';
+  nrQuery.textContent = query;
+  nrPypiSearch.href = `https://pypi.org/search/?q=${encodeURIComponent(query)}`;
+  const suggestions = findSuggestions(query);
+  nrSuggestions.innerHTML = '';
+  if(suggestions.length === 0){
+    nrSectionLabel.style.display = 'none';
+    const noneMsg = document.createElement('div');
+    noneMsg.style.cssText = 'color: var(--ink-3); font-size: 13.5px; font-style: italic; padding: 16px;';
+    noneMsg.textContent = 'No similar packages found in our quick index.';
+    nrSuggestions.appendChild(noneMsg);
+  } else {
+    nrSectionLabel.style.display = '';
+    suggestions.forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'nr-suggestion';
+      btn.innerHTML = `
+        <div class="nr-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+        <div class="nr-body">
+          <div class="nr-name">${highlightMatch(s.name, query)}</div>
+          ${s.desc ? `<div class="nr-desc">${escapeHtml(s.desc)}</div>` : ''}
+        </div>
+        <svg class="nr-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      `;
+      btn.addEventListener('click', () => {
+        nameInput.value = s.name;
+        verInput.value = '';
+        form.dispatchEvent(new Event('submit'));
+      });
+      nrSuggestions.appendChild(btn);
+    });
+  }
+  noResults.classList.add('visible');
+}
+nrRetry.addEventListener('click', () => {
+  noResults.classList.remove('visible');
+  nameInput.value = '';
+  nameInput.focus();
+});
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = nameInput.value.trim();
@@ -1944,6 +2695,7 @@ form.addEventListener('submit', async (e) => {
   if(!name) return;
 
   hideAc();
+  setView('results');
   resetResults();
   showLoader(true);
 
@@ -1970,7 +2722,11 @@ form.addEventListener('submit', async (e) => {
     welcome.style.display = 'none';
     results.classList.add('visible');
   }catch(err){
-    showError(err.message || 'Something went wrong.');
+    if(/HTTP\s*404/i.test(err.message || '') || /not found/i.test(err.message || '')){
+      showNoResults(name);
+    } else {
+      showError(err.message || 'Something went wrong.');
+    }
   }finally{
     showLoader(false);
   }
@@ -2905,6 +3661,7 @@ function resetResults(){
   emptyDeps.style.display = 'none';
   errorEl.classList.remove('visible');
   errorMsg.textContent = '';
+  noResults.classList.remove('visible');
   totalNodesLoaded = 0;
   activeFetches.clear();
   if(treeFilter) treeFilter.value = '';
