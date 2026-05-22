@@ -746,6 +746,179 @@ a.dep-name:hover{ color: var(--blue); }
 }
 .classifier{ color: var(--ink-3); font-size: 12.5px; line-height: 1.5; padding: 2px 0; }
 
+/* Files / Downloads */
+.dl-selectors{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.dl-select{
+  position: relative;
+  display: flex; flex-direction: column;
+  background: var(--surface-2);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-10);
+  padding: 8px 12px;
+  transition: border-color var(--dur-1) var(--ease);
+}
+.dl-select:hover{ border-color: var(--hair-strong); }
+.dl-select:focus-within{ border-color: var(--blue-soft); box-shadow: 0 0 0 3px var(--blue-wash); }
+.dl-select label{
+  font: 500 10px/1 var(--font-sans);
+  color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 4px;
+  display: flex; align-items: center; gap: 6px;
+}
+.dl-select label svg{ width: 11px; height: 11px; }
+.dl-select select{
+  appearance: none; -webkit-appearance: none;
+  border: none; outline: none; background: transparent;
+  font: 600 13px/1.2 var(--font-sans);
+  color: var(--ink);
+  padding-right: 16px;
+  cursor: pointer;
+  width: 100%;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: 12px;
+  min-width: 0;
+  text-overflow: ellipsis;
+}
+html[data-theme="dark"] .dl-select select{ background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a1a1a6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>"); }
+.dl-select select option{
+  font-family: var(--font-sans);
+  background: var(--surface);
+  color: var(--ink);
+}
+.dl-hint{
+  font: 400 11.5px/1.4 var(--font-sans);
+  color: var(--ink-3);
+  margin-top: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.dl-hint svg{ width: 12px; height: 12px; flex-shrink: 0; }
+.dl-hint.warn{ color: var(--orange); }
+.dl-hint.warn svg{ color: var(--orange); }
+.dl-hint.ok{ color: var(--green); }
+.dl-hint.ok svg{ color: var(--green); }
+
+.dl-row{
+  display:flex; gap:8px; margin-top: 14px; flex-wrap: wrap;
+}
+.dl-btn{
+  flex: 1; min-width: 130px;
+  display:inline-flex; align-items:center; gap: 8px; justify-content: center;
+  padding: 10px 14px;
+  border-radius: var(--r-10);
+  border: 1px solid var(--hair);
+  background: var(--surface-2);
+  font: 600 13px/1 var(--font-sans); color: var(--ink);
+  text-decoration: none; cursor: pointer;
+  transition: all var(--dur-1) var(--ease);
+}
+.dl-btn:hover{ border-color: var(--blue-soft); background: var(--blue-wash); color: var(--blue); transform: translateY(-1px); box-shadow: var(--e1); }
+.dl-btn svg{ width: 15px; height: 15px; }
+.dl-btn .dl-kind{ font: 500 11px/1 var(--font-mono); color: var(--ink-3); margin-top: 4px; display:block; }
+.dl-btn .dl-stack{ display:flex; flex-direction:column; align-items:flex-start; line-height: 1.2; }
+.dl-btn.primary{ background: var(--blue); color:#fff; border-color: var(--blue); box-shadow: 0 4px 12px rgba(0,113,227,0.22); }
+.dl-btn.primary:hover{ background: var(--blue-hover); color:#fff; }
+.dl-btn.primary .dl-kind{ color: rgba(255,255,255,0.78); }
+
+/* Files tab list */
+.files-list{ display:grid; gap: 6px; }
+.file-row{
+  display:grid;
+  grid-template-columns: 36px 1fr auto auto;
+  align-items: center; gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--r-10);
+  background: var(--surface-2);
+  border: 1px solid var(--hair);
+  transition: all var(--dur-1) var(--ease);
+}
+.file-row:hover{ border-color: var(--hair-strong); background: var(--surface-3); }
+.file-icon{
+  width: 32px; height: 32px; border-radius: var(--r-8);
+  display:grid; place-items:center;
+  flex-shrink:0;
+}
+.file-icon.wheel{ background: var(--blue-wash); color: var(--blue); }
+.file-icon.sdist{ background: var(--orange-wash); color: var(--orange); }
+.file-icon.egg  { background: var(--purple-wash); color: var(--purple); }
+.file-icon svg{ width:16px; height:16px; }
+.file-name{
+  font: 500 13px/1.3 var(--font-mono); color: var(--ink);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;
+}
+.file-meta{
+  font: 400 12px/1.2 var(--font-sans); color: var(--ink-3); margin-top: 3px;
+  display:flex; gap: 8px; align-items: center;
+}
+.file-meta .dot{ width: 3px; height: 3px; border-radius: 50%; background: var(--ink-5); }
+.file-size{
+  font: 500 12px/1 var(--font-mono);
+  color: var(--ink-2); padding: 5px 9px; border-radius: var(--r-full);
+  background: var(--surface); border: 1px solid var(--hair);
+  white-space: nowrap;
+}
+.file-dl{
+  width: 34px; height: 34px;
+  border-radius: var(--r-8);
+  border: 1px solid var(--hair);
+  background: var(--surface);
+  color: var(--ink-2);
+  display:grid; place-items:center;
+  text-decoration:none; cursor: pointer;
+  transition: all var(--dur-1) var(--ease);
+}
+.file-dl:hover{ background: var(--blue); color: #fff; border-color: var(--blue); }
+.file-dl svg{ width: 15px; height: 15px; }
+.files-empty{
+  padding: 24px; text-align:center; color: var(--ink-3); font-style: italic;
+}
+.files-group-title{
+  font: 600 12px/1 var(--font-sans);
+  color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.08em;
+  margin: 18px 0 8px;
+  display:flex; align-items:center; gap: 8px;
+}
+.files-group-title:first-child{ margin-top: 0; }
+.files-group-title .badge{
+  font: 500 11px/1 var(--font-mono);
+  color: var(--ink-2); padding: 3px 7px; border-radius: var(--r-full);
+  background: var(--surface-3); border: 1px solid var(--hair);
+  text-transform: none; letter-spacing: 0;
+}
+
+/* file row highlighted (matches current filter) */
+.file-row.match{
+  border-color: var(--blue-soft);
+  background: var(--blue-wash);
+}
+.file-row.match .file-dl{
+  background: var(--blue); color: #fff; border-color: var(--blue);
+}
+.files-filter-bar{
+  display:flex; align-items:center; justify-content: space-between; gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--r-10);
+  background: var(--blue-wash);
+  border: 1px solid var(--blue-soft);
+  margin-bottom: 12px;
+  font: 500 12.5px/1.3 var(--font-sans);
+  color: var(--ink-2);
+  flex-wrap: wrap;
+}
+.files-filter-bar strong{ color: var(--blue); font-weight: 600; }
+.files-filter-bar .clear-link{
+  font: 500 12px/1 var(--font-sans);
+  color: var(--blue); cursor: pointer;
+  background: transparent; border: none; padding: 4px 8px; border-radius: var(--r-full);
+}
+.files-filter-bar .clear-link:hover{ background: var(--surface); }
+
 /* Versions */
 .versions{
   display:grid; gap: 6px; margin-top: 8px;
@@ -900,7 +1073,6 @@ footer a{ color: var(--blue); text-decoration: none; }
     <div class="nav-links">
       <a class="nav-pill" href="https://pypi.org" target="_blank" rel="noopener">PyPI</a>
       <a class="nav-pill" href="https://docs.python.org" target="_blank" rel="noopener">Docs</a>
-      <a class="nav-pill" href="https://github.com" target="_blank" rel="noopener">GitHub</a>
       <button class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
@@ -1001,6 +1173,26 @@ footer a{ color: var(--blue); text-decoration: none; }
         </button>
       </div>
 
+      <div class="dl-selectors">
+        <div class="dl-select">
+          <label for="sel-pyver">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Python
+          </label>
+          <select id="sel-pyver" aria-label="Python version"></select>
+        </div>
+        <div class="dl-select">
+          <label for="sel-platform">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Platform
+          </label>
+          <select id="sel-platform" aria-label="Platform"></select>
+        </div>
+      </div>
+
+      <div class="dl-row" id="dl-row"></div>
+      <div class="dl-hint" id="dl-hint" style="display:none;"></div>
+
       <div class="meta">
         <div class="meta-row">
           <span class="meta-key"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Author</span>
@@ -1036,6 +1228,10 @@ footer a{ color: var(--blue); text-decoration: none; }
         <button class="tab" data-tab="info">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
           Info
+        </button>
+        <button class="tab" data-tab="files">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Files <span class="count" id="tab-count-files">0</span>
         </button>
         <button class="tab" data-tab="versions">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
@@ -1080,6 +1276,13 @@ footer a{ color: var(--blue); text-decoration: none; }
         <div class="info-grid" id="info-grid"></div>
         <h3 style="margin-top: 24px;">Classifiers</h3>
         <div id="info-classifiers" style="margin-top: 8px;"></div>
+      </div>
+
+      <!-- FILES TAB -->
+      <div class="panel" id="panel-files">
+        <h3>Distribution files</h3>
+        <p style="margin-bottom: 4px;">Direct download links from PyPI for this release.</p>
+        <div id="files-list" class="files-list"></div>
       </div>
 
       <!-- VERSIONS TAB -->
@@ -1161,6 +1364,14 @@ const statDirect = $('#stat-direct');
 const statTotal = $('#stat-total');
 const tabCount = $('#tab-count');
 const tabCountVers = $('#tab-count-vers');
+const tabCountFiles = $('#tab-count-files');
+const dlRow = $('#dl-row');
+const filesList = $('#files-list');
+const selPyver = $('#sel-pyver');
+const selPlatform = $('#sel-platform');
+const dlHint = $('#dl-hint');
+let currentUrls = [];
+let currentPkgName = '';
 
 const infoDesc = $('#info-desc');
 const infoGrid = $('#info-grid');
@@ -1179,6 +1390,9 @@ const ICON = {
   dot: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3"/></svg>',
   alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
   ext: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>',
+  download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  wheel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="9"/><line x1="12" y1="15" x2="12" y2="21"/><line x1="3" y1="12" x2="9" y2="12"/><line x1="15" y1="12" x2="21" y2="12"/></svg>',
+  archive: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>',
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
   warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
@@ -1211,6 +1425,75 @@ function relativeDate(iso){
     if(v >= 1) return `${v} ${unit}${v>1?'s':''} ago`;
   }
   return 'just now';
+}
+function formatBytes(n){
+  if(n == null) return '—';
+  if(n < 1024) return `${n} B`;
+  if(n < 1024*1024) return `${(n/1024).toFixed(1)} KB`;
+  if(n < 1024*1024*1024) return `${(n/1024/1024).toFixed(1)} MB`;
+  return `${(n/1024/1024/1024).toFixed(2)} GB`;
+}
+function parseWheelTags(filename){
+  // foo-1.2.3-py3-none-any.whl  ->  py3 / any
+  const stripped = filename.replace(/\.whl$/,'');
+  const parts = stripped.split('-');
+  if(parts.length < 5) return { python: '—', abi: '—', platform: '—' };
+  return { python: parts[parts.length-3], abi: parts[parts.length-2], platform: parts[parts.length-1] };
+}
+
+/* ---- Python / Platform classification ---- */
+// Returns array of normalized python versions a wheel supports.
+// cp311 -> ['3.11']; py3 -> ['3.x']; py2.py3 -> ['2.x','3.x']
+function pythonVersionsOf(file){
+  if(file.packagetype === 'sdist') return ['any'];
+  const tag = (parseWheelTags(file.filename).python || '').toLowerCase();
+  if(!tag || tag === '—') return [file.python_version || 'any'];
+  const out = new Set();
+  tag.split('.').forEach(t => {
+    const m = t.match(/^cp(\d)(\d+)$/);
+    if(m){ out.add(`${m[1]}.${m[2]}`); return; }
+    const pp = t.match(/^pp(\d)(\d+)$/);
+    if(pp){ out.add(`${pp[1]}.${pp[2]} (PyPy)`); return; }
+    if(/^py(\d)$/.test(t)){ out.add(`${t[2]}.x`); return; }
+    out.add(t);
+  });
+  return Array.from(out);
+}
+
+// Classify a wheel file into a friendly platform label
+function platformOf(file){
+  if(file.packagetype === 'sdist') return { id: 'sdist', label: 'Source distribution' };
+  const fn = file.filename.toLowerCase();
+  const plat = (parseWheelTags(file.filename).platform || '').toLowerCase();
+  if(plat === 'any')                          return { id: 'any',         label: 'Any platform (pure Python)' };
+  if(/win_arm64/.test(plat))                  return { id: 'win-arm64',   label: 'Windows ARM64' };
+  if(/win_amd64/.test(plat))                  return { id: 'win-x86_64',  label: 'Windows x86_64' };
+  if(/win32/.test(plat))                      return { id: 'win-x86',     label: 'Windows 32-bit' };
+  if(/macosx.*(arm64|universal2)/.test(plat)) return { id: 'mac-arm64',   label: 'macOS Apple Silicon (arm64)' };
+  if(/macosx.*(x86_64|intel)/.test(plat))     return { id: 'mac-x86_64',  label: 'macOS Intel (x86_64)' };
+  if(/macosx/.test(plat))                     return { id: 'mac-other',   label: 'macOS (other)' };
+  if(/musllinux.*aarch64|musllinux.*arm64/.test(plat)) return { id: 'linux-musl-arm64', label: 'Linux musl ARM64' };
+  if(/musllinux.*x86_64/.test(plat))          return { id: 'linux-musl-x86_64', label: 'Linux musl x86_64' };
+  if(/manylinux.*aarch64|linux.*aarch64/.test(plat)) return { id: 'linux-arm64', label: 'Linux ARM64 (aarch64)' };
+  if(/manylinux.*x86_64|linux.*x86_64/.test(plat)) return { id: 'linux-x86_64', label: 'Linux x86_64' };
+  if(/manylinux.*i686|linux.*i686/.test(plat)) return { id: 'linux-i686', label: 'Linux 32-bit (i686)' };
+  if(/manylinux.*ppc64le/.test(plat))         return { id: 'linux-ppc64le', label: 'Linux ppc64le' };
+  if(/manylinux.*s390x/.test(plat))           return { id: 'linux-s390x', label: 'Linux s390x' };
+  return { id: 'other:' + plat, label: plat || 'Unknown' };
+}
+
+// Guess user's platform for default selection
+function detectPlatform(){
+  const ua = navigator.userAgent || '';
+  const platform = (navigator.userAgentData?.platform || navigator.platform || '').toLowerCase();
+  const isMac = /mac/.test(platform);
+  const isWin = /win/.test(platform);
+  const isLinux = /linux/.test(platform) && !isMac;
+  const isArm = /arm|aarch64/i.test(ua) || /arm/i.test(navigator.userAgentData?.architecture || '');
+  if(isMac) return isArm ? 'mac-arm64' : 'mac-x86_64';
+  if(isWin) return isArm ? 'win-arm64' : 'win-x86_64';
+  if(isLinux) return isArm ? 'linux-arm64' : 'linux-x86_64';
+  return 'any';
 }
 async function cachedFetch(url){
   if(fetchCache.has(url)) return fetchCache.get(url);
@@ -1550,6 +1833,221 @@ function renderPackageCard(data){
     metaReleased.textContent = relativeDate(versionData[0].upload_time);
     metaReleased.title = versionData[0].upload_time;
   } else metaReleased.textContent = '—';
+
+  // Downloads
+  renderDownloads(data);
+}
+
+/* =========================================================
+   FILES / DOWNLOADS
+========================================================= */
+function renderDownloads(data){
+  const urls = data.urls || [];
+  currentUrls = urls;
+  currentPkgName = data.info.name;
+  buildSelectors(urls);
+  updateDownloads();
+  renderFilesTab();
+}
+
+function buildSelectors(urls){
+  // Collect unique python versions + platforms across all wheels
+  const pyVersions = new Set();
+  const platforms = new Map(); // id -> label
+  urls.forEach(u => {
+    if(u.packagetype === 'bdist_wheel'){
+      pythonVersionsOf(u).forEach(p => pyVersions.add(p));
+      const pl = platformOf(u);
+      platforms.set(pl.id, pl.label);
+    } else if(u.packagetype === 'sdist'){
+      platforms.set('sdist', 'Source distribution');
+    }
+  });
+
+  // Sort python versions: numeric desc, 'x' generic at bottom but above 'any'
+  const pyList = Array.from(pyVersions).sort((a, b) => {
+    const numA = parseFloat(a); const numB = parseFloat(b);
+    if(isNaN(numA) && isNaN(numB)) return a.localeCompare(b);
+    if(isNaN(numA)) return 1;
+    if(isNaN(numB)) return -1;
+    if(a.includes('x') && !b.includes('x')) return 1;
+    if(b.includes('x') && !a.includes('x')) return -1;
+    return numB - numA;
+  });
+  if(pyList.length === 0) pyList.push('any');
+
+  selPyver.innerHTML = '<option value="any">Any Python version</option>' +
+    pyList.map(v => `<option value="${escapeHtml(v)}">Python ${escapeHtml(v)}</option>`).join('');
+
+  // Platforms: order with detected platform first, then group
+  const ORDER = ['any','mac-arm64','mac-x86_64','win-x86_64','win-arm64','linux-x86_64','linux-arm64','linux-musl-x86_64','linux-musl-arm64','win-x86','linux-i686','linux-ppc64le','linux-s390x','sdist'];
+  const sortedPlat = Array.from(platforms.keys()).sort((a,b) => {
+    const ai = ORDER.indexOf(a), bi = ORDER.indexOf(b);
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+  });
+  selPlatform.innerHTML = '<option value="any-all">Any platform</option>' +
+    sortedPlat.map(id => `<option value="${escapeHtml(id)}">${escapeHtml(platforms.get(id))}</option>`).join('');
+
+  // Defaults: prefer current platform if available; else 'any-all'
+  const detected = detectPlatform();
+  selPlatform.value = platforms.has(detected) ? detected : (platforms.has('any') ? 'any' : 'any-all');
+  // Default python: highest available
+  selPyver.value = pyList[0] && /^\d/.test(pyList[0]) ? pyList[0] : 'any';
+}
+
+selPyver.addEventListener('change', () => { updateDownloads(); renderFilesTab(); });
+selPlatform.addEventListener('change', () => { updateDownloads(); renderFilesTab(); });
+
+function fileMatchesSelection(file){
+  const wantPy = selPyver.value;
+  const wantPlat = selPlatform.value;
+  // Platform check
+  const pl = platformOf(file);
+  if(wantPlat !== 'any-all' && pl.id !== wantPlat) return false;
+  // Python check
+  if(wantPy === 'any') return true;
+  if(file.packagetype === 'sdist') return true; // sdist works for any Python
+  const supported = pythonVersionsOf(file);
+  // Allow generic match: 'py3' tag (3.x) covers any selected 3.x
+  if(supported.includes(wantPy)) return true;
+  if(supported.some(s => s === '3.x' && wantPy.startsWith('3.'))) return true;
+  if(supported.some(s => s === '2.x' && wantPy.startsWith('2.'))) return true;
+  return false;
+}
+
+function updateDownloads(){
+  dlRow.innerHTML = '';
+  const matches = currentUrls.filter(fileMatchesSelection);
+  const wheel = matches.find(u => u.packagetype === 'bdist_wheel');
+  const sdist = matches.find(u => u.packagetype === 'sdist') || currentUrls.find(u => u.packagetype === 'sdist');
+
+  if(currentUrls.length === 0){
+    const a = document.createElement('a');
+    a.className = 'dl-btn';
+    a.href = `https://pypi.org/project/${encodeURIComponent(currentPkgName)}/#files`;
+    a.target = '_blank'; a.rel = 'noopener';
+    a.innerHTML = ICON.download + '<span>View files on PyPI</span>';
+    dlRow.appendChild(a);
+    dlHint.style.display = 'none';
+    return;
+  }
+
+  if(wheel){
+    const a = document.createElement('a');
+    a.className = 'dl-btn primary';
+    a.href = wheel.url; a.setAttribute('download','');
+    a.title = wheel.filename;
+    a.innerHTML = `${ICON.download}<span class="dl-stack"><span>Download wheel</span><span class="dl-kind">${escapeHtml(formatBytes(wheel.size))} · ${escapeHtml(parseWheelTags(wheel.filename).python)}</span></span>`;
+    dlRow.appendChild(a);
+  }
+  if(sdist){
+    const a = document.createElement('a');
+    a.className = 'dl-btn' + (wheel ? '' : ' primary');
+    a.href = sdist.url; a.setAttribute('download','');
+    a.title = sdist.filename;
+    a.innerHTML = `${ICON.archive}<span class="dl-stack"><span>Source dist</span><span class="dl-kind">${escapeHtml(formatBytes(sdist.size))}</span></span>`;
+    dlRow.appendChild(a);
+  }
+  if(!wheel && !sdist){
+    // No match -> show first available + warn
+    const fallback = currentUrls[0];
+    if(fallback){
+      const a = document.createElement('a');
+      a.className = 'dl-btn';
+      a.href = fallback.url; a.setAttribute('download','');
+      a.title = fallback.filename;
+      a.innerHTML = `${ICON.download}<span class="dl-stack"><span>Closest available</span><span class="dl-kind">${escapeHtml(formatBytes(fallback.size))}</span></span>`;
+      dlRow.appendChild(a);
+    }
+  }
+
+  // Hint
+  if(!wheel && !sdist){
+    dlHint.style.display = 'flex';
+    dlHint.className = 'dl-hint warn';
+    dlHint.innerHTML = ICON.warn + `<span>No wheel matches this Python + platform. Try “Any platform” or pick a different Python.</span>`;
+  } else if(!wheel && sdist){
+    dlHint.style.display = 'flex';
+    dlHint.className = 'dl-hint warn';
+    dlHint.innerHTML = ICON.warn + `<span>No prebuilt wheel for this selection — source dist will compile on install.</span>`;
+  } else {
+    dlHint.style.display = 'flex';
+    dlHint.className = 'dl-hint ok';
+    const total = currentUrls.filter(u => u.packagetype === 'bdist_wheel' && fileMatchesSelection(u)).length;
+    dlHint.innerHTML = ICON.check + `<span>${total} matching wheel${total!==1?'s':''} available.</span>`;
+  }
+}
+
+function renderFilesTab(){
+  filesList.innerHTML = '';
+  tabCountFiles.textContent = currentUrls.length;
+  if(currentUrls.length === 0){
+    filesList.innerHTML = `<div class="files-empty">No files available for this release. <a href="https://pypi.org/project/${encodeURIComponent(currentPkgName)}/#files" target="_blank" rel="noopener" style="color:var(--blue);">Open on PyPI →</a></div>`;
+    return;
+  }
+  // Filter bar
+  const isFiltered = selPyver.value !== 'any' || selPlatform.value !== 'any-all';
+  if(isFiltered){
+    const bar = document.createElement('div');
+    bar.className = 'files-filter-bar';
+    const pyLbl = selPyver.value === 'any' ? 'any Python' : `Python ${selPyver.value}`;
+    const platLbl = selPlatform.value === 'any-all' ? 'all platforms' : (selPlatform.options[selPlatform.selectedIndex]?.textContent || selPlatform.value);
+    bar.innerHTML = `<span>Filtering by <strong>${escapeHtml(pyLbl)}</strong> · <strong>${escapeHtml(platLbl)}</strong></span><button class="clear-link" id="clear-files-filter">Clear filter</button>`;
+    filesList.appendChild(bar);
+    bar.querySelector('#clear-files-filter').addEventListener('click', () => {
+      selPyver.value = 'any'; selPlatform.value = 'any-all';
+      updateDownloads(); renderFilesTab();
+    });
+  }
+
+  const wheels = currentUrls.filter(u => u.packagetype === 'bdist_wheel');
+  const sdists = currentUrls.filter(u => u.packagetype === 'sdist');
+  const others = currentUrls.filter(u => u.packagetype !== 'bdist_wheel' && u.packagetype !== 'sdist');
+
+  const renderGroup = (items, title, kind) => {
+    if(items.length === 0) return;
+    const matching = items.filter(fileMatchesSelection).length;
+    const t = document.createElement('div');
+    t.className = 'files-group-title';
+    t.innerHTML = `<span>${title}</span><span class="badge">${items.length} · ${matching} match${matching!==1?'es':''}</span>`;
+    filesList.appendChild(t);
+    items.forEach(u => filesList.appendChild(fileRow(u, kind)));
+  };
+  renderGroup(wheels, 'Built distributions', 'wheel');
+  renderGroup(sdists, 'Source distribution', 'sdist');
+  renderGroup(others, 'Other', 'egg');
+}
+
+function fileRow(u, kind){
+  const row = document.createElement('div');
+  row.className = 'file-row';
+  if(fileMatchesSelection(u)) row.classList.add('match');
+  const tags = u.packagetype === 'bdist_wheel' ? parseWheelTags(u.filename) : null;
+  const icon = kind === 'wheel' ? ICON.wheel : kind === 'sdist' ? ICON.archive : ICON.download;
+  let metaParts = [];
+  if(tags){
+    const pyVs = pythonVersionsOf(u).join(', ');
+    metaParts.push(`<span>Python: <strong style="color:var(--ink-2);">${escapeHtml(pyVs)}</strong></span>`);
+    metaParts.push(`<span class="dot"></span>`);
+    metaParts.push(`<span>${escapeHtml(platformOf(u).label)}</span>`);
+  } else if(u.python_version){
+    metaParts.push(`<span>${escapeHtml(u.python_version)}</span>`);
+  }
+  if(u.upload_time){
+    if(metaParts.length){ metaParts.push(`<span class="dot"></span>`); }
+    metaParts.push(`<span>${escapeHtml(relativeDate(u.upload_time))}</span>`);
+  }
+
+  row.innerHTML = `
+    <div class="file-icon ${kind}">${icon}</div>
+    <div style="min-width:0;">
+      <div class="file-name" title="${escapeHtml(u.filename)}">${escapeHtml(u.filename)}</div>
+      <div class="file-meta">${metaParts.join('')}</div>
+    </div>
+    <span class="file-size">${escapeHtml(formatBytes(u.size))}</span>
+    <a class="file-dl" href="${escapeHtml(u.url)}" download title="Download ${escapeHtml(u.filename)}">${ICON.download}</a>
+  `;
+  return row;
 }
 
 /* =========================================================
@@ -1719,6 +2217,48 @@ function renderNodes(deps, parentUl, depth){
       const cmd = `pip install "${rawDep}"`;
       try{ await navigator.clipboard.writeText(cmd); showToast(`Copied: ${cmd}`);} catch(_){}
     });
+    const dlBtn = document.createElement('button');
+    dlBtn.className = 'icon-btn';
+    dlBtn.title = 'Download package';
+    dlBtn.innerHTML = ICON.download;
+    dlBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      dlBtn.innerHTML = ICON.spinner;
+      dlBtn.querySelector('svg').style.animation = 'spin 0.85s linear infinite';
+      try{
+        const j = await cachedFetch(`https://pypi.org/pypi/${encodeURIComponent(d.name)}/json`);
+        const urls = j.urls || [];
+        // Match to package card's current selection where possible
+        const wantPy = selPyver.value;
+        const wantPlat = selPlatform.value;
+        const matches = urls.filter(u => {
+          const pl = platformOf(u);
+          if(wantPlat !== 'any-all' && pl.id !== wantPlat) return false;
+          if(wantPy === 'any') return true;
+          if(u.packagetype === 'sdist') return true;
+          const sup = pythonVersionsOf(u);
+          if(sup.includes(wantPy)) return true;
+          if(sup.some(s => s === '3.x' && wantPy.startsWith('3.'))) return true;
+          return false;
+        });
+        const pick = matches.find(u => u.packagetype === 'bdist_wheel')
+          || matches.find(u => u.packagetype === 'sdist')
+          || urls.find(u => u.packagetype === 'bdist_wheel' && /none-any/.test(u.filename))
+          || urls.find(u => u.packagetype === 'bdist_wheel')
+          || urls.find(u => u.packagetype === 'sdist')
+          || urls[0];
+        if(pick){
+          window.open(pick.url, '_blank');
+          showToast(`Downloading ${d.name} · ${formatBytes(pick.size)}`);
+        } else {
+          window.open(`https://pypi.org/project/${encodeURIComponent(d.name)}/#files`, '_blank');
+        }
+      }catch(_){
+        window.open(`https://pypi.org/project/${encodeURIComponent(d.name)}/#files`, '_blank');
+      }finally{
+        dlBtn.innerHTML = ICON.download;
+      }
+    });
     const extBtn = document.createElement('a');
     extBtn.className = 'icon-btn';
     extBtn.title = 'View on PyPI';
@@ -1728,6 +2268,7 @@ function renderNodes(deps, parentUl, depth){
     extBtn.innerHTML = ICON.ext;
     extBtn.addEventListener('click', e => e.stopPropagation());
     actions.appendChild(copyBtn);
+    actions.appendChild(dlBtn);
     actions.appendChild(extBtn);
 
     row.appendChild(chev);
