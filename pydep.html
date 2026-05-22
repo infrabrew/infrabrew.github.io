@@ -892,6 +892,146 @@ html[data-theme="dark"] .dl-select select{ background-image: url("data:image/svg
   text-transform: none; letter-spacing: 0;
 }
 
+/* Bundle modal */
+.modal-bg{
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 100;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 24px;
+  animation: fadeIn 200ms var(--ease-emph);
+}
+.modal-bg.visible{ display:flex; }
+@keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+.modal{
+  background: var(--surface);
+  border-radius: var(--r-16);
+  border: 1px solid var(--hair);
+  box-shadow: var(--e4);
+  width: 100%; max-width: 520px;
+  max-height: 80vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  animation: modalIn 320ms var(--ease-emph);
+}
+@keyframes modalIn{
+  from{ opacity:0; transform: scale(0.96) translateY(8px); }
+  to{ opacity:1; transform: scale(1) translateY(0); }
+}
+.modal-head{
+  padding: 20px 24px 16px;
+  display: flex; align-items: flex-start; gap: 14px;
+  border-bottom: 1px solid var(--hair);
+}
+.modal-icon{
+  width: 40px; height: 40px; border-radius: var(--r-10);
+  background: var(--blue-wash); color: var(--blue);
+  display: grid; place-items: center; flex-shrink: 0;
+}
+.modal-icon svg{ width: 20px; height: 20px; }
+.modal-title{ font: 700 17px/1.25 var(--font-sans); color: var(--ink); letter-spacing: -0.01em; }
+.modal-sub{ font: 400 13px/1.4 var(--font-sans); color: var(--ink-3); margin-top: 4px; }
+.modal-close{
+  margin-left: auto; flex-shrink: 0;
+  width: 30px; height: 30px; border-radius: 50%;
+  border: none; background: var(--surface-3); color: var(--ink-3);
+  cursor: pointer; display: grid; place-items: center;
+}
+.modal-close:hover{ background: var(--hair-strong); color: var(--ink); }
+.modal-body{
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1; min-height: 0;
+}
+.modal-foot{
+  padding: 14px 24px;
+  border-top: 1px solid var(--hair);
+  background: var(--surface-2);
+  display: flex; gap: 8px; justify-content: flex-end;
+}
+.btn{
+  font: 600 13.5px/1 var(--font-sans);
+  padding: 10px 16px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--hair);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: all var(--dur-1) var(--ease);
+}
+.btn:hover{ border-color: var(--hair-strong); background: var(--surface-3); }
+.btn:disabled{ opacity: 0.5; cursor: not-allowed; }
+.btn.primary{
+  background: var(--blue); color: #fff; border-color: var(--blue);
+  box-shadow: 0 4px 12px rgba(0,113,227,0.22);
+}
+.btn.primary:hover{ background: var(--blue-hover); }
+.btn svg{ width: 14px; height: 14px; }
+
+.progress-summary{
+  display:flex; align-items:center; justify-content: space-between;
+  font: 500 13px/1 var(--font-sans);
+  color: var(--ink-2);
+  margin-bottom: 8px;
+}
+.progress-summary .count{
+  font-family: var(--font-mono); font-size: 12.5px;
+  color: var(--ink-3);
+}
+.progress-bar-wrap{
+  height: 8px; background: var(--surface-3);
+  border-radius: var(--r-full); overflow: hidden;
+  margin-bottom: 16px;
+}
+.progress-bar{
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--blue), #5eaaff);
+  border-radius: var(--r-full);
+  transition: width 240ms var(--ease);
+}
+.bundle-log{
+  font: 500 12px/1.5 var(--font-mono);
+  color: var(--ink-2);
+  background: var(--surface-2);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-10);
+  padding: 12px 14px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.bundle-log .log-line{
+  display: flex; align-items: center; gap: 8px;
+  padding: 2px 0;
+}
+.bundle-log .log-line svg{ width: 12px; height: 12px; flex-shrink: 0; }
+.bundle-log .log-line.ok svg{ color: var(--green); }
+.bundle-log .log-line.err svg{ color: var(--red); }
+.bundle-log .log-line.warn svg{ color: var(--orange); }
+.bundle-log .log-line.pending svg{ color: var(--ink-3); animation: spin 0.85s linear infinite; }
+.bundle-log .pkg-name{ color: var(--ink); font-weight: 600; }
+.bundle-log .file-info{ color: var(--ink-3); margin-left: auto; font-size: 11px; }
+
+/* Bundle CTA button */
+.bundle-cta{
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px 14px;
+  border-radius: var(--r-10);
+  border: 1px dashed var(--blue-soft);
+  background: transparent;
+  color: var(--blue);
+  font: 600 13px/1.2 var(--font-sans);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all var(--dur-1) var(--ease);
+}
+.bundle-cta:hover{ background: var(--blue-wash); border-style: solid; }
+.bundle-cta svg{ width: 15px; height: 15px; }
+
 /* file row highlighted (matches current filter) */
 .file-row.match{
   border-color: var(--blue-soft);
@@ -1058,6 +1198,7 @@ footer a{ color: var(--blue); text-decoration: none; }
   .pkg-card{ position: static; }
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 
@@ -1192,6 +1333,10 @@ footer a{ color: var(--blue); text-decoration: none; }
 
       <div class="dl-row" id="dl-row"></div>
       <div class="dl-hint" id="dl-hint" style="display:none;"></div>
+      <button class="bundle-cta" id="bundle-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        Download bundle (package + all dependencies)
+      </button>
 
       <div class="meta">
         <div class="meta-row">
@@ -1299,6 +1444,39 @@ footer a{ color: var(--blue); text-decoration: none; }
   &copy; 2026 PyDep — Powered by <a href="https://pypi.org" target="_blank" rel="noopener">PyPI</a>
 </footer>
 
+<!-- BUNDLE MODAL -->
+<div class="modal-bg" id="bundle-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      </div>
+      <div style="min-width:0; flex:1;">
+        <div class="modal-title" id="bundle-title">Bundle all dependencies</div>
+        <div class="modal-sub" id="bundle-sub">—</div>
+      </div>
+      <button class="modal-close" id="bundle-close" title="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="progress-summary">
+        <span id="bundle-status">Ready</span>
+        <span class="count" id="bundle-count">0 / 0</span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="bundle-progress"></div></div>
+      <div class="bundle-log" id="bundle-log"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="bundle-cancel">Cancel</button>
+      <button class="btn primary" id="bundle-start">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Start bundling
+      </button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
   <span id="toast-msg">Copied</span>
@@ -1380,6 +1558,18 @@ const versionsList = $('#versions-list');
 
 const toast = $('#toast');
 const toastMsg = $('#toast-msg');
+
+const bundleBtn = $('#bundle-btn');
+const bundleModal = $('#bundle-modal');
+const bundleClose = $('#bundle-close');
+const bundleCancel = $('#bundle-cancel');
+const bundleStart = $('#bundle-start');
+const bundleStatus = $('#bundle-status');
+const bundleCount = $('#bundle-count');
+const bundleProgress = $('#bundle-progress');
+const bundleLog = $('#bundle-log');
+const bundleTitle = $('#bundle-title');
+const bundleSub = $('#bundle-sub');
 
 /* =========================================================
    ICONS (inline)
@@ -2357,6 +2547,354 @@ function prettifyCondition(c){
     .replace(/\s+and\s+/g, ' & ')
     .replace(/\s+or\s+/g, ' | ');
   return s.length > 50 ? s.slice(0, 47) + '…' : s;
+}
+
+/* =========================================================
+   BUNDLE DOWNLOADER
+========================================================= */
+let bundleCancelled = false;
+let bundleRunning = false;
+
+bundleBtn.addEventListener('click', () => openBundleModal());
+bundleClose.addEventListener('click', () => closeBundleModal());
+bundleCancel.addEventListener('click', () => {
+  if(bundleRunning){ bundleCancelled = true; bundleStatus.textContent = 'Cancelling…'; }
+  else closeBundleModal();
+});
+bundleModal.addEventListener('click', (e) => { if(e.target === bundleModal && !bundleRunning) closeBundleModal(); });
+bundleStart.addEventListener('click', () => runBundle());
+
+function openBundleModal(){
+  if(!currentPkg){ showToast('Search for a package first'); return; }
+  bundleCancelled = false; bundleRunning = false;
+  bundleTitle.textContent = `Bundle: ${currentPkg.name} ${currentPkg.version}`;
+  const platLbl = selPlatform.value === 'any-all' ? 'all platforms' : (selPlatform.options[selPlatform.selectedIndex]?.textContent || selPlatform.value);
+  const pyLbl = selPyver.value === 'any' ? 'any Python' : `Python ${selPyver.value}`;
+  bundleSub.textContent = `Will resolve the full dependency graph and pack matching wheels for ${pyLbl} · ${platLbl} into a single .zip archive.`;
+  bundleStatus.textContent = 'Ready to download package + all dependencies.';
+  bundleCount.textContent = '0 / 0';
+  bundleProgress.style.width = '0%';
+  bundleLog.innerHTML = '';
+  bundleStart.disabled = false;
+  bundleStart.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Start bundling`;
+  bundleCancel.textContent = 'Cancel';
+  bundleModal.classList.add('visible');
+}
+function closeBundleModal(){
+  if(bundleRunning) return;
+  bundleModal.classList.remove('visible');
+}
+
+function logLine(kind, html){
+  const div = document.createElement('div');
+  div.className = `log-line ${kind}`;
+  const icons = {
+    ok: ICON.check,
+    err: ICON.alert,
+    warn: ICON.warn,
+    pending: ICON.spinner,
+    info: ICON.dot,
+  };
+  div.innerHTML = `${icons[kind] || ICON.dot}<span>${html}</span>`;
+  bundleLog.appendChild(div);
+  bundleLog.scrollTop = bundleLog.scrollHeight;
+  return div;
+}
+
+async function resolveDepGraph(rootName, rootVersion){
+  // BFS through dep graph, respecting "extra" markers only when extras present.
+  const visited = new Set();
+  const queue = [{name: rootName, version: rootVersion, depth: 0}];
+  const ordered = [];
+  while(queue.length){
+    if(bundleCancelled) return ordered;
+    const cur = queue.shift();
+    const key = cur.name.toLowerCase();
+    if(visited.has(key)) continue;
+    visited.add(key);
+    let data;
+    try{
+      const url = cur.version
+        ? `https://pypi.org/pypi/${encodeURIComponent(cur.name)}/${encodeURIComponent(cur.version)}/json`
+        : `https://pypi.org/pypi/${encodeURIComponent(cur.name)}/json`;
+      data = await cachedFetch(url);
+    }catch(e){
+      ordered.push({ name: cur.name, error: e.message || 'fetch failed', depth: cur.depth });
+      continue;
+    }
+    ordered.push({ name: data.info.name, version: data.info.version, urls: data.urls || [], depth: cur.depth });
+    const deps = data.info.requires_dist || [];
+    deps.forEach(rawDep => {
+      const d = parseDep(rawDep);
+      if(!d.name) return;
+      // Skip optional/extra-only deps (require "extra" marker satisfied) — best effort
+      if(d.condition && /\bextra\s*==/.test(d.condition)) return;
+      // Skip clearly-incompatible markers when user picked a python version
+      if(d.condition && selPyver.value !== 'any'){
+        const ver = selPyver.value;
+        const m = d.condition.match(/python_version\s*([<>=!]+)\s*["']([\d.]+)["']/);
+        if(m){
+          const op = m[1], rhs = m[2];
+          if(!checkVersion(ver, op, rhs)) return;
+        }
+      }
+      if(!visited.has(d.name.toLowerCase())){
+        queue.push({ name: d.name, depth: cur.depth + 1 });
+      }
+    });
+  }
+  return ordered;
+}
+
+function checkVersion(a, op, b){
+  const pa = a.split('.').map(Number);
+  const pb = b.split('.').map(Number);
+  const len = Math.max(pa.length, pb.length);
+  let cmp = 0;
+  for(let i=0;i<len;i++){
+    const av = pa[i]||0, bv = pb[i]||0;
+    if(av !== bv){ cmp = av < bv ? -1 : 1; break; }
+  }
+  if(op === '>=') return cmp >= 0;
+  if(op === '<=') return cmp <= 0;
+  if(op === '>')  return cmp > 0;
+  if(op === '<')  return cmp < 0;
+  if(op === '==') return cmp === 0;
+  if(op === '!=') return cmp !== 0;
+  return true;
+}
+
+function pickFileForBundle(urls){
+  if(!urls || urls.length === 0) return null;
+  const wantPy = selPyver.value;
+  const wantPlat = selPlatform.value;
+  const matches = urls.filter(u => {
+    const pl = platformOf(u);
+    if(wantPlat !== 'any-all' && pl.id !== wantPlat && pl.id !== 'any' && pl.id !== 'sdist') return false;
+    if(wantPy === 'any') return true;
+    if(u.packagetype === 'sdist') return true;
+    const sup = pythonVersionsOf(u);
+    if(sup.includes(wantPy)) return true;
+    if(sup.some(s => s === '3.x' && wantPy.startsWith('3.'))) return true;
+    return false;
+  });
+  // Prefer: pure-Python wheel > platform wheel > sdist
+  return matches.find(u => u.packagetype === 'bdist_wheel' && /none-any/.test(u.filename))
+      || matches.find(u => u.packagetype === 'bdist_wheel')
+      || matches.find(u => u.packagetype === 'sdist')
+      || urls.find(u => u.packagetype === 'bdist_wheel' && /none-any/.test(u.filename))
+      || urls.find(u => u.packagetype === 'sdist')
+      || urls[0];
+}
+
+async function runBundle(){
+  if(bundleRunning) return;
+  if(typeof JSZip === 'undefined'){
+    logLine('err', 'Archive library failed to load. Check your network connection.');
+    return;
+  }
+  bundleRunning = true;
+  bundleCancelled = false;
+  bundleStart.disabled = true;
+  bundleStart.innerHTML = `${ICON.spinner}<span>Working…</span>`;
+  bundleLog.innerHTML = '';
+  bundleStatus.textContent = 'Resolving dependency graph…';
+  bundleCount.textContent = '0 / ?';
+  bundleProgress.style.width = '5%';
+
+  const resolveLine = logLine('pending', `Walking dependency graph from <span class="pkg-name">${escapeHtml(currentPkg.name)}</span>…`);
+
+  let graph;
+  try{
+    graph = await resolveDepGraph(currentPkg.name, currentPkg.version);
+  }catch(e){
+    resolveLine.classList.remove('pending');
+    resolveLine.classList.add('err');
+    resolveLine.querySelector('svg').outerHTML = ICON.alert;
+    finishBundle(false, 'Failed to resolve dependencies.');
+    return;
+  }
+  if(bundleCancelled){ finishBundle(false, 'Cancelled.'); return; }
+
+  resolveLine.classList.remove('pending');
+  resolveLine.classList.add('ok');
+  resolveLine.querySelector('svg').outerHTML = ICON.check;
+  resolveLine.querySelector('span').innerHTML = `Resolved <strong>${graph.length}</strong> package${graph.length!==1?'s':''} in the dependency graph.`;
+
+  const zip = new JSZip();
+  const pkgsFolder = zip.folder('packages');
+  const total = graph.length;
+  let done = 0;
+  let totalBytes = 0;
+  const manifest = [];
+  const failures = [];
+
+  bundleStatus.textContent = 'Downloading files…';
+  bundleCount.textContent = `0 / ${total}`;
+
+  for(const item of graph){
+    if(bundleCancelled) break;
+    if(item.error){
+      logLine('err', `<span class="pkg-name">${escapeHtml(item.name)}</span> · ${escapeHtml(item.error)}`);
+      failures.push({ name: item.name, reason: item.error });
+      done++;
+      bundleCount.textContent = `${done} / ${total}`;
+      bundleProgress.style.width = `${10 + 85 * (done/total)}%`;
+      continue;
+    }
+    const file = pickFileForBundle(item.urls);
+    if(!file){
+      logLine('warn', `<span class="pkg-name">${escapeHtml(item.name)}</span> ${escapeHtml(item.version || '')} · no matching file <span class="file-info">skipped</span>`);
+      failures.push({ name: item.name, reason: 'no matching distribution' });
+      done++;
+      bundleCount.textContent = `${done} / ${total}`;
+      bundleProgress.style.width = `${10 + 85 * (done/total)}%`;
+      continue;
+    }
+    const line = logLine('pending', `<span class="pkg-name">${escapeHtml(item.name)}</span> ${escapeHtml(item.version)} <span class="file-info">${escapeHtml(file.filename)} · ${escapeHtml(formatBytes(file.size))}</span>`);
+    try{
+      const resp = await fetch(file.url);
+      if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const blob = await resp.blob();
+      pkgsFolder.file(file.filename, blob);
+      totalBytes += blob.size;
+      manifest.push({
+        name: item.name,
+        version: item.version,
+        file: `packages/${file.filename}`,
+        size: blob.size,
+        url: file.url,
+        sha256: file.digests?.sha256 || null,
+        depth: item.depth,
+      });
+      line.classList.remove('pending');
+      line.classList.add('ok');
+      line.querySelector('svg').outerHTML = ICON.check;
+    }catch(e){
+      line.classList.remove('pending');
+      line.classList.add('err');
+      line.querySelector('svg').outerHTML = ICON.alert;
+      line.querySelector('span').innerHTML += ` · failed: ${escapeHtml(e.message)}`;
+      failures.push({ name: item.name, reason: e.message });
+    }
+    done++;
+    bundleCount.textContent = `${done} / ${total}`;
+    bundleProgress.style.width = `${10 + 85 * (done/total)}%`;
+  }
+
+  if(bundleCancelled){ finishBundle(false, 'Cancelled.'); return; }
+
+  // Add manifest + README + requirements.txt + install script
+  const platLbl = selPlatform.value === 'any-all' ? 'all platforms' : (selPlatform.options[selPlatform.selectedIndex]?.textContent || selPlatform.value);
+  const pyLbl = selPyver.value === 'any' ? 'any Python' : `Python ${selPyver.value}`;
+  zip.file('manifest.json', JSON.stringify({
+    root: { name: currentPkg.name, version: currentPkg.version },
+    python: selPyver.value,
+    platform: selPlatform.value,
+    generated: new Date().toISOString(),
+    total_packages: manifest.length,
+    total_bytes: totalBytes,
+    failures,
+    packages: manifest,
+  }, null, 2));
+  zip.file('requirements.txt', manifest.map(m => `${m.name}==${m.version}`).join('\n') + '\n');
+  zip.file('install.sh',
+`#!/usr/bin/env bash
+# Offline install bundle generated by PyDep.
+# Root: ${currentPkg.name}==${currentPkg.version}
+# Target: ${pyLbl} · ${platLbl}
+set -e
+pip install --no-index --find-links=packages "${currentPkg.name}==${currentPkg.version}"
+`);
+  zip.file('install.bat',
+`@echo off
+REM Offline install bundle generated by PyDep.
+REM Root: ${currentPkg.name}==${currentPkg.version}
+REM Target: ${pyLbl} - ${platLbl}
+pip install --no-index --find-links=packages "${currentPkg.name}==${currentPkg.version}"
+`);
+  zip.file('README.txt',
+`PyDep offline bundle
+====================
+
+Root package: ${currentPkg.name}==${currentPkg.version}
+Target:       ${pyLbl} · ${platLbl}
+Packages:     ${manifest.length}
+Total size:   ${formatBytes(totalBytes)}
+Failures:     ${failures.length}
+Generated:    ${new Date().toString()}
+
+To install offline:
+
+  pip install --no-index --find-links=packages "${currentPkg.name}==${currentPkg.version}"
+
+Or use the included scripts: install.sh (macOS/Linux) or install.bat (Windows).
+
+Files:
+  packages/      All wheel/sdist files (${manifest.length})
+  manifest.json  Full bundle metadata + SHA256 digests
+  requirements.txt
+  install.sh / install.bat
+`);
+
+  bundleStatus.textContent = 'Compressing archive…';
+  bundleProgress.style.width = '96%';
+  logLine('info', `Compressing <strong>${manifest.length}</strong> file${manifest.length!==1?'s':''} · ${escapeHtml(formatBytes(totalBytes))}`);
+
+  let blob;
+  try{
+    // Stream the zip out as chunks and build a Blob from those — avoids
+    // allocating one giant ArrayBuffer for the entire archive at the end.
+    const chunks = [];
+    await new Promise((resolve, reject) => {
+      zip.generateInternalStream({
+        type: 'uint8array',
+        compression: 'STORE',
+        streamFiles: true,
+      })
+        .on('data', (chunk, meta) => {
+          chunks.push(chunk);
+          bundleProgress.style.width = `${96 + 4 * (meta.percent/100)}%`;
+        })
+        .on('end', resolve)
+        .on('error', reject)
+        .resume();
+    });
+    blob = new Blob(chunks, { type: 'application/zip' });
+    // Free the chunk array references so GC can reclaim Uint8Arrays
+    chunks.length = 0;
+  }catch(e){
+    const hint = /allocation failed|out of memory|maximum|RangeError/i.test(e.message || '')
+      ? ' — bundle too large for this browser tab. Try a narrower selection (e.g. specific Python version + platform) or download files individually from the Files tab.'
+      : '';
+    logLine('err', `Failed to generate archive: ${escapeHtml(e.message)}${escapeHtml(hint)}`);
+    finishBundle(false, 'Archive generation failed.');
+    return;
+  }
+
+  const filename = `${currentPkg.name}-${currentPkg.version}-bundle.zip`;
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 2000);
+
+  bundleProgress.style.width = '100%';
+  logLine('ok', `Saved <span class="pkg-name">${escapeHtml(filename)}</span> <span class="file-info">${escapeHtml(formatBytes(blob.size))}</span>`);
+  finishBundle(true, `Bundle saved · ${manifest.length} packages · ${formatBytes(blob.size)}${failures.length ? ` · ${failures.length} failed` : ''}`);
+}
+
+function finishBundle(success, msg){
+  bundleRunning = false;
+  bundleStart.disabled = false;
+  bundleStart.innerHTML = `${success
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>'
+  }<span>${success ? 'Done — close' : 'Try again'}</span>`;
+  bundleStart.onclick = success ? closeBundleModal : runBundle;
+  bundleCancel.textContent = success ? 'Close' : 'Cancel';
+  bundleStatus.textContent = msg;
+  if(success) showToast('Bundle downloaded');
 }
 
 /* =========================================================
