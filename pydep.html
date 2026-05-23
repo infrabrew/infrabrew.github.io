@@ -10,11 +10,11 @@
 <meta name="apple-mobile-web-app-title" content="PyDep" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="description" content="PyDep — Python Package Search Engine. Browse PyPI, explore dependency graphs, and bundle packages with all their dependencies." />
-<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%233b82f6'/><stop offset='1' stop-color='%231d4ed8'/></linearGradient></defs><rect width='180' height='180' rx='40' fill='url(%23g)'/><g fill='none' stroke='white' stroke-width='10' stroke-linecap='round'><circle cx='80' cy='80' r='42'/><line x1='112' y1='112' x2='148' y2='148'/></g><g fill='white' stroke='white' stroke-width='6' stroke-linecap='round'><circle cx='80' cy='60' r='6'/><circle cx='62' cy='96' r='6'/><circle cx='98' cy='96' r='6'/><line x1='80' y1='66' x2='64' y2='92'/><line x1='80' y1='66' x2='96' y2='92'/></g></svg>" />
-<title>PyDep — Python Dependency Explorer</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%232196F3'/><stop offset='1' stop-color='%231565C0'/></linearGradient></defs><rect width='180' height='180' rx='40' fill='url(%23g)'/><g fill='none' stroke='white' stroke-width='10' stroke-linecap='round'><circle cx='80' cy='80' r='42'/><line x1='112' y1='112' x2='148' y2='148'/></g><g fill='white' stroke='white' stroke-width='6' stroke-linecap='round'><circle cx='80' cy='60' r='6'/><circle cx='62' cy='96' r='6'/><circle cx='98' cy='96' r='6'/><line x1='80' y1='66' x2='64' y2='92'/><line x1='80' y1='66' x2='96' y2='92'/></g></svg>" />
+<title>PyDep — Python Package Search Engine</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
 <style>
 /* ============================================================
    TOKENS — Apple system colors, Material-ish elevation
@@ -35,12 +35,12 @@
   --ink-4: #86868b;
   --ink-5: #b4b4b8;
 
-  /* Accent: Apple blue */
-  --blue: #0071e3;
-  --blue-hover: #0077ed;
-  --blue-press: #006edb;
-  --blue-wash: #eaf2ff;
-  --blue-soft: #d6e6ff;
+  /* Accent: Material Design Blue */
+  --blue: #2196F3;
+  --blue-hover: #1E88E5;
+  --blue-press: #1976D2;
+  --blue-wash: #E3F2FD;
+  --blue-soft: #BBDEFB;
 
   /* System colors */
   --green:#34c759; --green-wash:#e7f8ec;
@@ -96,10 +96,10 @@ html[data-theme="dark"]{
   --ink-4:#86868b;
   --ink-5:#48484a;
 
-  --blue:#0a84ff;
-  --blue-hover:#3a9eff;
-  --blue-wash:rgba(10,132,255,0.16);
-  --blue-soft:rgba(10,132,255,0.28);
+  --blue:#42A5F5;
+  --blue-hover:#64B5F6;
+  --blue-wash:rgba(33,150,243,0.16);
+  --blue-soft:rgba(33,150,243,0.28);
 
   --green-wash:rgba(52,199,89,0.16);
   --orange-wash:rgba(255,159,10,0.18);
@@ -154,14 +154,26 @@ body{
 }
 .brand{
   display:flex; align-items:center; gap:10px;
-  font-weight:700; letter-spacing:-0.02em; font-size:17px; color:var(--ink);
+  font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight:700; letter-spacing:-0.025em; font-size:19px; color:var(--ink);
   text-decoration:none;
+}
+.brand-text .grad{
+  color: #2196F3;
+  background: none;
+  -webkit-text-fill-color: #2196F3;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+}
+html[data-theme="dark"] .brand-text .grad{
+  color: #64B5F6;
+  -webkit-text-fill-color: #64B5F6;
 }
 .brand-mark{
   width:28px; height:28px; border-radius:8px;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: linear-gradient(135deg, #2196F3, #1565C0);
   display:grid; place-items:center; color:#fff;
-  box-shadow: 0 4px 12px rgba(29,78,216,0.32), inset 0 1px 0 rgba(255,255,255,0.3);
+  box-shadow: 0 4px 12px rgba(33,150,243,0.32), inset 0 1px 0 rgba(255,255,255,0.3);
 }
 .brand-mark svg{ width:16px; height:16px; }
 .nav-links{ display:flex; align-items:center; gap:6px; }
@@ -259,9 +271,9 @@ body[data-view="landing"] .nav-inner{
 }
 .wordmark-mark{
   width: 72px; height: 72px; border-radius: 20px;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: linear-gradient(135deg, #2196F3, #1565C0);
   display: grid; place-items: center; color: #fff;
-  box-shadow: 0 12px 32px rgba(29,78,216,0.32), inset 0 1px 0 rgba(255,255,255,0.3);
+  box-shadow: 0 12px 32px rgba(33,150,243,0.32), inset 0 1px 0 rgba(255,255,255,0.3);
   position: relative;
   overflow: hidden;
 }
@@ -272,10 +284,27 @@ body[data-view="landing"] .nav-inner{
 }
 .wordmark-mark svg{ width: 42px; height: 42px; position: relative; z-index: 1; }
 .wordmark-text{
-  font: 700 48px/1 var(--font-sans);
-  letter-spacing: -0.03em;
+  font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  font-size: 56px;
+  line-height: 1;
+  letter-spacing: -0.04em;
   color: var(--ink);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+}
+.wordmark-text .grad{
+  /* Material Design Blue 500 */
+  color: #2196F3;
+  background: none;
+  -webkit-text-fill-color: #2196F3;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  font-weight: 700;
+}
+html[data-theme="dark"] .wordmark-text .grad{
+  /* Material Design Blue 300 for dark mode legibility */
+  color: #64B5F6;
+  -webkit-text-fill-color: #64B5F6;
 }
 .tagline{
   font: 500 14px/1.4 var(--font-sans);
@@ -288,7 +317,7 @@ body[data-view="landing"] .nav-inner{
   .wordmark{ margin-bottom: 14px; }
   .wordmark-mark{ width: 60px; height: 60px; border-radius: 16px; }
   .wordmark-mark svg{ width: 34px; height: 34px; }
-  .wordmark-text{ font-size: 38px; }
+  .wordmark-text{ font-size: 44px; }
   .tagline{ font-size: 12px; margin-bottom: 32px; }
 }
 
@@ -445,11 +474,11 @@ h1 .grad{
   font: 600 14px/1 var(--font-sans);
   border-radius: var(--r-full);
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  box-shadow: 0 4px 14px rgba(0,113,227,0.25);
+  box-shadow: 0 4px 14px rgba(33,150,243,0.28);
   transition: background var(--dur-1) var(--ease), transform var(--dur-1) var(--ease), box-shadow var(--dur-2) var(--ease);
   position: relative; overflow: hidden;
 }
-.search button.go:hover{ background: var(--blue-hover); box-shadow: 0 6px 20px rgba(0,113,227,0.32); }
+.search button.go:hover{ background: var(--blue-hover); box-shadow: 0 6px 20px rgba(33,150,243,0.36); }
 .search button.go:active{ transform: scale(0.97); }
 .search button.go svg{ width:16px; height:16px; }
 
@@ -479,11 +508,83 @@ h1 .grad{
   border-radius: var(--r-14);
   box-shadow: var(--e3);
   overflow: hidden;
-  max-height: 360px; overflow-y: auto;
+  max-height: 400px; overflow-y: auto;
   z-index: 30;
   display: none;
   animation: acIn 200ms var(--ease-emph);
 }
+.ac-section-label{
+  font: 600 10.5px/1 var(--font-sans);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--ink-4);
+  padding: 10px 16px 6px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+.ac-section-label .ac-section-action{
+  font: 500 10.5px/1 var(--font-sans);
+  color: var(--ink-3);
+  background: transparent; border: none; padding: 4px 6px;
+  border-radius: var(--r-6);
+  cursor: pointer; text-transform: none; letter-spacing: 0;
+}
+.ac-section-label .ac-section-action:hover{ color: var(--ink); background: var(--surface-3); }
+.ac-name mark{
+  background: transparent;
+  color: var(--blue);
+  font-weight: 700;
+  padding: 0;
+}
+html[data-theme="dark"] .ac-name mark{ color: #5eaaff; }
+.ac-meta-pill{
+  font: 500 11px/1 var(--font-mono);
+  color: var(--ink-3);
+  padding: 4px 8px; border-radius: var(--r-full);
+  background: var(--surface-3); border: 1px solid var(--hair);
+  flex-shrink: 0;
+  white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.ac-meta-pill svg{ width: 10px; height: 10px; }
+.ac-meta-pill.popular{
+  color: var(--orange); background: var(--orange-wash); border-color: transparent;
+}
+.ac-meta-pill.recent{
+  color: var(--blue); background: var(--blue-wash); border-color: transparent;
+}
+.ac-footer{
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  font: 500 12.5px/1.3 var(--font-sans);
+  color: var(--ink-3);
+  background: var(--surface-2);
+  border-top: 1px solid var(--hair);
+  cursor: pointer;
+  position: sticky; bottom: 0;
+  transition: background var(--dur-1) var(--ease);
+}
+.ac-footer:hover{ background: var(--surface-3); color: var(--ink); }
+.ac-footer svg{ width: 14px; height: 14px; flex-shrink: 0; color: var(--blue); }
+.ac-footer strong{ color: var(--ink); font-weight: 600; }
+.ac-footer .ac-footer-kbd{
+  margin-left: auto;
+  font: 500 11px/1 var(--font-mono);
+  color: var(--ink-4);
+  padding: 3px 7px;
+  border-radius: var(--r-6);
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-bottom-width: 2px;
+}
+.ac-loader{
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px;
+  font: 500 12px/1 var(--font-sans);
+  color: var(--ink-3);
+}
+.ac-loader svg{ width: 14px; height: 14px; animation: spin 0.85s linear infinite; color: var(--blue); }
 @keyframes acIn{
   from{ opacity:0; transform: translateY(-6px) scale(0.99); }
   to{ opacity:1; transform: translateY(0) scale(1); }
@@ -502,6 +603,7 @@ h1 .grad{
   width: 32px; height: 32px; border-radius: var(--r-8);
   background: var(--blue-wash); color: var(--blue);
   display:grid; place-items:center; flex-shrink:0;
+  font: 700 13px/1 var(--font-sans);
 }
 .ac-icon svg{ width:16px; height:16px; }
 .ac-body{ flex:1; min-width:0; }
@@ -546,9 +648,9 @@ h1 .grad{
 .pkg-avatar{
   width:48px; height:48px; border-radius: var(--r-12);
   display:grid; place-items:center; flex-shrink:0;
-  background: linear-gradient(135deg, var(--blue), #4ea0ff);
+  background: linear-gradient(135deg, var(--blue), #64B5F6);
   color: #fff; font: 700 20px/1 var(--font-sans);
-  box-shadow: 0 6px 18px rgba(0,113,227,0.30), inset 0 1px 0 rgba(255,255,255,0.25);
+  box-shadow: 0 6px 18px rgba(33,150,243,0.32), inset 0 1px 0 rgba(255,255,255,0.25);
 }
 .pkg-title{ font: 700 22px/1.15 var(--font-sans); color: var(--ink); letter-spacing:-0.015em; word-break: break-word; }
 .pkg-version-row{
@@ -728,7 +830,7 @@ h1 .grad{
 }
 .dep-row{
   display: grid;
-  grid-template-columns: 28px 36px 1fr auto;
+  grid-template-columns: 28px 36px minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
@@ -736,6 +838,7 @@ h1 .grad{
   cursor: default;
   transition: background var(--dur-1) var(--ease);
   position: relative;
+  min-width: 0;
 }
 .dep-row:hover{ background: var(--surface-3); }
 .dep-row.expandable{ cursor: pointer; }
@@ -779,13 +882,14 @@ h1 .grad{
 .avatar-red    { background: var(--red-wash);    color: var(--red); }
 .avatar-indigo { background: var(--indigo-wash); color: var(--indigo); }
 
-.dep-info{ min-width:0; display:flex; flex-direction:column; gap: 3px; }
-.dep-name-row{ display:flex; align-items:center; gap:8px; min-width:0; }
+.dep-info{ min-width:0; max-width: 100%; display:flex; flex-direction:column; gap: 3px; overflow: hidden; }
+.dep-name-row{ display:flex; align-items:center; gap:8px; min-width:0; max-width: 100%; }
 .dep-name{
   font: 600 14px/1.2 var(--font-sans); color: var(--ink);
   text-decoration:none;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-  max-width: 100%;
+  min-width: 0;
+  flex-shrink: 1;
 }
 a.dep-name:hover{ color: var(--blue); }
 .dep-extras{
@@ -793,12 +897,20 @@ a.dep-name:hover{ color: var(--blue); }
   color: var(--purple);
   padding: 3px 7px; border-radius: var(--r-full);
   background: var(--purple-wash);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+  flex-shrink: 1;
+  cursor: help;
 }
 .dep-sub{
   display:flex; align-items:center; gap:10px;
   font: 400 12px/1.2 var(--font-sans);
   color: var(--ink-3);
   min-width: 0;
+  max-width: 100%;
+  flex-wrap: wrap;
 }
 .dep-constraint{
   font-family: var(--font-mono);
@@ -810,6 +922,8 @@ a.dep-name:hover{ color: var(--blue); }
   white-space: nowrap;
   max-width: 100%;
   overflow:hidden; text-overflow:ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
 }
 .dep-condition{
   display:inline-flex; align-items:center; gap:4px;
@@ -999,7 +1113,7 @@ html[data-theme="dark"] .dl-select select{ background-image: url("data:image/svg
 .dl-btn svg{ width: 15px; height: 15px; }
 .dl-btn .dl-kind{ font: 500 11px/1 var(--font-mono); color: var(--ink-3); margin-top: 4px; display:block; }
 .dl-btn .dl-stack{ display:flex; flex-direction:column; align-items:flex-start; line-height: 1.2; }
-.dl-btn.primary{ background: var(--blue); color:#fff; border-color: var(--blue); box-shadow: 0 4px 12px rgba(0,113,227,0.22); }
+.dl-btn.primary{ background: var(--blue); color:#fff; border-color: var(--blue); box-shadow: 0 4px 12px rgba(33,150,243,0.24); }
 .dl-btn.primary:hover{ background: var(--blue-hover); color:#fff; }
 .dl-btn.primary .dl-kind{ color: rgba(255,255,255,0.78); }
 
@@ -1283,7 +1397,7 @@ html[data-theme="dark"] .dl-select select{ background-image: url("data:image/svg
 .btn:disabled{ opacity: 0.5; cursor: not-allowed; }
 .btn.primary{
   background: var(--blue); color: #fff; border-color: var(--blue);
-  box-shadow: 0 4px 12px rgba(0,113,227,0.22);
+  box-shadow: 0 4px 12px rgba(33,150,243,0.24);
 }
 .btn.primary:hover{ background: var(--blue-hover); }
 .btn svg{ width: 14px; height: 14px; }
@@ -1347,6 +1461,177 @@ html[data-theme="dark"] .dl-select select{ background-image: url("data:image/svg
 }
 .bundle-cta:hover{ background: var(--blue-wash); border-style: solid; }
 .bundle-cta svg{ width: 15px; height: 15px; }
+
+/* Add-to-cart secondary button */
+.add-to-cart{
+  width: 100%;
+  margin-top: 6px;
+  padding: 9px 14px;
+  border-radius: var(--r-10);
+  border: 1px solid var(--hair);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font: 500 12.5px/1.2 var(--font-sans);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all var(--dur-1) var(--ease);
+}
+.add-to-cart:hover{ background: var(--surface-3); border-color: var(--hair-strong); color: var(--ink); }
+.add-to-cart.added{
+  background: var(--green-wash); border-color: var(--green); color: var(--green);
+}
+.add-to-cart svg{ width: 14px; height: 14px; }
+
+/* Floating bundle cart (bottom right) */
+.cart-fab{
+  position: fixed;
+  right: 24px; bottom: 24px;
+  z-index: 80;
+  display: none;
+  flex-direction: column;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 48px);
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-16);
+  box-shadow: var(--e4);
+  overflow: hidden;
+  animation: cartIn 280ms var(--ease-emph);
+}
+.cart-fab.visible{ display: flex; }
+@keyframes cartIn{
+  from{ opacity: 0; transform: translateY(20px) scale(0.96); }
+  to{ opacity: 1; transform: translateY(0) scale(1); }
+}
+.cart-fab.collapsed{
+  width: auto;
+  border-radius: var(--r-full);
+  flex-direction: row;
+  align-items: center;
+  padding: 10px 16px 10px 14px;
+  cursor: pointer;
+  gap: 10px;
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+  box-shadow: 0 8px 24px rgba(33,150,243,0.36);
+}
+.cart-fab.collapsed .cart-body,
+.cart-fab.collapsed .cart-foot,
+.cart-fab.collapsed .cart-collapse{ display: none; }
+.cart-fab.collapsed .cart-head{ background: transparent; border: none; padding: 0; gap: 8px; }
+.cart-fab.collapsed .cart-head-icon{ background: rgba(255,255,255,0.18); color: #fff; }
+.cart-fab.collapsed .cart-title{ color: #fff; font-size: 13px; }
+.cart-fab.collapsed .cart-count{ background: rgba(255,255,255,0.22); color: #fff; }
+.cart-fab.collapsed .cart-sub{ display: none; }
+.cart-fab.collapsed:hover{ transform: translateY(-1px); box-shadow: 0 12px 28px rgba(33,150,243,0.40); }
+
+.cart-head{
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--hair);
+  background: var(--surface-2);
+}
+.cart-head-icon{
+  width: 32px; height: 32px; border-radius: var(--r-8);
+  background: var(--blue-wash); color: var(--blue);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.cart-head-icon svg{ width: 16px; height: 16px; }
+.cart-title{
+  font: 600 14px/1.2 var(--font-sans); color: var(--ink);
+  flex: 1; min-width: 0;
+}
+.cart-sub{
+  font: 400 11.5px/1.3 var(--font-sans);
+  color: var(--ink-3); margin-top: 2px;
+}
+.cart-count{
+  font: 600 12px/1 var(--font-mono);
+  color: var(--blue); padding: 4px 8px;
+  border-radius: var(--r-full);
+  background: var(--blue-wash);
+  border: 1px solid var(--blue-soft);
+  flex-shrink: 0;
+}
+.cart-collapse{
+  width: 26px; height: 26px;
+  border: none; background: var(--surface-3);
+  border-radius: 50%;
+  color: var(--ink-3); cursor: pointer;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: all var(--dur-1) var(--ease);
+}
+.cart-collapse:hover{ background: var(--hair-strong); color: var(--ink); }
+.cart-collapse svg{ width: 13px; height: 13px; }
+.cart-body{
+  flex: 1; min-height: 0;
+  overflow-y: auto;
+  padding: 8px;
+}
+.cart-item{
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--r-8);
+  transition: background var(--dur-1) var(--ease);
+}
+.cart-item:hover{ background: var(--surface-3); }
+.cart-item-avatar{
+  width: 28px; height: 28px; border-radius: var(--r-8);
+  display: grid; place-items: center;
+  font: 600 12px/1 var(--font-sans);
+  flex-shrink: 0;
+}
+.cart-item-body{ flex: 1; min-width: 0; }
+.cart-item-name{
+  font: 600 13px/1.2 var(--font-sans);
+  color: var(--ink); cursor: pointer;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cart-item-name:hover{ color: var(--blue); }
+.cart-item-ver{
+  font: 500 11px/1 var(--font-mono);
+  color: var(--ink-4);
+  margin-top: 2px;
+}
+.cart-item-remove{
+  width: 26px; height: 26px;
+  border: none; background: transparent;
+  color: var(--ink-4); cursor: pointer;
+  border-radius: var(--r-6);
+  display: grid; place-items: center;
+  transition: all var(--dur-1) var(--ease);
+  flex-shrink: 0;
+}
+.cart-item-remove:hover{ background: var(--red-wash); color: var(--red); }
+.cart-item-remove svg{ width: 13px; height: 13px; }
+.cart-empty{
+  padding: 32px 16px; text-align: center;
+  color: var(--ink-3); font-size: 12.5px; font-style: italic;
+}
+.cart-foot{
+  padding: 12px;
+  border-top: 1px solid var(--hair);
+  background: var(--surface-2);
+  display: flex; gap: 8px;
+}
+.cart-foot .btn{ flex: 1; justify-content: center; }
+
+@media (max-width: 768px){
+  .cart-fab{
+    right: 12px; left: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    width: auto;
+    max-width: none;
+  }
+  .cart-fab.collapsed{
+    left: auto;
+    right: 12px;
+  }
+}
 
 /* file row highlighted (matches current filter) */
 .file-row.match{
@@ -1826,10 +2111,11 @@ footer a{ color: var(--blue); text-decoration: none; }
 
   .tree-pane{ padding: 6px; }
   .dep-row{
-    grid-template-columns: 30px 32px 1fr auto;
+    grid-template-columns: 30px 32px minmax(0, 1fr) auto;
     gap: 8px;
     padding: 10px 10px;
   }
+  .dep-extras{ max-width: 110px; font-size: 10px; }
   .dep-avatar{ width: 30px; height: 30px; font-size: 12px; border-radius: 8px; }
   .dep-name{ font-size: 13.5px; }
   .dep-name-row{ gap: 6px; }
@@ -1952,7 +2238,7 @@ footer a{ color: var(--blue); text-decoration: none; }
           <circle cx="12.8" cy="12.6" r="1.5" fill="currentColor"/>
         </svg>
       </span>
-      <span class="brand-text">PyDep</span>
+      <span class="brand-text">Py<span class="grad">Dep</span></span>
     </a>
     <div class="nav-search-mount" id="nav-search-mount"></div>
     <div class="nav-links">
@@ -2137,6 +2423,10 @@ footer a{ color: var(--blue); text-decoration: none; }
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
         Download bundle (package + all dependencies)
       </button>
+      <button class="add-to-cart" id="add-to-cart-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span id="add-to-cart-label">Add to multi-bundle</span>
+      </button>
 
       <div class="meta">
         <div class="meta-row">
@@ -2277,6 +2567,34 @@ footer a{ color: var(--blue); text-decoration: none; }
   </div>
 </div>
 
+<!-- BUNDLE CART (floating, multi-package) -->
+<div class="cart-fab" id="cart-fab">
+  <div class="cart-head">
+    <div class="cart-head-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    </div>
+    <div style="flex:1; min-width:0;">
+      <div class="cart-title">Multi-bundle</div>
+      <div class="cart-sub" id="cart-sub">0 packages selected</div>
+    </div>
+    <div class="cart-count" id="cart-count">0</div>
+    <button class="cart-collapse" id="cart-collapse" title="Minimize">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+  </div>
+  <div class="cart-body" id="cart-body"></div>
+  <div class="cart-foot">
+    <button class="btn" id="cart-clear">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+      Clear
+    </button>
+    <button class="btn primary" id="cart-bundle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Bundle all
+    </button>
+  </div>
+</div>
+
 <div class="toast" id="toast">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
   <span id="toast-msg">Copied</span>
@@ -2377,6 +2695,17 @@ const bundleProgress = $('#bundle-progress');
 const bundleLog = $('#bundle-log');
 const bundleTitle = $('#bundle-title');
 const bundleSub = $('#bundle-sub');
+
+/* Multi-package cart */
+const addToCartBtn = $('#add-to-cart-btn');
+const addToCartLabel = $('#add-to-cart-label');
+const cartFab = $('#cart-fab');
+const cartCount = $('#cart-count');
+const cartSub = $('#cart-sub');
+const cartBody = $('#cart-body');
+const cartCollapse = $('#cart-collapse');
+const cartClear = $('#cart-clear');
+const cartBundle = $('#cart-bundle');
 
 /* =========================================================
    VIEW MODES (landing / results)
@@ -2614,79 +2943,287 @@ let acTimer = null;
 let acIndex = -1;
 let acResults = [];
 
+/* ---- Top-PyPI lazy index (8000 most-downloaded packages) ---- */
+let TOP_PYPI = null;
+let TOP_PYPI_LOADING = null;
+async function loadTopPypi(){
+  if(TOP_PYPI) return TOP_PYPI;
+  if(TOP_PYPI_LOADING) return TOP_PYPI_LOADING;
+  // sessionStorage cache (per tab) — small enough that it's worth caching
+  try{
+    const cached = sessionStorage.getItem('pydep-toppypi-v1');
+    if(cached){
+      TOP_PYPI = JSON.parse(cached);
+      return TOP_PYPI;
+    }
+  }catch(_){}
+  TOP_PYPI_LOADING = fetch('https://hugovk.github.io/top-pypi-packages/top-pypi-packages.min.json')
+    .then(r => r.ok ? r.json() : Promise.reject(new Error('top-pypi fetch failed')))
+    .then(data => {
+      const rows = (data.rows || []).map(r => ({ name: r.project, downloads: r.download_count }));
+      TOP_PYPI = rows;
+      // Cache only top 4000 to save space
+      try{ sessionStorage.setItem('pydep-toppypi-v1', JSON.stringify(rows.slice(0, 4000))); }catch(_){}
+      // Re-render current query with richer data
+      if(nameInput.value.trim().length >= 1 && ac.classList.contains('visible')){
+        showAcSuggestions(nameInput.value.trim());
+      }
+      return TOP_PYPI;
+    })
+    .catch(() => { TOP_PYPI = []; return []; });
+  return TOP_PYPI_LOADING;
+}
+
+/* ---- Matching ---- */
+function isSubsequence(needle, hay){
+  let i = 0;
+  for(let j = 0; j < hay.length && i < needle.length; j++){
+    if(hay[j] === needle[i]) i++;
+  }
+  return i === needle.length;
+}
+function acScore(q, name, downloads, curated){
+  q = q.toLowerCase();
+  const nm = name.toLowerCase();
+  const qNoSep = q.replace(/[-_.]/g, '');
+  const nmNoSep = nm.replace(/[-_.]/g, '');
+
+  let score = 0;
+  if(q === nm) score = 1500;
+  else if(qNoSep === nmNoSep) score = 1400;
+  else if(nm.startsWith(q)) score = 1000 - Math.min(nm.length, 60);
+  else if(nmNoSep.startsWith(qNoSep)) score = 900 - Math.min(nm.length, 60);
+  else if(nm.includes(q)) score = 600 - Math.min(nm.length, 60);
+  else if(nmNoSep.includes(qNoSep)) score = 550 - Math.min(nm.length, 60);
+  else if(q.length >= 3 && isSubsequence(qNoSep, nmNoSep)) score = 300 - Math.min(nm.length, 60);
+  else {
+    const dist = levenshtein(qNoSep, nmNoSep);
+    if(dist <= 1 && nm.length >= 3) score = 350;
+    else if(dist <= 2 && nm.length >= 5) score = 200;
+    else return 0;
+  }
+  // Popularity boost (log scale, capped)
+  if(downloads){
+    score += Math.min(80, Math.log10(Math.max(1, downloads)) * 8);
+  }
+  // Slight curation bonus (curated entries have descriptions worth showing)
+  if(curated) score += 5;
+  return score;
+}
+function formatDownloads(n){
+  if(!n) return '';
+  if(n >= 1e9) return (n/1e9).toFixed(1).replace(/\.0$/,'') + 'B';
+  if(n >= 1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'') + 'M';
+  if(n >= 1e3) return (n/1e3).toFixed(1).replace(/\.0$/,'') + 'K';
+  return String(n);
+}
+function highlightAcName(name, q){
+  if(!q) return escapeHtml(name);
+  const ql = q.toLowerCase();
+  const nl = name.toLowerCase();
+  // Substring highlight (fast path)
+  const i = nl.indexOf(ql);
+  if(i >= 0){
+    return escapeHtml(name.slice(0,i))
+      + '<mark>' + escapeHtml(name.slice(i, i+q.length)) + '</mark>'
+      + escapeHtml(name.slice(i+q.length));
+  }
+  // Subsequence highlight: mark each matching char
+  let out = '';
+  let qi = 0;
+  for(let j = 0; j < name.length; j++){
+    const ch = name[j];
+    if(qi < ql.length && ch.toLowerCase() === ql[qi]){
+      out += '<mark>' + escapeHtml(ch) + '</mark>';
+      qi++;
+    } else {
+      out += escapeHtml(ch);
+    }
+  }
+  return out;
+}
+
 nameInput.addEventListener('input', () => {
-  // Typing a new package name resets the version to 'latest'
   verInput.value = '';
   clearTimeout(acTimer);
-  const q = nameInput.value.trim().toLowerCase();
-  if(q.length < 1){ hideAc(); return; }
-  // Instant local results
-  const local = POPULAR
-    .filter(p => p.name.toLowerCase().includes(q))
-    .sort((a,b) => {
-      const aStarts = a.name.toLowerCase().startsWith(q) ? 0 : 1;
-      const bStarts = b.name.toLowerCase().startsWith(q) ? 0 : 1;
-      return aStarts - bStarts;
-    })
-    .slice(0, 8);
-  renderAc(local);
-  // Then try fetching exact match for richer info
-  acTimer = setTimeout(() => fetchExactMatch(q), 320);
+  const q = nameInput.value.trim();
+  if(q.length < 1){
+    // Show recent searches when input is empty + focused
+    showAcRecents();
+    return;
+  }
+  loadTopPypi(); // kick off lazy load
+  showAcSuggestions(q);
+  acTimer = setTimeout(() => fetchExactMatch(q), 280);
 });
+
 nameInput.addEventListener('focus', () => {
-  if(nameInput.value.trim().length >= 1) nameInput.dispatchEvent(new Event('input'));
+  const q = nameInput.value.trim();
+  if(q.length >= 1) nameInput.dispatchEvent(new Event('input'));
+  else showAcRecents();
 });
 nameInput.addEventListener('blur', () => setTimeout(hideAc, 180));
 nameInput.addEventListener('keydown', (e) => {
   if(!ac.classList.contains('visible')) return;
-  if(e.key === 'ArrowDown'){ e.preventDefault(); acIndex = Math.min(acIndex+1, acResults.length-1); highlightAc(); }
-  else if(e.key === 'ArrowUp'){ e.preventDefault(); acIndex = Math.max(acIndex-1, 0); highlightAc(); }
-  else if(e.key === 'Enter' && acIndex >= 0){ e.preventDefault(); pickAc(acResults[acIndex]); }
+  const count = acResults.length;
+  if(e.key === 'ArrowDown'){ e.preventDefault(); acIndex = (acIndex + 1) % Math.max(count, 1); highlightAc(); }
+  else if(e.key === 'ArrowUp'){ e.preventDefault(); acIndex = (acIndex - 1 + Math.max(count, 1)) % Math.max(count, 1); highlightAc(); }
+  else if(e.key === 'Enter' && acIndex >= 0 && acResults[acIndex]){ e.preventDefault(); pickAc(acResults[acIndex]); }
   else if(e.key === 'Escape'){ hideAc(); }
+  else if(e.key === 'Tab' && acIndex >= 0 && acResults[acIndex]){
+    // Tab fills the input without submitting (Google-style)
+    e.preventDefault();
+    nameInput.value = acResults[acIndex].name;
+    hideAc();
+  }
 });
+
+function showAcRecents(){
+  const recent = (typeof getRecent === 'function') ? getRecent() : [];
+  if(recent.length === 0){ hideAc(); return; }
+  acResults = recent.slice(0, 6).map(name => ({ name, desc: '', curated: false, isRecent: true }));
+  renderAcDom('Recent', null);
+}
+
+function showAcSuggestions(q){
+  const ql = q.toLowerCase();
+  const top = TOP_PYPI || [];
+  const seen = new Set();
+  const candidates = [];
+
+  // Curated POPULAR (descriptions)
+  POPULAR.forEach(p => {
+    const key = p.name.toLowerCase();
+    seen.add(key);
+    candidates.push({ name: p.name, desc: p.desc || '', downloads: null, curated: true });
+  });
+  // Top PyPI (massive index)
+  for(const p of top){
+    const key = p.name.toLowerCase();
+    if(seen.has(key)) {
+      // Merge popularity into existing entry
+      const ex = candidates.find(c => c.name.toLowerCase() === key);
+      if(ex && !ex.downloads) ex.downloads = p.downloads;
+      continue;
+    }
+    seen.add(key);
+    candidates.push({ name: p.name, desc: '', downloads: p.downloads, curated: false });
+  }
+
+  // Score + sort + slice
+  const scored = candidates
+    .map(p => ({ ...p, _score: acScore(ql, p.name, p.downloads, p.curated) }))
+    .filter(p => p._score > 0)
+    .sort((a, b) => b._score - a._score)
+    .slice(0, 8);
+
+  acResults = scored;
+  renderAcDom(null, q);
+}
 
 async function fetchExactMatch(q){
   try{
     const data = await cachedFetch(`https://pypi.org/pypi/${encodeURIComponent(q)}/json`);
-    const exact = { name: data.info.name, desc: data.info.summary || '', version: data.info.version };
-    // Add to results if not already
-    const existing = acResults.find(r => r.name.toLowerCase() === exact.name.toLowerCase());
-    if(!existing){
+    const exact = {
+      name: data.info.name,
+      desc: data.info.summary || '',
+      curated: false,
+      verified: true, // came back from PyPI directly
+      downloads: null,
+    };
+    const existingIdx = acResults.findIndex(r => r.name.toLowerCase() === exact.name.toLowerCase());
+    if(existingIdx >= 0){
+      // Enrich existing entry
+      acResults[existingIdx].desc = acResults[existingIdx].desc || exact.desc;
+      acResults[existingIdx].verified = true;
+    } else {
+      // Insert at top
       acResults.unshift(exact);
-      renderAcDom(acResults);
-    } else if(!existing.version){
-      existing.version = exact.version; existing.desc = existing.desc || exact.desc;
-      renderAcDom(acResults);
+      acResults = acResults.slice(0, 9);
     }
-  }catch(e){ /* ignore */ }
+    renderAcDom(null, q);
+  }catch(_){}
 }
-function renderAc(list){
-  acResults = list.map(p => ({name:p.name, desc:p.desc||'', version:p.version||''}));
-  renderAcDom(acResults);
-}
-function renderAcDom(list){
+
+function renderAcDom(sectionLabel, q){
   ac.innerHTML = '';
   acIndex = -1;
-  if(list.length === 0){
-    ac.innerHTML = `<div class="ac-empty">No matches. Press Explore to search PyPI directly.</div>`;
+  const trimmedQ = (q || '').trim();
+
+  if(acResults.length === 0){
+    if(TOP_PYPI_LOADING && !TOP_PYPI){
+      // Index still loading
+      ac.innerHTML = `<div class=\"ac-loader\">${ICON.spinner}<span>Searching PyPI index\u2026</span></div>`;
+    } else {
+      ac.innerHTML = `<div class=\"ac-empty\">No matches in our index. Press Enter to search PyPI directly.</div>`;
+    }
+    if(trimmedQ) appendAcFooter(trimmedQ);
     ac.classList.add('visible');
     return;
   }
-  list.forEach((p, i) => {
+
+  if(sectionLabel){
+    const lbl = document.createElement('div');
+    lbl.className = 'ac-section-label';
+    let actionHtml = '';
+    if(sectionLabel === 'Recent'){
+      actionHtml = '<button class="ac-section-action" id="ac-clear-recent">Clear</button>';
+    }
+    lbl.innerHTML = `<span>${escapeHtml(sectionLabel)}</span>${actionHtml}`;
+    ac.appendChild(lbl);
+    if(sectionLabel === 'Recent'){
+      lbl.querySelector('#ac-clear-recent').addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        if(typeof clearRecent === 'function') clearRecent();
+        hideAc();
+      });
+    }
+  }
+
+  acResults.forEach((p) => {
     const div = document.createElement('div');
     div.className = 'ac-item';
+    const letter = p.name[0].toUpperCase();
+    const av = avatarFor(p.name);
+    let pill = '';
+    if(p.isRecent){
+      pill = `<div class="ac-meta-pill recent" title="From your history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>recent</div>`;
+    } else if(p.downloads){
+      pill = `<div class="ac-meta-pill" title="${p.downloads.toLocaleString()} downloads / month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>${escapeHtml(formatDownloads(p.downloads))}/mo</div>`;
+    } else if(p.curated){
+      pill = `<div class="ac-meta-pill popular" title="Popular package"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>popular</div>`;
+    }
     div.innerHTML = `
-      <div class="ac-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+      <div class="ac-icon ${av}">${escapeHtml(letter)}</div>
       <div class="ac-body">
-        <div class="ac-name">${escapeHtml(p.name)}</div>
+        <div class="ac-name">${highlightAcName(p.name, trimmedQ)}</div>
         ${p.desc ? `<div class="ac-desc">${escapeHtml(p.desc)}</div>` : ''}
       </div>
-      ${p.version ? `<div class="ac-ver">${escapeHtml(p.version)}</div>` : ''}
+      ${pill}
     `;
     div.addEventListener('mousedown', (e) => { e.preventDefault(); pickAc(p); });
     ac.appendChild(div);
   });
+
+  if(trimmedQ) appendAcFooter(trimmedQ);
   ac.classList.add('visible');
+}
+
+function appendAcFooter(q){
+  const footer = document.createElement('div');
+  footer.className = 'ac-footer';
+  footer.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span>Search PyPI for &ldquo;<strong>${escapeHtml(q)}</strong>&rdquo;</span>
+    <span class="ac-footer-kbd">Enter</span>
+  `;
+  footer.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    nameInput.value = q;
+    hideAc();
+    form.dispatchEvent(new Event('submit'));
+  });
+  ac.appendChild(footer);
 }
 function highlightAc(){
   const items = $$('.ac-item', ac);
@@ -3013,6 +3550,7 @@ form.addEventListener('submit', async (e) => {
     results.classList.add('visible');
     pushRecent(data.info.name);
     updateSidebarActive();
+    updateAddBtnState(data.info.name);
   }catch(err){
     if(/HTTP\s*404/i.test(err.message || '') || /not found/i.test(err.message || '')){
       showNoResults(name);
@@ -3421,8 +3959,15 @@ function renderNodes(deps, parentUl, depth){
     if(d.extras){
       const ex = document.createElement('span');
       ex.className = 'dep-extras';
-      ex.textContent = `[${d.extras}]`;
-      ex.title = `Extras: ${d.extras}`;
+      const list = d.extras.split(',').map(s => s.trim()).filter(Boolean);
+      let label;
+      if(list.length > 3){
+        label = `[${list.slice(0, 2).join(', ')} +${list.length - 2}]`;
+      } else {
+        label = `[${list.join(', ')}]`;
+      }
+      ex.textContent = label;
+      ex.title = `Extras (${list.length}): ${list.join(', ')}`;
       nameRow.appendChild(ex);
     }
     info.appendChild(nameRow);
@@ -3598,12 +4143,142 @@ function prettifyCondition(c){
 }
 
 /* =========================================================
+   MULTI-PACKAGE BUNDLE CART
+========================================================= */
+const CART_KEY = 'pydep-cart';
+let cart = loadCart();
+let cartCollapsed = false;
+
+function loadCart(){
+  try{ return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
+  catch(_){ return []; }
+}
+function saveCart(){
+  try{ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }catch(_){}
+}
+function addToCart(name, version){
+  if(!name) return false;
+  const existing = cart.find(c => c.name.toLowerCase() === name.toLowerCase());
+  if(existing){
+    existing.version = version; // update version if changed
+    saveCart();
+    renderCart();
+    return false;
+  }
+  cart.push({ name, version: version || '' });
+  saveCart();
+  renderCart();
+  return true;
+}
+function removeFromCart(name){
+  cart = cart.filter(c => c.name.toLowerCase() !== name.toLowerCase());
+  saveCart();
+  renderCart();
+}
+function clearCart(){
+  cart = [];
+  saveCart();
+  renderCart();
+}
+function isInCart(name){
+  return cart.some(c => c.name.toLowerCase() === (name || '').toLowerCase());
+}
+function renderCart(){
+  cartCount.textContent = String(cart.length);
+  cartSub.textContent = `${cart.length} package${cart.length === 1 ? '' : 's'} selected`;
+  if(cart.length === 0){
+    cartFab.classList.remove('visible');
+  } else {
+    cartFab.classList.add('visible');
+    cartFab.classList.toggle('collapsed', cartCollapsed);
+  }
+  cartBody.innerHTML = '';
+  if(cart.length === 0){
+    const e = document.createElement('div');
+    e.className = 'cart-empty';
+    e.textContent = 'No packages added yet.';
+    cartBody.appendChild(e);
+  } else {
+    cart.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'cart-item';
+      row.innerHTML = `
+        <div class="cart-item-avatar ${avatarFor(item.name)}">${escapeHtml(item.name[0].toUpperCase())}</div>
+        <div class="cart-item-body">
+          <div class="cart-item-name" title="Open ${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
+          <div class="cart-item-ver">${escapeHtml(item.version || 'latest')}</div>
+        </div>
+        <button class="cart-item-remove" title="Remove">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      `;
+      row.querySelector('.cart-item-name').addEventListener('click', () => {
+        nameInput.value = item.name;
+        verInput.value = item.version || '';
+        hideAc();
+        form.dispatchEvent(new Event('submit'));
+      });
+      row.querySelector('.cart-item-remove').addEventListener('click', () => removeFromCart(item.name));
+      cartBody.appendChild(row);
+    });
+  }
+  // Update card button state
+  if(currentPkg){
+    updateAddBtnState(currentPkg.name);
+  }
+}
+function updateAddBtnState(pkgName){
+  if(!addToCartBtn) return;
+  if(isInCart(pkgName)){
+    addToCartBtn.classList.add('added');
+    addToCartLabel.textContent = 'Added to multi-bundle';
+    addToCartBtn.querySelector('svg').innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+  } else {
+    addToCartBtn.classList.remove('added');
+    addToCartLabel.textContent = 'Add to multi-bundle';
+    addToCartBtn.querySelector('svg').innerHTML = '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>';
+  }
+}
+
+addToCartBtn?.addEventListener('click', () => {
+  if(!currentPkg) return;
+  if(isInCart(currentPkg.name)){
+    removeFromCart(currentPkg.name);
+    showToast(`Removed ${currentPkg.name} from bundle`);
+  } else {
+    addToCart(currentPkg.name, currentPkg.version);
+    showToast(`Added ${currentPkg.name} ${currentPkg.version} to bundle`);
+    cartCollapsed = false;
+  }
+});
+cartCollapse?.addEventListener('click', () => {
+  cartCollapsed = true;
+  cartFab.classList.add('collapsed');
+});
+cartFab?.addEventListener('click', (e) => {
+  if(cartCollapsed && !e.target.closest('.cart-collapse')){
+    cartCollapsed = false;
+    cartFab.classList.remove('collapsed');
+  }
+});
+cartClear?.addEventListener('click', () => {
+  if(cart.length === 0) return;
+  clearCart();
+  showToast('Bundle cleared');
+});
+cartBundle?.addEventListener('click', () => {
+  if(cart.length === 0){ showToast('Add packages first'); return; }
+  openBundleModal({ multi: true });
+});
+renderCart();
+
+/* =========================================================
    BUNDLE DOWNLOADER
 ========================================================= */
 let bundleCancelled = false;
 let bundleRunning = false;
 
-bundleBtn.addEventListener('click', () => openBundleModal());
+bundleBtn.addEventListener('click', () => openBundleModal({ multi: false }));
 bundleClose.addEventListener('click', () => closeBundleModal());
 bundleCancel.addEventListener('click', () => {
   if(bundleRunning){ bundleCancelled = true; bundleStatus.textContent = 'Cancelling…'; }
@@ -3612,20 +4287,34 @@ bundleCancel.addEventListener('click', () => {
 bundleModal.addEventListener('click', (e) => { if(e.target === bundleModal && !bundleRunning) closeBundleModal(); });
 bundleStart.addEventListener('click', () => runBundle());
 
-function openBundleModal(){
-  if(!currentPkg){ showToast('Search for a package first'); return; }
+let bundleMode = 'single'; // 'single' or 'multi'
+
+function openBundleModal({ multi = false } = {}){
+  if(multi){
+    if(cart.length === 0){ showToast('Add packages first'); return; }
+    bundleMode = 'multi';
+    const names = cart.map(c => c.name).join(', ');
+    bundleTitle.textContent = `Multi-bundle: ${cart.length} package${cart.length === 1 ? '' : 's'}`;
+    const platLbl = selPlatform.value === 'any-all' ? 'all platforms' : (selPlatform.options[selPlatform.selectedIndex]?.textContent || selPlatform.value);
+    const pyLbl = selPyver.value === 'any' ? 'any Python' : `Python ${selPyver.value}`;
+    bundleSub.textContent = `Resolve ${cart.length} root${cart.length === 1 ? '' : 's'} (${names}) plus their full transitive deps for ${pyLbl} · ${platLbl}.`;
+  } else {
+    if(!currentPkg){ showToast('Search for a package first'); return; }
+    bundleMode = 'single';
+    bundleTitle.textContent = `Bundle: ${currentPkg.name} ${currentPkg.version}`;
+    const platLbl = selPlatform.value === 'any-all' ? 'all platforms' : (selPlatform.options[selPlatform.selectedIndex]?.textContent || selPlatform.value);
+    const pyLbl = selPyver.value === 'any' ? 'any Python' : `Python ${selPyver.value}`;
+    bundleSub.textContent = `Will resolve the full dependency graph and pack matching wheels for ${pyLbl} · ${platLbl} into a single .zip archive.`;
+  }
   bundleCancelled = false; bundleRunning = false;
-  bundleTitle.textContent = `Bundle: ${currentPkg.name} ${currentPkg.version}`;
-  const platLbl = selPlatform.value === 'any-all' ? 'all platforms' : (selPlatform.options[selPlatform.selectedIndex]?.textContent || selPlatform.value);
-  const pyLbl = selPyver.value === 'any' ? 'any Python' : `Python ${selPyver.value}`;
-  bundleSub.textContent = `Will resolve the full dependency graph and pack matching wheels for ${pyLbl} · ${platLbl} into a single .zip archive.`;
-  bundleStatus.textContent = 'Ready to download package + all dependencies.';
+  bundleStatus.textContent = 'Ready.';
   bundleCount.textContent = '0 / 0';
   bundleProgress.style.width = '0%';
   bundleLog.innerHTML = '';
   bundleStart.disabled = false;
   bundleStart.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Start bundling`;
   bundleCancel.textContent = 'Cancel';
+  bundleStart.onclick = runBundle;
   bundleModal.classList.add('visible');
 }
 function closeBundleModal(){
@@ -3649,10 +4338,10 @@ function logLine(kind, html){
   return div;
 }
 
-async function resolveDepGraph(rootName, rootVersion){
-  // BFS through dep graph, respecting "extra" markers only when extras present.
+async function resolveDepGraph(roots){
+  // roots is an array of { name, version }. BFS across all roots, deduping by name.
   const visited = new Set();
-  const queue = [{name: rootName, version: rootVersion, depth: 0}];
+  const queue = roots.map(r => ({ name: r.name, version: r.version, depth: 0 }));
   const ordered = [];
   while(queue.length){
     if(bundleCancelled) return ordered;
@@ -3675,9 +4364,7 @@ async function resolveDepGraph(rootName, rootVersion){
     deps.forEach(rawDep => {
       const d = parseDep(rawDep);
       if(!d.name) return;
-      // Skip optional/extra-only deps (require "extra" marker satisfied) — best effort
       if(d.condition && /\bextra\s*==/.test(d.condition)) return;
-      // Skip clearly-incompatible markers when user picked a python version
       if(d.condition && selPyver.value !== 'any'){
         const ver = selPyver.value;
         const m = d.condition.match(/python_version\s*([<>=!]+)\s*["']([\d.]+)["']/);
@@ -3750,11 +4437,17 @@ async function runBundle(){
   bundleCount.textContent = '0 / ?';
   bundleProgress.style.width = '5%';
 
-  const resolveLine = logLine('pending', `Walking dependency graph from <span class="pkg-name">${escapeHtml(currentPkg.name)}</span>…`);
+  const roots = bundleMode === 'multi'
+    ? cart.map(c => ({ name: c.name, version: c.version }))
+    : [{ name: currentPkg.name, version: currentPkg.version }];
+  const rootLabel = bundleMode === 'multi'
+    ? `${roots.length} root packages (${roots.map(r => r.name).join(', ')})`
+    : `<span class="pkg-name">${escapeHtml(currentPkg.name)}</span>`;
+  const resolveLine = logLine('pending', `Walking dependency graph from ${rootLabel}…`);
 
   let graph;
   try{
-    graph = await resolveDepGraph(currentPkg.name, currentPkg.version);
+    graph = await resolveDepGraph(roots);
   }catch(e){
     resolveLine.classList.remove('pending');
     resolveLine.classList.add('err');
@@ -3835,8 +4528,15 @@ async function runBundle(){
   // Add manifest + README + requirements.txt + install script
   const platLbl = selPlatform.value === 'any-all' ? 'all platforms' : (selPlatform.options[selPlatform.selectedIndex]?.textContent || selPlatform.value);
   const pyLbl = selPyver.value === 'any' ? 'any Python' : `Python ${selPyver.value}`;
+  const rootsList = roots.map(r => `${r.name}${r.version ? '==' + r.version : ''}`);
+  const rootsForPip = rootsList.map(r => `"${r}"`).join(' ');
+  const bundleSlug = bundleMode === 'multi'
+    ? `pydep-multi-${roots.length}pkg`
+    : `${currentPkg.name}-${currentPkg.version}`;
+
   zip.file('manifest.json', JSON.stringify({
-    root: { name: currentPkg.name, version: currentPkg.version },
+    mode: bundleMode,
+    roots: roots.map(r => ({ name: r.name, version: r.version || null })),
     python: selPyver.value,
     platform: selPlatform.value,
     generated: new Date().toISOString(),
@@ -3849,23 +4549,24 @@ async function runBundle(){
   zip.file('install.sh',
 `#!/usr/bin/env bash
 # Offline install bundle generated by PyDep.
-# Root: ${currentPkg.name}==${currentPkg.version}
+# Roots: ${rootsList.join(', ')}
 # Target: ${pyLbl} · ${platLbl}
 set -e
-pip install --no-index --find-links=packages "${currentPkg.name}==${currentPkg.version}"
+pip install --no-index --find-links=packages ${rootsForPip}
 `);
   zip.file('install.bat',
 `@echo off
 REM Offline install bundle generated by PyDep.
-REM Root: ${currentPkg.name}==${currentPkg.version}
+REM Roots: ${rootsList.join(', ')}
 REM Target: ${pyLbl} - ${platLbl}
-pip install --no-index --find-links=packages "${currentPkg.name}==${currentPkg.version}"
+pip install --no-index --find-links=packages ${rootsForPip}
 `);
   zip.file('README.txt',
 `PyDep offline bundle
 ====================
 
-Root package: ${currentPkg.name}==${currentPkg.version}
+Mode:         ${bundleMode}
+Roots:        ${rootsList.join(', ')}
 Target:       ${pyLbl} · ${platLbl}
 Packages:     ${manifest.length}
 Total size:   ${formatBytes(totalBytes)}
@@ -3874,7 +4575,7 @@ Generated:    ${new Date().toString()}
 
 To install offline:
 
-  pip install --no-index --find-links=packages "${currentPkg.name}==${currentPkg.version}"
+  pip install --no-index --find-links=packages ${rootsForPip}
 
 Or use the included scripts: install.sh (macOS/Linux) or install.bat (Windows).
 
@@ -3920,7 +4621,7 @@ Files:
     return;
   }
 
-  const filename = `${currentPkg.name}-${currentPkg.version}-bundle.zip`;
+  const filename = `${bundleSlug}-bundle.zip`;
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = filename;
