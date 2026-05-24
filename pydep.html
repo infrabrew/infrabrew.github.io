@@ -2444,10 +2444,148 @@ footer a{ color: var(--blue); text-decoration: none; }
   body{ overscroll-behavior: none; }
 }
 
-/* iOS safari URL bar dynamic height handling */
-@supports (height: 100dvh){
-  body[data-view="landing"]{ height: 100dvh; }
-  body[data-view="landing"] .shell{ /* let flex distribute */ }
+/* ============================================================
+   EASTER EGGS
+============================================================ */
+/* Falling particles (confetti / logo rain) */
+.egg-fx{
+  position: fixed; inset: 0; z-index: 9999;
+  pointer-events: none; overflow: hidden;
+}
+.egg-particle{
+  position: absolute; top: -40px;
+  font-size: 22px; line-height: 1;
+  will-change: transform, opacity;
+  animation: eggFall linear forwards;
+}
+@keyframes eggFall{
+  0%{ transform: translateY(-40px) rotate(0deg); opacity: 1; }
+  85%{ opacity: 1; }
+  100%{ transform: translateY(110vh) rotate(var(--egg-spin, 360deg)); opacity: 0; }
+}
+
+/* Retro terminal flash (logo clicked x5) */
+html.retro-flash, html.retro-flash body{
+  background: #000 !important;
+}
+html.retro-flash body{
+  filter: none;
+  animation: retroScan 1.6s steps(1) ;
+}
+html.retro-flash *{
+  color: #33ff66 !important;
+  border-color: rgba(51,255,102,0.4) !important;
+  text-shadow: 0 0 6px rgba(51,255,102,0.55) !important;
+  font-family: 'JetBrains Mono', monospace !important;
+}
+html.retro-flash .wordmark-text,
+html.retro-flash .brand-text,
+html.retro-flash .wordmark-text .grad,
+html.retro-flash .brand-text .grad{
+  color: #33ff66 !important;
+  -webkit-text-fill-color: #33ff66 !important;
+}
+@keyframes retroScan{
+  0%{ box-shadow: inset 0 0 0 9999px rgba(51,255,102,0.10); }
+  100%{ box-shadow: inset 0 0 0 9999px rgba(51,255,102,0); }
+}
+
+/* Hidden "hacker" high-contrast theme (Ctrl+Alt+H) */
+html[data-theme="hacker"]{
+  --bg:#000; --bg-grad-top:#000; --bg-grad-bot:#020a02;
+  --surface:#0a140a; --surface-2:#060f06; --surface-3:#0f1f0f;
+  --ink:#39ff7a; --ink-2:#2fe06b; --ink-3:#27c25c; --ink-4:#1f9c49; --ink-5:#176b33;
+  --blue:#39ff7a; --blue-hover:#5cff95; --blue-wash:rgba(57,255,122,0.12); --blue-soft:rgba(57,255,122,0.3);
+  --dep-blue:#39ff7a; --dep-blue-hover:#5cff95;
+  --hair:rgba(57,255,122,0.16); --hair-strong:rgba(57,255,122,0.28);
+  --glass:rgba(5,15,5,0.72); --glass-strong:rgba(5,15,5,0.86);
+}
+html[data-theme="hacker"] body{
+  font-family: var(--font-mono);
+}
+html[data-theme="hacker"] .wordmark-text .grad,
+html[data-theme="hacker"] .brand-text .grad{
+  color:#39ff7a; -webkit-text-fill-color:#39ff7a;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .egg-particle{ animation-duration: 0.01ms !important; opacity: 0 !important; }
+  html.retro-flash body{ animation: none; }
+}
+
+/* ---- Theme-toggle easter eggs ---- */
+.theme-toggle.tt-dizzy svg{ animation: ttDizzy 700ms var(--ease); transform-origin: 50% 50%; }
+@keyframes ttDizzy{
+  0%{ transform: rotate(0) scale(1); }
+  25%{ transform: rotate(140deg) scale(1.15); }
+  50%{ transform: rotate(260deg) scale(0.9); }
+  75%{ transform: rotate(400deg) scale(1.1); }
+  100%{ transform: rotate(540deg) scale(1); }
+}
+.theme-toggle.tt-bounce svg{ animation: ttBounce 600ms var(--ease); }
+@keyframes ttBounce{
+  0%,100%{ transform: translateY(0); }
+  30%{ transform: translateY(-5px) scale(1.12); }
+  55%{ transform: translateY(1px) scale(0.95); }
+  75%{ transform: translateY(-2px); }
+}
+/* Sleepy "zzz" when hovering the moon a while */
+.theme-toggle .tt-zzz{
+  position: absolute; top: -6px; right: -4px;
+  font: 700 11px/1 var(--font-sans); color: var(--ink-3);
+  opacity: 0; pointer-events: none;
+  animation: ttZzz 1400ms var(--ease) forwards;
+}
+@keyframes ttZzz{
+  0%{ opacity: 0; transform: translateY(4px) scale(0.6); }
+  30%{ opacity: 1; transform: translateY(-2px) scale(1); }
+  100%{ opacity: 0; transform: translateY(-12px) scale(1.1); }
+}
+.theme-toggle{ position: relative; }
+
+/* Full-screen one-shot flourishes on theme change */
+.tt-sweep{
+  position: fixed; inset: 0; z-index: 9998; pointer-events: none;
+  opacity: 0;
+}
+.tt-sweep.stars{
+  background: radial-gradient(2px 2px at 20% 30%, #fff, transparent),
+             radial-gradient(2px 2px at 70% 20%, #fff, transparent),
+             radial-gradient(1.5px 1.5px at 40% 70%, #fff, transparent),
+             radial-gradient(2px 2px at 85% 60%, #fff, transparent),
+             radial-gradient(1.5px 1.5px at 55% 45%, #fff, transparent),
+             radial-gradient(2px 2px at 15% 80%, #fff, transparent),
+             radial-gradient(1.5px 1.5px at 90% 35%, #fff, transparent);
+  animation: ttStars 1500ms var(--ease) forwards;
+}
+@keyframes ttStars{
+  0%{ opacity: 0; }
+  35%{ opacity: 0.9; }
+  100%{ opacity: 0; }
+}
+.tt-sweep.sunrise{
+  background: linear-gradient(180deg, rgba(255,213,128,0.0) 0%, rgba(255,179,71,0.35) 55%, rgba(255,140,66,0.0) 100%);
+  animation: ttSunrise 1400ms var(--ease) forwards;
+}
+@keyframes ttSunrise{
+  0%{ opacity: 0; transform: translateY(40%); }
+  40%{ opacity: 1; }
+  100%{ opacity: 0; transform: translateY(-10%); }
+}
+/* A single shooting star / firefly drifting across once */
+.tt-shooter{
+  position: fixed; z-index: 9998; pointer-events: none;
+  font-size: 18px; top: 18%; left: -40px;
+  animation: ttShoot 1600ms var(--ease) forwards;
+}
+@keyframes ttShoot{
+  0%{ opacity: 0; transform: translate(0,0) rotate(0); }
+  15%{ opacity: 1; }
+  100%{ opacity: 0; transform: translate(108vw, 26vh) rotate(20deg); }
+}
+@media (prefers-reduced-motion: reduce){
+  .tt-sweep, .tt-shooter, .theme-toggle.tt-dizzy svg, .theme-toggle.tt-bounce svg{ animation: none !important; }
+  .theme-toggle .tt-zzz{ display: none; }
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -2807,22 +2945,182 @@ footer a{ color: var(--blue); text-decoration: none; }
    THEME
 ========================================================= */
 (function(){
+  const root = document.documentElement;
+  const toggle = document.getElementById('theme-toggle');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- Initial theme ----
   const saved = localStorage.getItem('pydep-theme');
-  if(saved === 'dark') document.documentElement.setAttribute('data-theme','dark');
-  else if(saved === 'light') document.documentElement.setAttribute('data-theme','light');
-  else if(window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.setAttribute('data-theme','dark');
-  document.getElementById('theme-toggle').addEventListener('click', () => {
-    const root = document.documentElement;
-    const isDark = root.getAttribute('data-theme') === 'dark';
-    // Enable the brief crossfade, switch theme, then clean up the class
+  if(saved === 'dark') root.setAttribute('data-theme','dark');
+  else if(saved === 'light') root.setAttribute('data-theme','light');
+  else if(window.matchMedia('(prefers-color-scheme: dark)').matches) root.setAttribute('data-theme','dark');
+
+  // Central theme setter with the smooth crossfade
+  function applyTheme(name, persist = true){
     root.classList.add('theme-transitioning');
-    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
-    localStorage.setItem('pydep-theme', isDark ? 'light' : 'dark');
+    root.setAttribute('data-theme', name);
+    if(persist) localStorage.setItem('pydep-theme', name);
     window.clearTimeout(root._themeTransTimer);
-    root._themeTransTimer = window.setTimeout(() => {
-      root.classList.remove('theme-transitioning');
-    }, 1000);
+    root._themeTransTimer = window.setTimeout(() => root.classList.remove('theme-transitioning'), 1000);
+  }
+  // Expose for other easter eggs (hacker theme uses its own path)
+  window.__setTheme = applyTheme;
+
+  function isDark(){ return root.getAttribute('data-theme') === 'dark'; }
+
+  // ---- One-shot full-screen flourishes ----
+  function sweep(kind){
+    if(reduceMotion) return;
+    const el = document.createElement('div');
+    el.className = 'tt-sweep ' + kind;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1600);
+  }
+  function shooter(glyph){
+    if(reduceMotion) return;
+    const el = document.createElement('div');
+    el.className = 'tt-shooter';
+    el.textContent = glyph;
+    el.style.top = (10 + Math.random() * 25) + '%';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1700);
+  }
+
+  // ---- Greetings / personality ----
+  let sunModeCount = 0;
+  function greetForHour(){
+    const h = new Date().getHours();
+    if(h < 5) return 'Up late? 🌙';
+    if(h < 12) return 'Good morning ☀️';
+    if(h < 18) return 'Good afternoon 🌤️';
+    return 'Good evening 🌆';
+  }
+  function holidayGlyph(){
+    const d = new Date();
+    const m = d.getMonth() + 1, day = d.getDate();
+    if(m === 10 && day === 31) return '🎃';
+    if(m === 12 && day >= 24 && day <= 26) return '🎄';
+    if(m === 1 && day === 1) return '🎆';
+    return null;
+  }
+
+  // ---- Core toggle behavior ----
+  let clickTimes = [];
+  let madeUpMindShown = false;
+  let hackerUnlocked = false;
+
+  function doToggle(){
+    const goingDark = !isDark();
+
+    // Rapid-toggle tracking
+    const now = Date.now();
+    clickTimes = clickTimes.filter(t => now - t < 4000);
+    clickTimes.push(now);
+
+    // 10 rapid flips → unlock hidden hacker theme (discoverability bridge)
+    if(clickTimes.length >= 10 && !hackerUnlocked){
+      hackerUnlocked = true;
+      clickTimes = [];
+      applyTheme('hacker', false);
+      if(typeof Egg !== 'undefined' && Egg.snakeRain) Egg.snakeRain();
+      showToast('> Persistence unlocked a secret: hacker mode 🐍');
+      return;
+    }
+    // 5 rapid flips → "make up your mind" + dizzy spin
+    if(clickTimes.length === 5 && !madeUpMindShown){
+      madeUpMindShown = true;
+      setTimeout(() => { madeUpMindShown = false; }, 6000);
+      toggle.classList.remove('tt-dizzy'); void toggle.offsetWidth;
+      toggle.classList.add('tt-dizzy');
+      setTimeout(() => toggle.classList.remove('tt-dizzy'), 720);
+      showToast('Make up your mind 😅');
+    }
+
+    applyTheme(goingDark ? 'dark' : 'light');
+
+    // Personality + rare flourishes
+    if(goingDark){
+      shooter(Math.random() < 0.5 ? '☄️' : '✨'); // a drifting shooting star / firefly
+      if(Math.random() < 1/12) sweep('stars');     // rare star sweep
+    } else {
+      sunModeCount++;
+      const greet = greetForHour();
+      const hol = holidayGlyph();
+      if(hol) showToast('Happy day ' + hol);
+      else if(sunModeCount === 1 || Math.random() < 0.4) showToast(greet);
+      if(Math.random() < 1/12) sweep('sunrise');    // rare sunrise glow
+    }
+  }
+
+  toggle.addEventListener('click', doToggle);
+
+  // ---- Long-press → snap to sunrise/sunset based on local hour ----
+  let pressTimer = null, longPressed = false;
+  function startPress(){
+    longPressed = false;
+    pressTimer = setTimeout(() => {
+      longPressed = true;
+      const h = new Date().getHours();
+      const wantDark = (h < 6 || h >= 18); // night → dark, day → light
+      applyTheme(wantDark ? 'dark' : 'light');
+      showToast(wantDark ? '🌙 Set to your local night' : '☀️ Set to your local day');
+      if(wantDark){ sweep('stars'); } else { sweep('sunrise'); }
+    }, 550);
+  }
+  function cancelPress(suppressClick){
+    clearTimeout(pressTimer);
+    if(longPressed && suppressClick){
+      // prevent the click that follows a long-press
+      const block = (e) => { e.stopImmediatePropagation(); e.preventDefault(); toggle.removeEventListener('click', block, true); };
+      toggle.addEventListener('click', block, true);
+    }
+  }
+  toggle.addEventListener('mousedown', startPress);
+  toggle.addEventListener('mouseup', () => cancelPress(true));
+  toggle.addEventListener('mouseleave', () => cancelPress(false));
+  toggle.addEventListener('touchstart', startPress, { passive: true });
+  toggle.addEventListener('touchend', () => cancelPress(true));
+
+  // Shift-click also snaps to local time-of-day (desktop convenience)
+  toggle.addEventListener('click', (e) => {
+    if(e.shiftKey){
+      e.stopImmediatePropagation();
+      const h = new Date().getHours();
+      const wantDark = (h < 6 || h >= 18);
+      applyTheme(wantDark ? 'dark' : 'light');
+      showToast(wantDark ? '🌙 Local night' : '☀️ Local day');
+    }
+  }, true);
+
+  // ---- Hover-hold 2s → icon bounce + sleepy "zzz" (when on dark/moon) ----
+  let hoverTimer = null;
+  toggle.addEventListener('mouseenter', () => {
+    hoverTimer = setTimeout(() => {
+      toggle.classList.remove('tt-bounce'); void toggle.offsetWidth;
+      toggle.classList.add('tt-bounce');
+      setTimeout(() => toggle.classList.remove('tt-bounce'), 650);
+      if(isDark() && !reduceMotion){
+        const z = document.createElement('span');
+        z.className = 'tt-zzz'; z.textContent = 'z';
+        toggle.appendChild(z);
+        setTimeout(() => z.remove(), 1500);
+      }
+    }, 2000);
   });
+  toggle.addEventListener('mouseleave', () => clearTimeout(hoverTimer));
+
+  // ---- Late-night nudge: past midnight on light mode, suggest dark (once) ----
+  (function lateNightNudge(){
+    const h = new Date().getHours();
+    if((h >= 0 && h < 5) && !isDark()){
+      const last = localStorage.getItem('pydep-latenudge');
+      const today = new Date().toDateString();
+      if(last !== today){
+        localStorage.setItem('pydep-latenudge', today);
+        setTimeout(() => showToast('🌙 It\u2019s late — tap the toggle for dark mode'), 1500);
+      }
+    }
+  })();
 })();
 
 /* =========================================================
@@ -3731,9 +4029,20 @@ form.addEventListener('submit', async (e) => {
   if(!name) return;
 
   hideAc();
+
+  // 🥚 Special Python in-joke terms (antigravity, this, …)
+  if(Egg.handleSpecialSearch(name)) return;
+
   setView('results');
   resetResults();
   showLoader(true);
+
+  // 🥚 Playful loader quip for famously huge dependency trees
+  const quip = Egg.loaderQuipFor(name);
+  if(quip){
+    const lt = document.querySelector('#loader .loader-text');
+    if(lt) lt.textContent = quip;
+  }
 
   try{
     totalNodesLoaded = 0;
@@ -3747,6 +4056,7 @@ form.addEventListener('submit', async (e) => {
       emptyDeps.style.display = 'block';
       tabCount.textContent = '0';
       statDirect.textContent = '0';
+      Egg.celebrateZeroDeps(); // 🥚 no dependencies — celebrate!
     } else {
       emptyDeps.style.display = 'none';
       renderNodes(deps, depTree, 0);
@@ -4873,9 +5183,187 @@ function resetResults(){
   $$('.panel').forEach(p => p.classList.remove('active'));
   $('#panel-deps').classList.add('active');
 }
+/* =========================================================
+   🥚 EASTER EGGS
+========================================================= */
+const Egg = (() => {
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Rain emoji/text particles from the top of the screen
+  function rain(symbols, count = 28, duration = 2600){
+    if(reduceMotion) return;
+    const layer = document.createElement('div');
+    layer.className = 'egg-fx';
+    document.body.appendChild(layer);
+    for(let i = 0; i < count; i++){
+      const p = document.createElement('span');
+      p.className = 'egg-particle';
+      p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      p.style.left = Math.random() * 100 + 'vw';
+      const dur = duration * (0.6 + Math.random() * 0.7);
+      p.style.animationDuration = dur + 'ms';
+      p.style.animationDelay = (Math.random() * 600) + 'ms';
+      p.style.fontSize = (16 + Math.random() * 22) + 'px';
+      p.style.setProperty('--egg-spin', (Math.random() * 720 - 360) + 'deg');
+      layer.appendChild(p);
+    }
+    setTimeout(() => layer.remove(), duration + 1400);
+  }
+
+  const confetti = () => rain(['🎉','🎊','✨','🥳','🟦','🟩','⭐'], 40, 2800);
+  const snakeRain = () => rain(['🐍','🐍','🐍','✨'], 30, 3000);
+
+  // Console greeting for the devs poking around
+  function consoleGreeting(){
+    const big = 'font: 700 28px/1.2 monospace; color:#2196F3;';
+    const small = 'font: 400 13px/1.5 monospace; color:#888;';
+    const link = 'font: 600 13px/1.5 monospace; color:#34c759;';
+    console.log('%cPyDep', big);
+    console.log('%c   ╭─ search PyPI · explore dep graphs · bundle offline ─╮', small);
+    console.log(
+`%c
+   ____        ____
+  |  _ \\ _   _|  _ \\  ___ _ __
+  | |_) | | | | | | |/ _ \\ '_ \\
+  |  __/| |_| | |_| |  __/ |_) |
+  |_|    \\__, |____/ \\___| .__/
+         |___/           |_|
+`, 'color:#2196F3; font-family:monospace;');
+    console.log('%cPoking around the console? You found us. 👋', small);
+    console.log('%cWe like people who read the source. Try searching "antigravity" or "this". Or hit ↑↑↓↓←→←→BA.', small);
+    console.log('%c→ Want to contribute / hire us? Say hi.', link);
+  }
+
+  // Konami code → snake rain
+  function initKonami(){
+    const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let pos = 0;
+    window.addEventListener('keydown', (e) => {
+      const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if(key === seq[pos]){
+        pos++;
+        if(pos === seq.length){
+          pos = 0;
+          snakeRain();
+          showToast('🐍 Konami unlocked — let it snow, Python style');
+        }
+      } else {
+        pos = (key === seq[0]) ? 1 : 0;
+      }
+    });
+  }
+
+  // Logo clicked 5x quickly → retro terminal flash
+  function initLogoClicks(){
+    const brand = document.querySelector('.brand');
+    const wordmark = document.querySelector('.wordmark-text');
+    let clicks = 0, timer = null;
+    const bump = () => {
+      clicks++;
+      clearTimeout(timer);
+      timer = setTimeout(() => { clicks = 0; }, 900);
+      if(clicks >= 5){
+        clicks = 0;
+        const root = document.documentElement;
+        root.classList.add('retro-flash');
+        showToast('> SYSTEM: retro mode engaged');
+        setTimeout(() => root.classList.remove('retro-flash'), 1700);
+      }
+    };
+    // Brand nav click already navigates home; count without blocking that.
+    if(brand) brand.addEventListener('click', bump);
+    if(wordmark){ wordmark.style.cursor = 'pointer'; wordmark.addEventListener('click', bump); }
+  }
+
+  // Hidden hacker theme toggle (Ctrl+Alt+H)
+  function initHackerTheme(){
+    let prev = null;
+    window.addEventListener('keydown', (e) => {
+      if((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'h' || e.key === 'H')){
+        e.preventDefault();
+        const root = document.documentElement;
+        root.classList.add('theme-transitioning');
+        if(root.getAttribute('data-theme') === 'hacker'){
+          root.setAttribute('data-theme', prev || 'light');
+          showToast('Exited hacker mode');
+        } else {
+          prev = root.getAttribute('data-theme') || 'light';
+          root.setAttribute('data-theme', 'hacker');
+          snakeRain();
+          showToast('> ACCESS GRANTED — hacker theme');
+        }
+        clearTimeout(root._themeTransTimer);
+        root._themeTransTimer = setTimeout(() => root.classList.remove('theme-transitioning'), 1000);
+      }
+    });
+  }
+
+  // Special Python in-joke search terms. Returns true if handled.
+  function handleSpecialSearch(rawName){
+    const n = (rawName || '').trim().toLowerCase();
+    switch(n){
+      case 'antigravity':
+        showToast('🚀 import antigravity');
+        rain(['🚀','☁️','✨','🐍'], 26, 3000);
+        setTimeout(() => window.open('https://xkcd.com/353/', '_blank', 'noopener'), 400);
+        return true;
+      case 'this':
+        showToast('The Zen of Python');
+        console.log('%cThe Zen of Python, by Tim Peters\n', 'font:600 13px monospace;color:#2196F3;');
+        console.log('%cBeautiful is better than ugly. Simple is better than complex. Readability counts. …\n(run `import this` in Python for the full poem)', 'font:400 12px/1.6 monospace;color:#888;');
+        rain(['🧘','🐍','✨'], 20, 2600);
+        return true;
+      case '__hello__':
+      case 'hello':
+        showToast('Hello, world! 🐍');
+        rain(['👋','🐍','✨'], 18, 2400);
+        return false; // still let it search normally
+      case 'pip':
+        showToast('📦 the package that packages packages');
+        return false;
+      default:
+        return false;
+    }
+  }
+
+  // Quips shown in the loader for famously enormous dependency trees
+  const HEAVY = {
+    tensorflow: 'Buckle up — this tree is enormous. ☕',
+    'tf-nightly': 'Buckle up — this tree is enormous. ☕',
+    torch: 'Hope you have some disk space… 💾',
+    'apache-airflow': 'Resolving Airflow — go grab a coffee. ☕',
+    airflow: 'Resolving Airflow — go grab a coffee. ☕',
+    transformers: 'Big model, big dependencies. 🤖',
+    scipy: 'Heavy on the math. 🧮',
+    pandas: 'Crunching a hefty tree… 🐼',
+    'jupyterlab': 'Notebooks bring friends. 📓',
+    boto3: 'AWS brings the whole cloud. ☁️',
+  };
+  function loaderQuipFor(name){
+    return HEAVY[(name || '').trim().toLowerCase()] || null;
+  }
+
+  // Celebrate a package that declares zero dependencies
+  function celebrateZeroDeps(){
+    confetti();
+  }
+
+  function init(){
+    consoleGreeting();
+    initKonami();
+    initLogoClicks();
+    initHackerTheme();
+  }
+
+  return { init, handleSpecialSearch, loaderQuipFor, celebrateZeroDeps, confetti, snakeRain };
+})();
+Egg.init();
+
 function showLoader(v){
   loader.classList.toggle('visible', v);
   if(v){
+    const lt = document.querySelector('#loader .loader-text');
+    if(lt) lt.textContent = 'Resolving from PyPI…';
     welcome.style.display = 'none';
     results.classList.remove('visible');
   }
