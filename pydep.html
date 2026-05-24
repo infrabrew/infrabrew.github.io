@@ -129,6 +129,31 @@ html[data-theme="dark"]{
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
+
+/* Smooth, gentle crossfade when toggling between light and dark themes.
+   Deliberately slow (~900ms) and softly eased so the change never reads as
+   a sudden flash — important for users sensitive to abrupt brightness shifts.
+   Applied only briefly during the toggle so it never interferes with
+   hover states, view transitions, or other animations. */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after{
+  transition: background-color 900ms cubic-bezier(0.33, 0, 0.2, 1),
+              background-image 900ms cubic-bezier(0.33, 0, 0.2, 1),
+              border-color 900ms cubic-bezier(0.33, 0, 0.2, 1),
+              color 900ms cubic-bezier(0.33, 0, 0.2, 1),
+              fill 900ms cubic-bezier(0.33, 0, 0.2, 1),
+              stroke 900ms cubic-bezier(0.33, 0, 0.2, 1),
+              box-shadow 900ms cubic-bezier(0.33, 0, 0.2, 1),
+              opacity 900ms cubic-bezier(0.33, 0, 0.2, 1) !important;
+}
+/* The page background gradient is the largest surface and the biggest
+   source of perceived "flash" — give it the same gentle fade. */
+html.theme-transitioning body{
+  transition: background-color 900ms cubic-bezier(0.33, 0, 0.2, 1),
+              background-image 900ms cubic-bezier(0.33, 0, 0.2, 1) !important;
+}
 body{
   font-family:var(--font-sans);
   color:var(--ink);
@@ -330,11 +355,26 @@ html[data-theme="dark"] .wordmark-text .grad{
 }
 
 /* Results layout: hide hero, dock search into nav */
-body[data-view="results"] .hero-text,
 body[data-view="results"] .quick,
 body[data-view="results"] #welcome,
 body[data-view="landing"] #welcome{
   display: none;
+}
+/* Hero wordmark/tagline: animate out smoothly on landing → results */
+.hero-text{
+  transition: opacity var(--dur-3) var(--ease-emph),
+              transform var(--dur-3) var(--ease-emph),
+              max-height var(--dur-4) var(--ease-emph),
+              margin var(--dur-3) var(--ease-emph);
+  max-height: 400px;
+  overflow: hidden;
+}
+body[data-view="results"] .hero-text{
+  opacity: 0;
+  transform: translateY(-16px) scale(0.96);
+  max-height: 0;
+  margin: 0;
+  pointer-events: none;
 }
 body[data-view="results"] .hero{
   margin-bottom: 0;
@@ -2772,9 +2812,16 @@ footer a{ color: var(--blue); text-decoration: none; }
   else if(saved === 'light') document.documentElement.setAttribute('data-theme','light');
   else if(window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.setAttribute('data-theme','dark');
   document.getElementById('theme-toggle').addEventListener('click', () => {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    const root = document.documentElement;
+    const isDark = root.getAttribute('data-theme') === 'dark';
+    // Enable the brief crossfade, switch theme, then clean up the class
+    root.classList.add('theme-transitioning');
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
     localStorage.setItem('pydep-theme', isDark ? 'light' : 'dark');
+    window.clearTimeout(root._themeTransTimer);
+    root._themeTransTimer = window.setTimeout(() => {
+      root.classList.remove('theme-transitioning');
+    }, 1000);
   });
 })();
 
