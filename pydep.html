@@ -11,7 +11,7 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="description" content="PyDep — Python Package Search Engine. Browse PyPI, explore dependency graphs, and bundle packages with all their dependencies." />
 <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%232196F3'/><stop offset='1' stop-color='%231565C0'/></linearGradient></defs><rect width='180' height='180' rx='40' fill='url(%23g)'/><g fill='none' stroke='white' stroke-width='10' stroke-linecap='round'><circle cx='80' cy='80' r='42'/><line x1='112' y1='112' x2='148' y2='148'/></g><g fill='white' stroke='white' stroke-width='6' stroke-linecap='round'><circle cx='80' cy='60' r='6'/><circle cx='62' cy='96' r='6'/><circle cx='98' cy='96' r='6'/><line x1='80' y1='66' x2='64' y2='92'/><line x1='80' y1='66' x2='96' y2='92'/></g></svg>" />
-<title>PyDep — Python Package Search Engine</title>
+<title>PyDep — Python Dependency Explorer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
@@ -778,6 +778,77 @@ html[data-theme="dark"] .ac-footer{
   animation: fadeUp 360ms var(--ease-emph);
 }
 .results.visible{ display: grid; }
+
+/* ----- Viewport-locked results view -----
+   The whole page does not scroll; instead the dependency list and the
+   Popular/Recent sidebar each scroll inside their own panel, while the
+   tabs, toolbar/filter, and package card stay fixed. */
+@media (min-width: 961px){
+  body[data-view="results"]{
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  body[data-view="results"] .shell{
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 12px;
+    overflow: hidden;
+  }
+  body[data-view="results"] footer{
+    flex-shrink: 0;
+    margin-top: 0;
+    padding: 12px 24px;
+  }
+  body[data-view="results"] #welcome{ overflow: auto; }
+  body[data-view="results"] .results.visible{
+    flex: 1;
+    min-height: 0;
+    align-items: stretch;
+  }
+  /* Each grid column manages its own height */
+  body[data-view="results"] .results.visible > *{
+    min-height: 0;
+  }
+  /* Package card aligns with the other panels and scrolls internally */
+  body[data-view="results"] .pkg-card{
+    align-self: stretch;
+    min-height: 0;
+    max-height: 100%;
+    overflow-y: auto;
+  }
+  /* Sidebar scrolls within itself */
+  body[data-view="results"] .sidebar{
+    min-height: 0;
+    overflow-y: auto;
+  }
+  /* Right column: tabs + toolbar fixed, only the tree list scrolls */
+  body[data-view="results"] .right-col{
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+  body[data-view="results"] #panel-deps{
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+  }
+  body[data-view="results"] #panel-deps .tree-pane{
+    flex: 1;
+    max-height: none;       /* let flex govern the height */
+    min-height: 0;
+  }
+  /* Info / Files / Versions panels scroll within the fixed area too */
+  body[data-view="results"] .right-col .panel.active:not(#panel-deps){
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
 @media (max-width: 960px){
   .results{ grid-template-columns: 1fr; }
 }
@@ -983,7 +1054,22 @@ html[data-theme="dark"] .tree-toolbar{
   border-radius: var(--r-14);
   padding: 8px;
   box-shadow: var(--e1), inset 0 1px 0 rgba(255,255,255,0.5);
+  margin-top: 10px;
+  max-height: calc(100vh - 240px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--hair-strong) transparent;
 }
+.tree-pane::-webkit-scrollbar{ width: 8px; }
+.tree-pane::-webkit-scrollbar-track{ background: transparent; }
+.tree-pane::-webkit-scrollbar-thumb{
+  background: var(--hair-strong);
+  border-radius: var(--r-full);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.tree-pane::-webkit-scrollbar-thumb:hover{ background: var(--ink-4); background-clip: content-box; }
 html[data-theme="dark"] .tree-pane{
   background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
   box-shadow: var(--e1), inset 0 1px 0 rgba(255,255,255,0.06);
@@ -2004,7 +2090,7 @@ footer a{ color: var(--blue); text-decoration: none; }
     display: grid;
     grid-template-columns: 240px minmax(0, 340px) minmax(0, 1fr);
     gap: 20px;
-    align-items: start;
+    align-items: stretch;
   }
   body[data-view="results"] .sidebar{
     display: flex;
@@ -2016,9 +2102,7 @@ footer a{ color: var(--blue); text-decoration: none; }
     border-radius: var(--r-14);
     box-shadow: var(--e1), inset 0 1px 0 rgba(255,255,255,0.5);
     padding: 14px 12px;
-    position: sticky;
-    top: 68px;
-    max-height: calc(100vh - 88px);
+    min-height: 0;
     overflow-y: auto;
   }
   html[data-theme="dark"] body[data-view="results"] .sidebar{
@@ -2026,9 +2110,8 @@ footer a{ color: var(--blue); text-decoration: none; }
     box-shadow: var(--e1), inset 0 1px 0 rgba(255,255,255,0.06);
   }
   body[data-view="results"] .pkg-card{
-    position: sticky;
-    top: 68px;
-    max-height: calc(100vh - 88px);
+    min-height: 0;
+    max-height: 100%;
     overflow-y: auto;
   }
 }
@@ -2340,7 +2423,7 @@ footer a{ color: var(--blue); text-decoration: none; }
   .tree-search{ max-width: 100%; padding: 8px 12px; }
   .tree-search input{ font-size: 14px; }
 
-  .tree-pane{ padding: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tree-pane{ padding: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; max-height: 60vh; }
   .dep-row{
     grid-template-columns: 30px 32px minmax(0, 1fr) auto;
     gap: 8px;
@@ -3985,6 +4068,9 @@ function showNoResults(query){
   loader.classList.remove('visible');
   emptyDeps.style.display = 'none';
   nrQuery.textContent = query;
+  // 🥚 Deadpan rotating not-found message
+  const lede = document.querySelector('#no-results .nr-lede');
+  if(lede) lede.textContent = Egg.notFoundQuip();
   nrPypiSearch.href = `https://pypi.org/search/?q=${encodeURIComponent(query)}`;
   const suggestions = findSuggestions(query);
   nrSuggestions.innerHTML = '';
@@ -4030,15 +4116,23 @@ form.addEventListener('submit', async (e) => {
 
   hideAc();
 
-  // 🥚 Special Python in-joke terms (antigravity, this, …)
+  // 🥚 Special Python in-joke terms (antigravity, this, spam, …)
   if(Egg.handleSpecialSearch(name)) return;
+
+  // 🥚 Gentle typo nudge for famous misspellings
+  const fix = Egg.typoFix(name);
+  if(fix){
+    showToast(`Did you mean "${fix}"? (we all do it) 😅`);
+    nameInput.value = fix;
+  }
+  const searchName = fix || name;
 
   setView('results');
   resetResults();
   showLoader(true);
 
   // 🥚 Playful loader quip for famously huge dependency trees
-  const quip = Egg.loaderQuipFor(name);
+  const quip = Egg.loaderQuipFor(searchName);
   if(quip){
     const lt = document.querySelector('#loader .loader-text');
     if(lt) lt.textContent = quip;
@@ -4046,7 +4140,7 @@ form.addEventListener('submit', async (e) => {
 
   try{
     totalNodesLoaded = 0;
-    const data = await fetchPackage(name, ver);
+    const data = await fetchPackage(searchName, ver);
     renderPackageCard(data);
     renderInfoTab(data);
     renderVersionsTab(data);
@@ -4065,6 +4159,7 @@ form.addEventListener('submit', async (e) => {
       statDirect.textContent = direct;
     }
     statTotal.textContent = totalNodesLoaded;
+    Egg.maybeGoDeeper(totalNodesLoaded); // 🥚 we need to go deeper
     welcome.style.display = 'none';
     results.classList.add('visible');
     pushRecent(data.info.name);
@@ -4955,6 +5050,7 @@ async function runBundle(){
   bundleStatus.textContent = 'Resolving dependency graph…';
   bundleCount.textContent = '0 / ?';
   bundleProgress.style.width = '5%';
+  Egg.bundleGag((msg) => logLine('info', escapeHtml(msg))); // 🥚 downloading more RAM…
 
   const roots = bundleMode === 'multi'
     ? cart.map(c => ({ name: c.name, version: c.version }))
@@ -5300,7 +5396,9 @@ const Egg = (() => {
 
   // Special Python in-joke search terms. Returns true if handled.
   function handleSpecialSearch(rawName){
-    const n = (rawName || '').trim().toLowerCase();
+    let n = (rawName || '').trim().toLowerCase();
+    // Let "import this" / "import antigravity" trigger the same eggs
+    n = n.replace(/^(import|from)\s+/, '').trim();
     switch(n){
       case 'antigravity':
         showToast('🚀 import antigravity');
@@ -5313,6 +5411,59 @@ const Egg = (() => {
         console.log('%cBeautiful is better than ugly. Simple is better than complex. Readability counts. …\n(run `import this` in Python for the full poem)', 'font:400 12px/1.6 monospace;color:#888;');
         rain(['🧘','🐍','✨'], 20, 2600);
         return true;
+      case '__future__':
+        showToast('from __future__ import flying_cars 🚗💨');
+        rain(['🚗','💨','✨'], 18, 2600);
+        return true;
+      case 'gil':
+        showToast('🔒 Only one thread may pass.');
+        rain(['🔒','🧵'], 16, 2400);
+        return true;
+      case 'spam':
+        showToast('🥫 Spam, spam, spam, eggs and spam!');
+        rain(['🥫','🍳','🥓'], 22, 2600);
+        return true;
+      case 'eggs':
+        showToast('🍳 …and spam. Lovely spam!');
+        rain(['🍳','🥫','✨'], 18, 2400);
+        return true;
+      case 'monty':
+      case 'montypython':
+      case 'monty-python':
+        showToast('Nobody expects the Spanish Inquisition! ⚔️');
+        rain(['⚔️','🛡️','🎩'], 22, 2800);
+        return true;
+      case 'knights':
+      case 'ni':
+        showToast('We are the knights who say… Ni! 🛡️');
+        rain(['🛡️','🌿'], 16, 2400);
+        return true;
+      case 'leftpad':
+      case 'left-pad':
+        showToast('11 lines that once broke the internet 😅');
+        rain(['📦','💥','🌐'], 20, 2600);
+        return true;
+      case 'xkcd':
+      case 'dependency':
+      case 'dependencies':
+        showToast('Modern infrastructure: held up by one tiny brick 🧱');
+        console.log('%cSee xkcd 2347 — the whole tower balances on "a project some random person in Nebraska has been thanklessly maintaining since 2003."', 'font:400 12px/1.6 monospace;color:#888;');
+        rain(['🧱','🏗️','😬'], 18, 2800);
+        setTimeout(() => window.open('https://xkcd.com/2347/', '_blank', 'noopener'), 400);
+        return true;
+      case 'isodd':
+      case 'is-odd':
+      case 'iseven':
+      case 'is-even':
+        showToast('You really needed a package for this? 😏');
+        return false;
+      case '2to3':
+        showToast('Ah, a brave soul. 🫡');
+        return false;
+      case 'coffee':
+        showToast('☕ brewing…');
+        rain(['☕','☕','✨'], 16, 2600);
+        return true;
       case '__hello__':
       case 'hello':
         showToast('Hello, world! 🐍');
@@ -5324,6 +5475,22 @@ const Egg = (() => {
       default:
         return false;
     }
+  }
+
+  // Common typos → gentle "did you mean" with the fix
+  const TYPOS = {
+    pyhton: 'python', phyton: 'python', pythn: 'python',
+    numpyy: 'numpy', nmpy: 'numpy', nupmy: 'numpy',
+    reqeusts: 'requests', requsts: 'requests', requets: 'requests', reqests: 'requests',
+    panads: 'pandas', padnas: 'pandas', pndas: 'pandas',
+    djano: 'django', dajngo: 'django',
+    flsk: 'flask', falsk: 'flask',
+    tensroflow: 'tensorflow', tensorlfow: 'tensorflow',
+    scikitlearn: 'scikit-learn', sklearn: 'scikit-learn',
+    beatifulsoup: 'beautifulsoup4', bs4: 'beautifulsoup4',
+  };
+  function typoFix(name){
+    return TYPOS[(name || '').trim().toLowerCase()] || null;
   }
 
   // Quips shown in the loader for famously enormous dependency trees
@@ -5340,6 +5507,9 @@ const Egg = (() => {
     boto3: 'AWS brings the whole cloud. ☁️',
   };
   function loaderQuipFor(name){
+    const h = new Date().getHours();
+    if(h >= 2 && h < 5) return 'Resolving dependencies… you should sleep 😴';
+    if(new Date().getDay() === 5 && h >= 14) return 'Deploying on a Friday? Respect. 🫡';
     return HEAVY[(name || '').trim().toLowerCase()] || null;
   }
 
@@ -5348,14 +5518,87 @@ const Egg = (() => {
     confetti();
   }
 
+  // Deep dependency tree → "we need to go deeper"
+  let deepShown = false;
+  function maybeGoDeeper(total){
+    if(total >= 60 && !deepShown){
+      deepShown = true;
+      setTimeout(() => { showToast('We need to go deeper 🌀'); rain(['🌀','🐍'], 14, 2200); }, 600);
+    }
+  }
+
+  // Deadpan rotating messages for the not-found state
+  const NOT_FOUND = [
+    'PyPI has never heard of this. Bold of you.',
+    '404: package as imaginary as my motivation.',
+    'Searched everywhere. Even checked the couch cushions.',
+    'Nope. Not even on a Tuesday.',
+    'That package is in another castle. 🍄',
+    'We looked. We really did.',
+  ];
+  function notFoundQuip(){
+    return NOT_FOUND[Math.floor(Math.random() * NOT_FOUND.length)];
+  }
+
+  // Occasionally drop a joke line into the bundle log
+  function bundleGag(appendLine){
+    if(Math.random() < 0.5){
+      appendLine('downloading more RAM…');
+      setTimeout(() => appendLine('just kidding 😄'), 900);
+    }
+  }
+
+  // Idle "still here?" nudge on the results view
+  function initIdle(){
+    let timer = null, fired = false;
+    const reset = () => {
+      clearTimeout(timer);
+      if(fired) return;
+      timer = setTimeout(() => {
+        if(!fired && document.body.getAttribute('data-view') === 'results'){
+          fired = true;
+          showToast('Still here? 👀');
+        }
+      }, 60000);
+    };
+    ['mousemove','keydown','scroll','click','touchstart'].forEach(ev =>
+      window.addEventListener(ev, reset, { passive: true }));
+    reset();
+  }
+
+  // Cycle joke taglines when the landing tagline is clicked
+  function initTagline(){
+    const tag = document.querySelector('.tagline');
+    if(!tag) return;
+    const lines = [
+      'Now with 100% more recursion',
+      'It\u2019s turtles all the way down 🐢',
+      'npm could never',
+      'Powered by caffeine and PyPI ☕',
+      'Resolving so you don\u2019t have to',
+    ];
+    let i = -1;
+    const original = tag.textContent;
+    tag.style.cursor = 'pointer';
+    tag.title = 'Click me';
+    tag.addEventListener('click', () => {
+      i++;
+      if(i >= lines.length){ tag.textContent = original; i = -1; }
+      else tag.textContent = lines[i];
+    });
+  }
+
   function init(){
     consoleGreeting();
     initKonami();
     initLogoClicks();
     initHackerTheme();
+    initIdle();
+    initTagline();
   }
 
-  return { init, handleSpecialSearch, loaderQuipFor, celebrateZeroDeps, confetti, snakeRain };
+  return { init, handleSpecialSearch, typoFix, loaderQuipFor, celebrateZeroDeps,
+           maybeGoDeeper, notFoundQuip, bundleGag, confetti, snakeRain };
 })();
 Egg.init();
 
