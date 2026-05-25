@@ -878,6 +878,25 @@ html[data-theme="dark"] .pkg-card{
   box-shadow: 0 4px 12px rgba(33,150,243,0.22), inset 0 1px 0 rgba(255,255,255,0.25);
 }
 .pkg-title{ font: 700 18px/1.2 var(--font-sans); color: var(--ink); letter-spacing:-0.01em; word-break: break-word; }
+
+/* Project favicon shown inside an avatar (well-known packages) */
+.pkg-avatar.has-favicon, .dep-avatar.has-favicon, .sb-avatar.has-favicon, .ac-icon.has-favicon{
+  background: #fff !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12), inset 0 0 0 1px var(--hair);
+  padding: 0;
+}
+html[data-theme="dark"] .pkg-avatar.has-favicon,
+html[data-theme="dark"] .dep-avatar.has-favicon,
+html[data-theme="dark"] .sb-avatar.has-favicon,
+html[data-theme="dark"] .ac-icon.has-favicon{
+  background: rgba(255,255,255,0.92) !important;
+}
+.avatar-favicon{
+  width: 64%; height: 64%;
+  object-fit: contain;
+  border-radius: 4px;
+  display: block;
+}
 .pkg-version-row{
   display:flex; align-items:center; gap:6px; margin-top:4px; flex-wrap:wrap;
 }
@@ -901,23 +920,45 @@ html[data-theme="dark"] .pkg-card{
 .install{
   background: var(--surface-2);
   border: 1px solid var(--hair);
-  border-radius: var(--r-8);
-  padding: 7px 10px;
+  border-radius: var(--r-10);
+  padding: 6px 6px 6px 12px;
   display:flex; align-items:center; gap: 8px;
   margin-bottom: 10px;
   font-family: var(--font-mono); font-size: 12px; color: var(--ink-2);
+  transition: border-color var(--dur-1) var(--ease), box-shadow var(--dur-1) var(--ease);
 }
-.install .prompt{ color: var(--ink-4); user-select:none; }
+.install:hover{ border-color: var(--hair-strong); }
+.install .prompt{ color: var(--blue); user-select:none; font-weight: 600; }
 .install .cmd{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .install button.copy{
-  border:none; background:transparent; cursor:pointer;
-  width: 26px; height: 26px; border-radius: var(--r-6);
+  border:1px solid var(--hair); background: var(--surface);
+  cursor:pointer;
+  width: 30px; height: 30px; border-radius: var(--r-8);
   color: var(--ink-3); display:grid; place-items:center;
-  transition: all var(--dur-1) var(--ease);
+  transition: color var(--dur-1) var(--ease), background var(--dur-1) var(--ease),
+              border-color var(--dur-1) var(--ease), transform var(--dur-1) var(--ease),
+              box-shadow var(--dur-1) var(--ease);
   flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
-.install button.copy:hover{ color: var(--blue); background: var(--blue-wash); }
-.install button.copy.copied{ color: var(--green); background: var(--green-wash); }
+.install button.copy svg{ width: 15px; height: 15px; transition: transform var(--dur-1) var(--ease); }
+.install button.copy:hover{
+  color: var(--dep-blue); background: var(--blue-wash);
+  border-color: var(--blue-soft);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(33,150,243,0.18);
+}
+.install button.copy:active{ transform: translateY(0) scale(0.92); }
+.install button.copy.copied{
+  color: #fff; background: var(--green); border-color: var(--green);
+  box-shadow: 0 3px 8px rgba(52,199,89,0.3);
+}
+.install button.copy.copied svg{ animation: copyPop 320ms var(--ease-emph); }
+@keyframes copyPop{
+  0%{ transform: scale(0.4); opacity: 0; }
+  60%{ transform: scale(1.15); }
+  100%{ transform: scale(1); opacity: 1; }
+}
 
 /* Meta list */
 .meta{ display:flex; flex-direction:column; gap: 0; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--hair); }
@@ -3396,6 +3437,109 @@ function avatarFor(name){
   for(let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
   return AVATAR_COLORS[h % AVATAR_COLORS.length];
 }
+
+/* ---- Project favicons for well-known packages ----
+   We never bundle anyone's logo. Instead we display the icon each project's
+   own site serves (the same favicon a browser tab shows), fetched at runtime
+   via a favicon service, and fall back to the generated letter avatar if no
+   icon loads. For dependency rows we only have the package name, so a small
+   map points the best-known packages at their project domain. */
+const PKG_DOMAINS = {
+  django: 'djangoproject.com', flask: 'flask.palletsprojects.com',
+  numpy: 'numpy.org', pandas: 'pandas.pydata.org', scipy: 'scipy.org',
+  requests: 'requests.readthedocs.io', pytest: 'pytest.org',
+  tensorflow: 'tensorflow.org', torch: 'pytorch.org', 'scikit-learn': 'scikit-learn.org',
+  matplotlib: 'matplotlib.org', pillow: 'python-pillow.org', sqlalchemy: 'sqlalchemy.org',
+  fastapi: 'fastapi.tiangolo.com', pydantic: 'pydantic.dev', celery: 'docs.celeryq.dev',
+  jinja2: 'jinja.palletsprojects.com', click: 'click.palletsprojects.com',
+  beautifulsoup4: 'crummy.com', lxml: 'lxml.de', boto3: 'aws.amazon.com',
+  transformers: 'huggingface.co', 'apache-airflow': 'airflow.apache.org',
+  poetry: 'python-poetry.org', pip: 'pip.pypa.io', setuptools: 'setuptools.pypa.io',
+  uvicorn: 'uvicorn.org', starlette: 'starlette.io', aiohttp: 'docs.aiohttp.org',
+  scrapy: 'scrapy.org', plotly: 'plotly.com', dash: 'plotly.com', streamlit: 'streamlit.io',
+  pyyaml: 'pyyaml.org', tornado: 'tornadoweb.org', redis: 'redis.io',
+  'opencv-python': 'opencv.org', keras: 'keras.io', seaborn: 'seaborn.pydata.org',
+  // — expanded —
+  werkzeug: 'werkzeug.palletsprojects.com', itsdangerous: 'palletsprojects.com',
+  markupsafe: 'palletsprojects.com', 'flask-sqlalchemy': 'flask-sqlalchemy.palletsprojects.com',
+  gunicorn: 'gunicorn.org', uwsgi: 'uwsgi-docs.readthedocs.io',
+  httpx: 'python-httpx.org', urllib3: 'urllib3.readthedocs.io', certifi: 'certifi.io',
+  'python-dateutil': 'dateutil.readthedocs.io', pytz: 'pythonhosted.org',
+  cryptography: 'cryptography.io', paramiko: 'paramiko.org', pyopenssl: 'pyopenssl.org',
+  rich: 'rich.readthedocs.io', typer: 'typer.tiangolo.com', tqdm: 'tqdm.github.io',
+  loguru: 'loguru.readthedocs.io', structlog: 'structlog.org',
+  black: 'black.readthedocs.io', ruff: 'docs.astral.sh', mypy: 'mypy-lang.org',
+  flake8: 'flake8.pycqa.org', isort: 'pycqa.github.io', pylint: 'pylint.pycqa.org',
+  tox: 'tox.wiki', nox: 'nox.thea.codes', hypothesis: 'hypothesis.works',
+  coverage: 'coverage.readthedocs.io', 'pytest-cov': 'pytest-cov.readthedocs.io',
+  sphinx: 'sphinx-doc.org', mkdocs: 'mkdocs.org', 'mkdocs-material': 'squidfunk.github.io',
+  jupyter: 'jupyter.org', jupyterlab: 'jupyter.org', notebook: 'jupyter.org',
+  ipython: 'ipython.org', ipywidgets: 'ipywidgets.readthedocs.io',
+  scikit_image: 'scikit-image.org', 'scikit-image': 'scikit-image.org',
+  statsmodels: 'statsmodels.org', sympy: 'sympy.org', networkx: 'networkx.org',
+  xgboost: 'xgboost.ai', lightgbm: 'lightgbm.readthedocs.io', catboost: 'catboost.ai',
+  spacy: 'spacy.io', nltk: 'nltk.org', gensim: 'radimrehurek.com',
+  'sentence-transformers': 'sbert.net', datasets: 'huggingface.co',
+  'huggingface-hub': 'huggingface.co', accelerate: 'huggingface.co',
+  openai: 'openai.com', anthropic: 'anthropic.com', langchain: 'langchain.com',
+  llama_index: 'llamaindex.ai', 'llama-index': 'llamaindex.ai',
+  django_rest_framework: 'django-rest-framework.org', djangorestframework: 'django-rest-framework.org',
+  graphene: 'graphene-python.org', strawberry_graphql: 'strawberry.rocks',
+  'strawberry-graphql': 'strawberry.rocks',
+  psycopg2: 'psycopg.org', 'psycopg2-binary': 'psycopg.org', psycopg: 'psycopg.org',
+  pymongo: 'pymongo.readthedocs.io', mysqlclient: 'mysqlclient.readthedocs.io',
+  alembic: 'alembic.sqlalchemy.org', peewee: 'docs.peewee-orm.com',
+  pandas_datareader: 'pydata.org', dask: 'dask.org', polars: 'pola.rs',
+  pyarrow: 'arrow.apache.org', duckdb: 'duckdb.org',
+  selenium: 'selenium.dev', playwright: 'playwright.dev',
+  'python-dotenv': 'saurabh-kumar.com', environs: 'pypi.org',
+  marshmallow: 'marshmallow.readthedocs.io', attrs: 'attrs.org',
+  arrow: 'arrow.readthedocs.io', pendulum: 'pendulum.eustace.io',
+  faker: 'faker.readthedocs.io', factory_boy: 'factoryboy.readthedocs.io',
+  'factory-boy': 'factoryboy.readthedocs.io',
+  websockets: 'websockets.readthedocs.io', 'flask-cors': 'flask-cors.readthedocs.io',
+  'flask-login': 'flask-login.readthedocs.io', 'flask-migrate': 'flask-migrate.readthedocs.io',
+  bokeh: 'bokeh.org', altair: 'altair-viz.github.io', pygame: 'pygame.org',
+  kivy: 'kivy.org', pyqt5: 'riverbankcomputing.com', pyside6: 'qt.io',
+  wheel: 'pythonwheels.com', twine: 'twine.readthedocs.io', build: 'pypa.io',
+  hatch: 'hatch.pypa.io', flit: 'flit.pypa.io', pdm: 'pdm-project.org',
+  pre_commit: 'pre-commit.com', 'pre-commit': 'pre-commit.com',
+  conda: 'conda.io', mamba: 'mamba.readthedocs.io',
+  fastparquet: 'fastparquet.readthedocs.io', h5py: 'h5py.org',
+  numba: 'numba.pydata.org', cython: 'cython.org', cffi: 'cffi.readthedocs.io',
+  pyspark: 'spark.apache.org', kafka_python: 'kafka-python.readthedocs.io',
+  grpcio: 'grpc.io', protobuf: 'protobuf.dev', thrift: 'thrift.apache.org',
+};
+function domainFromUrl(url){
+  try{ return new URL(url).hostname.replace(/^www\./, ''); }catch(_){ return null; }
+}
+function faviconUrl(domain){
+  // Google's favicon service returns the site's own icon (or a default).
+  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
+}
+// Try to show a project favicon in `el`; keep the existing letter avatar on failure.
+function applyFavicon(el, name, homeUrl){
+  const key = (name || '').trim().toLowerCase();
+  const domain = (homeUrl && domainFromUrl(homeUrl)) || PKG_DOMAINS[key] || null;
+  if(!domain) return; // unknown → keep generated icon
+  const img = new Image();
+  img.alt = '';
+  img.width = img.height = 0;
+  img.referrerPolicy = 'no-referrer';
+  img.onload = () => {
+    // Some services return a 16px generic globe; accept anything that loaded.
+    el.classList.add('has-favicon');
+    el.textContent = '';
+    const shown = document.createElement('img');
+    shown.src = img.src;
+    shown.alt = '';
+    shown.className = 'avatar-favicon';
+    shown.referrerPolicy = 'no-referrer';
+    el.appendChild(shown);
+  };
+  img.onerror = () => { /* keep the generated letter avatar */ };
+  img.src = faviconUrl(domain);
+}
 function relativeDate(iso){
   if(!iso) return '—';
   const t = new Date(iso); const now = new Date();
@@ -3791,6 +3935,7 @@ function renderAcDom(sectionLabel, q){
       </div>
       ${pill}
     `;
+    applyFavicon(div.querySelector('.ac-icon'), p.name); // 🎨 project favicon for well-known packages
     div.addEventListener('mousedown', (e) => { e.preventDefault(); pickAc(p); });
     ac.appendChild(div);
   });
@@ -3985,6 +4130,7 @@ function makeSbItem(name, isRecent){
     b.classList.add('active');
   }
   b.innerHTML = `<span class="sb-avatar ${avatarFor(name)}">${escapeHtml(name[0].toUpperCase())}</span><span class="sb-name">${escapeHtml(name)}</span>`;
+  applyFavicon(b.querySelector('.sb-avatar'), name); // 🎨 project favicon for well-known packages
   b.addEventListener('click', () => {
     nameInput.value = name;
     verInput.value = '';
@@ -4191,6 +4337,7 @@ function renderPackageCard(data){
   currentPkg = info;
   const letter = info.name[0].toUpperCase();
   pkgAvatar.textContent = letter;
+  pkgAvatar.classList.remove('has-favicon');
   pkgTitle.textContent = info.name;
   pkgVerPill.textContent = info.version;
   pipCmd.textContent = `pip install ${info.name}==${info.version}`;
@@ -4215,6 +4362,9 @@ function renderPackageCard(data){
   if(home){
     metaHome.innerHTML = `<a href="${escapeHtml(home)}" target="_blank" rel="noopener">${escapeHtml(home.replace(/^https?:\/\//,''))}</a>`;
   } else metaHome.textContent = '—';
+
+  // 🎨 Show the project's own favicon for well-known packages (graceful fallback)
+  applyFavicon(pkgAvatar, info.name, home);
 
   // Released
   const releases = data.releases || {};
@@ -4555,6 +4705,7 @@ function renderNodes(deps, parentUl, depth){
     const av = document.createElement('div');
     av.className = `dep-avatar ${avatarFor(d.name)}`;
     av.textContent = d.name[0].toUpperCase();
+    applyFavicon(av, d.name); // 🎨 project favicon for well-known deps
 
     // Info
     const info = document.createElement('div');
