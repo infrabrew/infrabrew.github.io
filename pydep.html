@@ -3722,27 +3722,40 @@ function acScore(q, name, downloads, curated){
   const nm = name.toLowerCase();
   const qNoSep = q.replace(/[-_.]/g, '');
   const nmNoSep = nm.replace(/[-_.]/g, '');
+  const segments = nm.split(/[-_.]/).filter(Boolean);
+  // Acronym of the segments, e.g. "django-rest-framework" -> "drf"
+  const acronym = segments.map(s => s[0]).join('');
 
   let score = 0;
-  if(q === nm) score = 1500;
-  else if(qNoSep === nmNoSep) score = 1400;
-  else if(nm.startsWith(q)) score = 1000 - Math.min(nm.length, 60);
-  else if(nmNoSep.startsWith(qNoSep)) score = 900 - Math.min(nm.length, 60);
-  else if(nm.includes(q)) score = 600 - Math.min(nm.length, 60);
-  else if(nmNoSep.includes(qNoSep)) score = 550 - Math.min(nm.length, 60);
-  else if(q.length >= 3 && isSubsequence(qNoSep, nmNoSep)) score = 300 - Math.min(nm.length, 60);
+  if(q === nm) score = 2000;                                   // exact
+  else if(qNoSep === nmNoSep) score = 1800;                    // exact ignoring separators
+  else if(nm.startsWith(q)) score = 1300 - Math.min(nm.length, 40); // prefix
+  else if(nmNoSep.startsWith(qNoSep)) score = 1200 - Math.min(nm.length, 40);
+  else if(segments.some(s => s.startsWith(q))) score = 1000 - Math.min(nm.length, 40); // word-start
+  else if(qNoSep.length >= 2 && acronym.startsWith(qNoSep)) score = 950; // acronym prefix (drf, bs)
+  else if(qNoSep.length >= 2 && acronym === qNoSep) score = 980;          // full acronym
+  else if(nm.includes(q)) score = 700 - Math.min(nm.length, 40);          // substring
+  else if(nmNoSep.includes(qNoSep)) score = 650 - Math.min(nm.length, 40);
+  else if(q.length >= 3 && isSubsequence(qNoSep, nmNoSep)) score = 380 - Math.min(nm.length, 40); // fuzzy subseq
   else {
     const dist = levenshtein(qNoSep, nmNoSep);
-    if(dist <= 1 && nm.length >= 3) score = 350;
-    else if(dist <= 2 && nm.length >= 5) score = 200;
+    if(dist <= 1 && nm.length >= 3) score = 420;               // 1 typo
+    else if(dist <= 2 && nm.length >= 6) score = 240;          // 2 typos on longer names
     else return 0;
   }
-  // Popularity boost (log scale, capped)
+
+  // Popularity boost — Google-style: heavily favor what most people install.
+  // Log10 of monthly downloads scaled so a top package (~1e8) adds ~280,
+  // enough to lift a popular substring match above an obscure prefix match.
   if(downloads){
-    score += Math.min(80, Math.log10(Math.max(1, downloads)) * 8);
+    score += Math.min(320, Math.log10(Math.max(1, downloads)) * 35);
   }
-  // Slight curation bonus (curated entries have descriptions worth showing)
-  if(curated) score += 5;
+  // Recent searches the user has actually opened rank higher.
+  if(typeof RECENT_SET !== 'undefined' && RECENT_SET.has(nm)) score += 200;
+  // Curated entries carry descriptions worth showing.
+  if(curated) score += 30;
+  // Penalize very long / noisy names slightly so concise matches win ties.
+  score -= Math.min(20, Math.max(0, nm.length - 18) * 0.5);
   return score;
 }
 function formatDownloads(n){
@@ -3849,8 +3862,8 @@ function showAcSuggestions(q){
   const scored = candidates
     .map(p => ({ ...p, _score: acScore(ql, p.name, p.downloads, p.curated) }))
     .filter(p => p._score > 0)
-    .sort((a, b) => b._score - a._score)
-    .slice(0, 8);
+    .sort((a, b) => b._score - a._score || (b.downloads||0) - (a.downloads||0))
+    .slice(0, 10);
 
   acResults = scored;
   renderAcDom(null, q);
@@ -4086,6 +4099,12 @@ function parseDep(raw){
 ========================================================= */
 const RECENT_KEY = 'pydep-recent';
 const MAX_RECENT = 8;
+// Lowercased set of recently-opened packages, used to boost them in predictions.
+let RECENT_SET = new Set();
+function refreshRecentSet(){
+  try{ RECENT_SET = new Set(getRecent().map(n => n.toLowerCase())); }
+  catch(_){ RECENT_SET = new Set(); }
+}
 function getRecent(){
   try{ return JSON.parse(localStorage.getItem(RECENT_KEY)) || []; }
   catch(_){ return []; }
@@ -4096,12 +4115,15 @@ function pushRecent(name){
   r.unshift(name);
   while(r.length > MAX_RECENT) r.pop();
   try{ localStorage.setItem(RECENT_KEY, JSON.stringify(r)); }catch(_){}
+  refreshRecentSet();
   renderSidebar();
 }
 function clearRecent(){
   try{ localStorage.removeItem(RECENT_KEY); }catch(_){}
+  refreshRecentSet();
   renderSidebar();
 }
+refreshRecentSet();
 function renderSidebar(){
   const sbRecent = $('#sb-recent');
   const sbRecentSection = $('#sb-recent-section');
@@ -4253,7 +4275,8 @@ function showNoResults(query){
 nrRetry.addEventListener('click', () => {
   noResults.classList.remove('visible');
   nameInput.value = '';
-  nameInput.focus();
+  verInput.value = '';
+  setView('landing');
 });
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
