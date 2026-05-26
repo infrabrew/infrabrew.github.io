@@ -883,7 +883,7 @@ html[data-theme="dark"] .pkg-card{
 .pkg-title{ font: 700 18px/1.2 var(--font-sans); color: var(--ink); letter-spacing:-0.01em; word-break: break-word; }
 
 /* Project favicon shown inside an avatar (well-known packages) */
-.pkg-avatar.has-favicon, .dep-avatar.has-favicon, .sb-avatar.has-favicon, .ac-icon.has-favicon{
+.pkg-avatar.has-favicon, .dep-avatar.has-favicon, .sb-avatar.has-favicon, .ac-icon.has-favicon, .cart-item-avatar.has-favicon{
   background: #fff !important;
   box-shadow: 0 2px 8px rgba(0,0,0,0.12), inset 0 0 0 1px var(--hair);
   padding: 0;
@@ -891,7 +891,8 @@ html[data-theme="dark"] .pkg-card{
 html[data-theme="dark"] .pkg-avatar.has-favicon,
 html[data-theme="dark"] .dep-avatar.has-favicon,
 html[data-theme="dark"] .sb-avatar.has-favicon,
-html[data-theme="dark"] .ac-icon.has-favicon{
+html[data-theme="dark"] .ac-icon.has-favicon,
+html[data-theme="dark"] .cart-item-avatar.has-favicon{
   background: rgba(255,255,255,0.92) !important;
 }
 .avatar-favicon{
@@ -1825,12 +1826,19 @@ html[data-theme="dark"] .nr-suggestion{
   width: 360px;
   max-width: calc(100vw - 32px);
   max-height: calc(100vh - 48px);
-  background: var(--surface);
+  background: linear-gradient(180deg, rgba(251,251,253,0.82), rgba(248,248,251,0.7));
+  backdrop-filter: saturate(160%) blur(24px);
+  -webkit-backdrop-filter: saturate(160%) blur(24px);
   border: 1px solid var(--hair);
   border-radius: var(--r-16);
-  box-shadow: var(--e4);
+  box-shadow: var(--e4), inset 0 1px 0 rgba(255,255,255,0.6);
   overflow: hidden;
   animation: cartIn 280ms var(--ease-emph);
+}
+html[data-theme="dark"] .cart-fab{
+  background: linear-gradient(180deg, rgba(40,40,44,0.84), rgba(30,30,34,0.74));
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: var(--e4), inset 0 1px 0 rgba(255,255,255,0.1);
 }
 .cart-fab.visible{ display: flex; }
 @keyframes cartIn{
@@ -1864,7 +1872,10 @@ html[data-theme="dark"] .nr-suggestion{
   display: flex; align-items: center; gap: 10px;
   padding: 14px 16px;
   border-bottom: 1px solid var(--hair);
-  background: var(--surface-2);
+  background: linear-gradient(180deg, rgba(255,255,255,0.3), rgba(255,255,255,0.08));
+}
+html[data-theme="dark"] .cart-head{
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01));
 }
 .cart-head-icon{
   width: 32px; height: 32px; border-radius: var(--r-8);
@@ -1948,8 +1959,11 @@ html[data-theme="dark"] .nr-suggestion{
 .cart-foot{
   padding: 12px;
   border-top: 1px solid var(--hair);
-  background: var(--surface-2);
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.18));
   display: flex; gap: 8px;
+}
+html[data-theme="dark"] .cart-foot{
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.05));
 }
 .cart-foot .btn{ flex: 1; justify-content: center; }
 
@@ -5138,6 +5152,7 @@ function renderCart(){
         hideAc();
         form.dispatchEvent(new Event('submit'));
       });
+      applyFavicon(row.querySelector('.cart-item-avatar'), item.name); // 🎨 project favicon
       row.querySelector('.cart-item-remove').addEventListener('click', () => removeFromCart(item.name));
       cartBody.appendChild(row);
     });
@@ -5171,12 +5186,15 @@ addToCartBtn?.addEventListener('click', () => {
     cartCollapsed = false;
   }
 });
-cartCollapse?.addEventListener('click', () => {
+cartCollapse?.addEventListener('click', (e) => {
+  // Minimize, and stop this click from bubbling to the fab's expand handler
+  e.stopPropagation();
   cartCollapsed = true;
   cartFab.classList.add('collapsed');
 });
 cartFab?.addEventListener('click', (e) => {
-  if(cartCollapsed && !e.target.closest('.cart-collapse')){
+  // When collapsed, clicking the pill anywhere reopens it
+  if(cartCollapsed){
     cartCollapsed = false;
     cartFab.classList.remove('collapsed');
   }
