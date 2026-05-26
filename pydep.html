@@ -22,10 +22,10 @@
 ============================================================ */
 :root{
   /* Surfaces (light) */
-  --bg: #F5F5F7;
+  --bg: #f5f5f7;
   --bg-grad-top: #eef0f5;
   --bg-grad-bot: #f7f7fa;
-  --surface: #F5F5F7;
+  --surface: #ffffff;
   --surface-2: #fafafc;
   --surface-3: #f2f2f5;
 
@@ -130,6 +130,8 @@ html[data-theme="dark"]{
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
+html{ overflow-x: hidden; }
+body{ overflow-x: hidden; }
 
 /* Smooth, gentle crossfade when toggling between light and dark themes.
    Deliberately slow (~900ms) and softly eased so the change never reads as
@@ -1239,9 +1241,14 @@ a.dep-name:hover{ color: var(--blue); }
   padding: 3px 7px; border-radius: var(--r-full);
   background: var(--orange-wash);
   white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  max-width: 100%;
+  min-width: 0;
+  flex-shrink: 1;
   cursor: help;
 }
-.dep-condition svg{ width:11px; height:11px; }
+.dep-condition svg{ width:11px; height:11px; flex-shrink:0; }
+.dep-condition > span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
 
 .dep-actions{ display:flex; align-items:center; gap:4px; flex-shrink:0; }
 .icon-btn{
@@ -2316,7 +2323,9 @@ footer a{ color: var(--blue); text-decoration: none; }
   body{
     overscroll-behavior-y: contain;
     background-attachment: scroll; /* fixed bg is laggy on iOS */
+    overflow-x: hidden;            /* never let wide content force a zoomed-out view */
   }
+  .shell, .results, .results.visible{ max-width: 100%; }
 
   /* Safe-area aware nav + footer */
   .nav{ padding-top: env(safe-area-inset-top); height: auto; min-height: 52px; }
@@ -2407,6 +2416,9 @@ footer a{ color: var(--blue); text-decoration: none; }
   /* ----- RESULTS LAYOUT ----- */
   .shell{ padding: 12px 12px 24px; }
   .results{ grid-template-columns: 1fr; gap: 14px; margin-top: 16px; }
+  /* Tighter nesting indent on phones so deep trees (e.g. transformers)
+     don't overflow horizontally and force a zoomed-out desktop view. */
+  .sub-tree{ padding-left: 14px; }
 
   .pkg-card{ padding: 18px; border-radius: 14px; }
   .pkg-head{ gap: 12px; margin-bottom: 12px; }
@@ -2465,7 +2477,15 @@ footer a{ color: var(--blue); text-decoration: none; }
   .tree-search{ max-width: 100%; padding: 8px 12px; }
   .tree-search input{ font-size: 14px; }
 
-  .tree-pane{ padding: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; max-height: 60vh; }
+  .tree-pane{ padding: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; max-height: 60vh; max-width: 100%; }
+  /* Ensure the tree pane is the only thing that scrolls sideways: its
+     ancestors must be allowed to shrink (min-width:0) so a wide tree row
+     scrolls inside the pane instead of forcing the whole page wider. */
+  #panel-deps, #panel-deps > *, .right-col, .results, .results.visible, .results.visible > *{
+    min-width: 0;
+    max-width: 100%;
+  }
+  .dep-tree, .sub-tree, .sub-inner, .dep-node{ min-width: 0; }
   .dep-row{
     grid-template-columns: 30px 32px minmax(0, 1fr) auto;
     gap: 8px;
@@ -2706,7 +2726,7 @@ html[data-theme="hacker"] .brand-text .grad{
 @keyframes ttShoot{
   0%{ opacity: 0; transform: translate(0,0) rotate(0); }
   15%{ opacity: 1; }
-  100%{ opacity: 0; transform: translate(108vw, 26vh) rotate(20deg); }
+  100%{ opacity: 0; transform: translate(96vw, 26vh) rotate(20deg); }
 }
 @media (prefers-reduced-motion: reduce){
   .tt-sweep, .tt-shooter, .theme-toggle.tt-dizzy svg, .theme-toggle.tt-bounce svg{ animation: none !important; }
@@ -3709,7 +3729,109 @@ async function loadTopPypi(){
   return TOP_PYPI_LOADING;
 }
 
-/* ---- Matching ---- */
+/* ---- FULL PyPI name index (all 600k+ packages) ----
+   Fetched once in the background and cached, so predictions can surface
+   ANY package — not just the popular ones. Names are bucketed by their
+   first two characters for fast prefix lookup, and we also keep a flat
+   array for substring/fuzzy passes. Falls back silently on failure. */
+let FULL_INDEX = null;          // { buckets: Map<prefix2, string[]>, all: string[] }
+let FULL_INDEX_LOADING = null;
+const FULL_INDEX_CACHE = 'pydep-pypi-names-v1';
+
+function buildIndex(names){
+  const buckets = new Map();
+  for(const n of names){
+    const k = n.slice(0, 2).toLowerCase();
+    let arr = buckets.get(k);
+    if(!arr){ arr = []; buckets.set(k, arr); }
+    arr.push(n);
+  }
+  return { buckets, all: names };
+}
+
+async function loadFullIndex(){
+  if(FULL_INDEX) return FULL_INDEX;
+  if(FULL_INDEX_LOADING) return FULL_INDEX_LOADING;
+
+  // Try a cached copy first (IndexedDB-free: use localStorage compactly).
+  try{
+    const cached = localStorage.getItem(FULL_INDEX_CACHE);
+    if(cached){
+      const obj = JSON.parse(cached);
+      // Refresh weekly in the background; serve cache immediately.
+      if(obj && Array.isArray(obj.names) && obj.names.length > 1000){
+        FULL_INDEX = buildIndex(obj.names);
+        const ageDays = (Date.now() - (obj.ts || 0)) / 8.64e7;
+        if(ageDays > 7) refreshFullIndex();   // stale → update silently
+        return FULL_INDEX;
+      }
+    }
+  }catch(_){}
+
+  FULL_INDEX_LOADING = fetchFullIndex();
+  return FULL_INDEX_LOADING;
+}
+
+function refreshFullIndex(){
+  // Background refresh that doesn't block current results.
+  fetchFullIndex().catch(() => {});
+}
+
+async function fetchFullIndex(){
+  // PyPI's official Simple index in JSON form lists every project name.
+  const URL = 'https://pypi.org/simple/';
+  try{
+    const res = await fetch(URL, { headers: { 'Accept': 'application/vnd.pypi.simple.v1+json' } });
+    if(!res.ok) throw new Error('simple index fetch failed');
+    const data = await res.json();
+    const names = (data.projects || []).map(p => p.name).filter(Boolean);
+    if(!names.length) throw new Error('empty index');
+    FULL_INDEX = buildIndex(names);
+    // Cache for next visits (this can be a few MB; ignore quota errors).
+    try{ localStorage.setItem(FULL_INDEX_CACHE, JSON.stringify({ ts: Date.now(), names })); }catch(_){}
+    // Re-render current query now that the full namespace is available.
+    if(nameInput.value.trim().length >= 1 && ac.classList.contains('visible')){
+      showAcSuggestions(nameInput.value.trim());
+    }
+    return FULL_INDEX;
+  }catch(e){
+    FULL_INDEX = FULL_INDEX || { buckets: new Map(), all: [] };
+    return FULL_INDEX;
+  }
+}
+
+// Pull candidate names from the full index for a query, cheaply.
+function fullIndexCandidates(ql){
+  if(!FULL_INDEX) return [];
+  const qNoSep = ql.replace(/[-_.]/g, '');
+  const out = [];
+  const limit = 400; // cap how many names we score from the giant list
+
+  // Fast path: prefix bucket by first two chars (and the no-sep variant).
+  const tryBucket = (key) => {
+    const arr = FULL_INDEX.buckets.get(key);
+    if(!arr) return;
+    for(let i = 0; i < arr.length && out.length < limit; i++){
+      const n = arr[i].toLowerCase();
+      if(n.startsWith(ql) || n.replace(/[-_.]/g, '').startsWith(qNoSep)) out.push(arr[i]);
+    }
+  };
+  if(ql.length >= 2){
+    tryBucket(ql.slice(0, 2));
+    if(qNoSep.slice(0, 2) !== ql.slice(0, 2)) tryBucket(qNoSep.slice(0, 2));
+  } else {
+    // Single char: scan that bucket range
+    for(const [k, arr] of FULL_INDEX.buckets){
+      if(k[0] === ql[0]){
+        for(let i = 0; i < arr.length && out.length < limit; i++){
+          if(arr[i].toLowerCase().startsWith(ql)) out.push(arr[i]);
+        }
+      }
+      if(out.length >= limit) break;
+    }
+  }
+  return out;
+}
 function isSubsequence(needle, hay){
   let i = 0;
   for(let j = 0; j < hay.length && i < needle.length; j++){
@@ -3801,6 +3923,7 @@ nameInput.addEventListener('input', () => {
     return;
   }
   loadTopPypi(); // kick off lazy load
+  loadFullIndex(); // kick off full-namespace lazy load (covers obscure packages)
   showAcSuggestions(q);
   acTimer = setTimeout(() => fetchExactMatch(q), 280);
 });
@@ -3858,6 +3981,14 @@ function showAcSuggestions(q){
     candidates.push({ name: p.name, desc: '', downloads: p.downloads, curated: false });
   }
 
+  // Full PyPI namespace (every package, popular or not) — prefix matches
+  for(const name of fullIndexCandidates(ql)){
+    const key = name.toLowerCase();
+    if(seen.has(key)) continue;
+    seen.add(key);
+    candidates.push({ name, desc: '', downloads: null, curated: false });
+  }
+
   // Score + sort + slice
   const scored = candidates
     .map(p => ({ ...p, _score: acScore(ql, p.name, p.downloads, p.curated) }))
@@ -3899,11 +4030,11 @@ function renderAcDom(sectionLabel, q){
   const trimmedQ = (q || '').trim();
 
   if(acResults.length === 0){
-    if(TOP_PYPI_LOADING && !TOP_PYPI){
+    if((TOP_PYPI_LOADING && !TOP_PYPI) || (FULL_INDEX_LOADING && !FULL_INDEX)){
       // Index still loading
-      ac.innerHTML = `<div class=\"ac-loader\">${ICON.spinner}<span>Searching PyPI index\u2026</span></div>`;
+      ac.innerHTML = `<div class=\"ac-loader\">${ICON.spinner}<span>Searching the full PyPI index\u2026</span></div>`;
     } else {
-      ac.innerHTML = `<div class=\"ac-empty\">No matches in our index. Press Enter to search PyPI directly.</div>`;
+      ac.innerHTML = `<div class=\"ac-empty\">No matches found. Press Enter to search PyPI for \u201c${escapeHtml(trimmedQ)}\u201d.</div>`;
     }
     if(trimmedQ) appendAcFooter(trimmedQ);
     ac.classList.add('visible');
