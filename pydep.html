@@ -10,8 +10,8 @@
 <meta name="apple-mobile-web-app-title" content="PyDep" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="description" content="PyDep — Python Package Search Engine. Browse PyPI, explore dependency graphs, and bundle packages with all their dependencies." />
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%232196F3'/><stop offset='1' stop-color='%231565C0'/></linearGradient></defs><rect width='180' height='180' rx='40' fill='url(%23g)'/><g fill='none' stroke='white' stroke-width='10' stroke-linecap='round'><circle cx='80' cy='80' r='42'/><line x1='112' y1='112' x2='148' y2='148'/></g><g fill='white' stroke='white' stroke-width='6' stroke-linecap='round'><circle cx='80' cy='60' r='6'/><circle cx='62' cy='96' r='6'/><circle cx='98' cy='96' r='6'/><line x1='80' y1='66' x2='64' y2='92'/><line x1='80' y1='66' x2='96' y2='92'/></g></svg>" />
-<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%232196F3'/><stop offset='1' stop-color='%231565C0'/></linearGradient></defs><rect width='180' height='180' rx='40' fill='url(%23g)'/><g fill='none' stroke='white' stroke-width='10' stroke-linecap='round'><circle cx='80' cy='80' r='42'/><line x1='112' y1='112' x2='148' y2='148'/></g><g fill='white' stroke='white' stroke-width='6' stroke-linecap='round'><circle cx='80' cy='60' r='6'/><circle cx='62' cy='96' r='6'/><circle cx='98' cy='96' r='6'/><line x1='80' y1='66' x2='64' y2='92'/><line x1='80' y1='66' x2='96' y2='92'/></g></svg>" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%233B6FF0'/><stop offset='1' stop-color='%232563EB'/></linearGradient></defs><rect width='180' height='180' rx='40' fill='url(%23g)'/><g fill='none' stroke='white' stroke-width='10' stroke-linecap='round'><circle cx='80' cy='80' r='42'/><line x1='112' y1='112' x2='148' y2='148'/></g><g fill='white' stroke='white' stroke-width='6' stroke-linecap='round'><circle cx='80' cy='60' r='6'/><circle cx='62' cy='96' r='6'/><circle cx='98' cy='96' r='6'/><line x1='80' y1='66' x2='64' y2='92'/><line x1='80' y1='66' x2='96' y2='92'/></g></svg>" />
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%233B6FF0'/><stop offset='1' stop-color='%232563EB'/></linearGradient></defs><rect width='180' height='180' rx='40' fill='url(%23g)'/><g fill='none' stroke='white' stroke-width='10' stroke-linecap='round'><circle cx='80' cy='80' r='42'/><line x1='112' y1='112' x2='148' y2='148'/></g><g fill='white' stroke='white' stroke-width='6' stroke-linecap='round'><circle cx='80' cy='60' r='6'/><circle cx='62' cy='96' r='6'/><circle cx='98' cy='96' r='6'/><line x1='80' y1='66' x2='64' y2='92'/><line x1='80' y1='66' x2='96' y2='92'/></g></svg>" />
 <title>PyDep</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -36,15 +36,15 @@
   --ink-4: #86868b;
   --ink-5: #b4b4b8;
 
-  /* Accent: Material Design Blue */
-  --blue: #2196F3;
-  --blue-hover: #1E88E5;
-  --blue-press: #1976D2;
-  --blue-wash: #E3F2FD;
-  --blue-soft: #BBDEFB;
+  /* Accent: deep azure */
+  --blue: #2563EB;
+  --blue-hover: #1D4ED8;
+  --blue-press: #1E40AF;
+  --blue-wash: #EAF0FE;
+  --blue-soft: #C7D7FB;
   /* Exact "Dep" wordmark blue — buttons match this */
-  --dep-blue: #2196F3;
-  --dep-blue-hover: #1E88E5;
+  --dep-blue: #2563EB;
+  --dep-blue-hover: #1D4ED8;
 
   /* System colors */
   --green:#34c759; --green-wash:#e7f8ec;
@@ -100,12 +100,12 @@ html[data-theme="dark"]{
   --ink-4:#86868b;
   --ink-5:#48484a;
 
-  --blue:#42A5F5;
-  --blue-hover:#64B5F6;
-  --blue-wash:rgba(33,150,243,0.16);
-  --blue-soft:rgba(33,150,243,0.28);
-  --dep-blue:#2196F3;
-  --dep-blue-hover:#1E88E5;
+  --blue:#60A5FA;
+  --blue-hover:#93B8FC;
+  --blue-wash:rgba(37,99,235,0.18);
+  --blue-soft:rgba(37,99,235,0.30);
+  --dep-blue:#3B82F6;
+  --dep-blue-hover:#60A5FA;
 
   --green-wash:rgba(52,199,89,0.16);
   --orange-wash:rgba(255,159,10,0.18);
@@ -194,21 +194,21 @@ body[data-view="results"]{ padding-top: 56px; }
   text-decoration:none;
 }
 .brand-text .grad{
-  color: #2196F3;
+  color: #2563EB;
   background: none;
-  -webkit-text-fill-color: #2196F3;
+  -webkit-text-fill-color: #2563EB;
   -webkit-background-clip: initial;
   background-clip: initial;
 }
 html[data-theme="dark"] .brand-text .grad{
-  color: #2196F3;
-  -webkit-text-fill-color: #2196F3;
+  color: #3B82F6;
+  -webkit-text-fill-color: #3B82F6;
 }
 .brand-mark{
   width:28px; height:28px; border-radius:8px;
-  background: linear-gradient(135deg, #2196F3, #1565C0);
+  background: linear-gradient(160deg, #3B6FF0, #2563EB);
   display:grid; place-items:center; color:#fff;
-  box-shadow: 0 4px 12px rgba(33,150,243,0.32), inset 0 1px 0 rgba(255,255,255,0.3);
+  box-shadow: 0 2px 8px rgba(37,99,235,0.18);
 }
 .brand-mark svg{ width:16px; height:16px; }
 .nav-links{ display:flex; align-items:center; gap:6px; }
@@ -307,16 +307,11 @@ body[data-view="landing"] .nav-inner{
 }
 .wordmark-mark{
   width: 72px; height: 72px; border-radius: 20px;
-  background: linear-gradient(135deg, #2196F3, #1565C0);
+  background: linear-gradient(160deg, #3B6FF0, #2563EB);
   display: grid; place-items: center; color: #fff;
-  box-shadow: 0 12px 32px rgba(33,150,243,0.32), inset 0 1px 0 rgba(255,255,255,0.3);
+  box-shadow: 0 6px 16px rgba(37,99,235,0.18);
   position: relative;
   overflow: hidden;
-}
-.wordmark-mark::after{
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.35), transparent 55%);
-  pointer-events: none;
 }
 .wordmark-mark svg{ width: 42px; height: 42px; position: relative; z-index: 1; }
 .wordmark-text{
@@ -329,24 +324,22 @@ body[data-view="landing"] .nav-inner{
   margin-bottom: 10px;
 }
 .wordmark-text .grad{
-  /* Material Design Blue 500 */
-  color: #2196F3;
+  color: #2563EB;
   background: none;
-  -webkit-text-fill-color: #2196F3;
+  -webkit-text-fill-color: #2563EB;
   -webkit-background-clip: initial;
   background-clip: initial;
   font-weight: 700;
 }
 html[data-theme="dark"] .wordmark-text .grad{
-  color: #2196F3;
-  -webkit-text-fill-color: #2196F3;
+  color: #3B82F6;
+  -webkit-text-fill-color: #3B82F6;
 }
 .tagline{
-  font: 500 14px/1.4 var(--font-sans);
+  font: 450 17px/1.5 var(--font-sans);
   color: var(--ink-3);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin-top: 16px;
+  letter-spacing: -0.01em;
+  margin-top: 14px;
   margin-bottom: 4px;
 }
 @media (max-width: 560px){
@@ -354,7 +347,7 @@ html[data-theme="dark"] .wordmark-text .grad{
   .wordmark-mark{ width: 60px; height: 60px; border-radius: 16px; }
   .wordmark-mark svg{ width: 34px; height: 34px; }
   .wordmark-text{ font-size: 44px; }
-  .tagline{ font-size: 12px; margin-bottom: 32px; }
+  .tagline{ font-size: 15px; margin-bottom: 32px; }
 }
 
 /* Results layout: hide hero, dock search into nav */
@@ -758,7 +751,28 @@ html[data-theme="dark"] .ac-footer{
 }
 .ac-icon svg{ width:16px; height:16px; }
 .ac-body{ flex:1; min-width:0; }
-.ac-name{ font: 600 14px/1.3 var(--font-sans); color: var(--ink); }
+.ac-name{ font: 600 14px/1.3 var(--font-sans); color: var(--ink); display:inline-flex; align-items:center; gap:6px; }
+.ac-verified{
+  display:inline-grid; place-items:center;
+  width:15px; height:15px; border-radius:50%;
+  background: var(--blue); color:#fff; flex-shrink:0;
+  animation: acVerifyPop 240ms var(--ease-emph);
+}
+.ac-verified svg{ width:9px; height:9px; }
+@keyframes acVerifyPop{ from{ opacity:0; transform: scale(0.4); } to{ opacity:1; transform: scale(1); } }
+.ac-live{
+  margin-left:auto; display:inline-flex; align-items:center; gap:5px;
+  font: 500 10.5px/1 var(--font-sans); color: var(--ink-4);
+  text-transform: uppercase; letter-spacing:0.06em;
+}
+.ac-footer .ac-footer-kbd{ margin-left: 12px; }
+.ac-live-dot{
+  width:6px; height:6px; border-radius:50%;
+  background: var(--ink-5); flex-shrink:0;
+  transition: background var(--dur-1) var(--ease);
+}
+.ac-live-dot.on{ background: var(--green); animation: acPulse 1.1s ease-in-out infinite; }
+@keyframes acPulse{ 0%,100%{ box-shadow: 0 0 0 0 rgba(52,199,89,0.5); } 50%{ box-shadow: 0 0 0 4px rgba(52,199,89,0); } }
 .ac-desc{ font: 400 12.5px/1.4 var(--font-sans); color: var(--ink-3); margin-top:2px;
   display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
 .ac-ver{
@@ -818,10 +832,10 @@ html[data-theme="dark"] .ac-footer{
   }
   /* Package card aligns with the other panels and scrolls internally */
   body[data-view="results"] .pkg-card{
-    align-self: stretch;
+    align-self: start;
     min-height: 0;
-    max-height: 100%;
-    overflow-y: auto;
+    max-height: none;
+    overflow: visible;
   }
   /* Sidebar scrolls within itself */
   body[data-view="results"] .sidebar{
@@ -876,9 +890,9 @@ html[data-theme="dark"] .pkg-card{
 .pkg-avatar{
   width:40px; height:40px; border-radius: var(--r-10);
   display:grid; place-items:center; flex-shrink:0;
-  background: linear-gradient(135deg, var(--blue), #64B5F6);
+  background: linear-gradient(160deg, #3B6FF0, var(--blue));
   color: #fff; font: 700 16px/1 var(--font-sans);
-  box-shadow: 0 4px 12px rgba(33,150,243,0.22), inset 0 1px 0 rgba(255,255,255,0.25);
+  box-shadow: 0 3px 10px rgba(37,99,235,0.16);
 }
 .pkg-title{ font: 700 18px/1.2 var(--font-sans); color: var(--ink); letter-spacing:-0.01em; word-break: break-word; }
 
@@ -965,8 +979,14 @@ html[data-theme="dark"] .cart-item-avatar.has-favicon{
 }
 
 /* Meta list */
-.meta{ display:flex; flex-direction:column; gap: 0; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--hair); }
-.meta-row{
+.card-label{
+  font: 600 11px/1 var(--font-sans);
+  letter-spacing: 0.02em;
+  color: var(--ink-4);
+  margin: 16px 0 8px;
+}
+.card-label:first-of-type{ margin-top: 14px; }
+.meta{ display:flex; flex-direction:column; gap: 0; margin-top: 4px; padding-top: 0; border-top: none; }.meta-row{
   display:flex; align-items:center; gap: 10px;
   padding: 6px 0;
   font-size: 12.5px;
@@ -987,24 +1007,25 @@ html[data-theme="dark"] .cart-item-avatar.has-favicon{
 .stats{
   display:flex;
   gap: 18px;
-  margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--hair);
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--hair);
 }
 .stat{
   padding: 0;
   background: none;
   border: none;
   flex: 1;
+  text-align: center;
 }
 .stat-num{
-  font: 700 22px/1 var(--font-sans);
+  font: 700 18px/1 var(--font-sans);
   letter-spacing: -0.02em;
   color: var(--ink);
   font-feature-settings: "tnum";
 }
 .stat-lbl{
-  font: 500 10.5px/1 var(--font-sans);
+  font: 500 10px/1 var(--font-sans);
   color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em;
-  margin-top: 6px;
+  margin-top: 5px;
 }
 
 /* ===== Right column ===== */
@@ -1076,6 +1097,12 @@ html[data-theme="dark"] .tree-toolbar{
 .tree-action.toggle.on{
   color: var(--blue); border-color: var(--blue-soft); background: var(--blue-wash);
 }
+.tree-orient{
+  font: 400 12px/1.5 var(--font-sans);
+  color: var(--ink-3);
+  margin: 10px 4px 8px;
+}
+.tree-orient em{ font-style: normal; color: var(--ink-2); font-weight: 600; }
 .tree-search{
   display:flex; align-items:center; gap:6px;
   background: var(--surface-2); border: 1px solid var(--hair);
@@ -1415,6 +1442,12 @@ html[data-theme="dark"] .dl-select select{ background-image: url("data:image/svg
 .dl-hint.warn svg{ color: var(--orange); }
 .dl-hint.ok{ color: var(--green); }
 .dl-hint.ok svg{ color: var(--green); }
+.dl-caption{
+  font: 400 11px/1.4 var(--font-sans);
+  color: var(--ink-4);
+  margin-top: 10px;
+  margin-bottom: 2px;
+}
 
 .dl-row{
   display:flex; gap:6px; margin-top: 8px; flex-wrap: wrap;
@@ -1705,6 +1738,14 @@ html[data-theme="dark"] .nr-suggestion{
   cursor: pointer; display: grid; place-items: center;
 }
 .modal-close:hover{ background: var(--hair-strong); color: var(--ink); }
+.modal-close.is-disabled,
+.modal-close:disabled{
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}
+.modal-close.is-disabled:hover,
+.modal-close:disabled:hover{ background: var(--surface-3); color: var(--ink-3); }
 .modal-body{
   padding: 20px 24px;
   overflow-y: auto;
@@ -1782,19 +1823,21 @@ html[data-theme="dark"] .nr-suggestion{
 /* Bundle CTA button */
 .bundle-cta{
   width: 100%;
-  margin-top: 6px;
-  padding: 10px 12px;
+  margin-top: 10px;
+  padding: 12px 14px;
   border-radius: var(--r-8);
-  border: 1px dashed var(--blue-soft);
-  background: transparent;
-  color: var(--blue);
-  font: 600 12px/1.2 var(--font-sans);
+  border: 1px solid var(--dep-blue);
+  background: var(--dep-blue);
+  color: #fff;
+  font: 600 13px/1.2 var(--font-sans);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.18);
   transition: all var(--dur-1) var(--ease);
 }
-.bundle-cta:hover{ background: var(--blue-wash); border-style: solid; }
-.bundle-cta svg{ width: 14px; height: 14px; }
+.bundle-cta:hover{ background: var(--dep-blue-hover); border-color: var(--dep-blue-hover); }
+.bundle-cta:active{ transform: translateY(1px); }
+.bundle-cta svg{ width: 15px; height: 15px; }
 
 /* Add-to-cart secondary button */
 .add-to-cart{
@@ -2174,8 +2217,8 @@ footer a{ color: var(--blue); text-decoration: none; }
   }
   body[data-view="results"] .pkg-card{
     min-height: 0;
-    max-height: 100%;
-    overflow-y: auto;
+    max-height: none;
+    overflow: visible;
   }
 }
 @media (min-width: 1440px){
@@ -2360,7 +2403,7 @@ footer a{ color: var(--blue); text-decoration: none; }
   .wordmark-mark{ width: 64px; height: 64px; border-radius: 18px; }
   .wordmark-mark svg{ width: 36px; height: 36px; }
   .wordmark-text{ font-size: 42px; margin-bottom: 6px; }
-  .tagline{ font-size: 11.5px; margin-bottom: 14px; }
+  .tagline{ font-size: 14px; margin-bottom: 14px; }
 
   body[data-view="landing"] .search-stage,
   body[data-view="landing"] .quick{ max-width: 100%; }
@@ -2387,12 +2430,21 @@ footer a{ color: var(--blue); text-decoration: none; }
   .search button.go span{ display: none; }
   .search button.go svg{ width: 16px; height: 16px; }
 
-  .quick{ margin-top: 16px; gap: 6px; }
-  .chip{
-    padding: 10px 14px; font-size: 13px;
-    border-radius: 999px;
+  .quick{ margin-top: 20px; gap: 7px; position: relative; padding-top: 26px; }
+  /* Label the chips so it's obvious these are quick-pick popular packages. */
+  body[data-view="landing"] .quick::before{
+    content: "Popular packages";
+    position: absolute; top: 0; left: 0; right: 0;
+    text-align: center;
+    font: 600 11px/1 var(--font-sans);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--ink-4);
   }
-  .chip .glyph{ width: 14px; height: 14px; }
+  .chip{
+    padding: 11px 16px; font-size: 13.5px;
+    border-radius: 999px; min-height: 42px;
+  }
+  .chip .glyph{ width: 15px; height: 15px; }
 
   /* ----- NAV (results mode) ----- */
   body[data-view="results"] .nav-pill{ display: none; }
@@ -2439,29 +2491,49 @@ footer a{ color: var(--blue); text-decoration: none; }
   .pkg-avatar{ width: 44px; height: 44px; font-size: 18px; border-radius: 11px; }
   .pkg-title{ font-size: 20px; }
   .pkg-version-row{ gap: 6px; }
-  .pkg-summary{ font-size: 13.5px; margin: 12px 0 14px; }
+  .pkg-summary{ font-size: 14px; line-height: 1.55; margin: 12px 0 14px; }
 
-  .install{ padding: 9px 10px; font-size: 12px; }
-  .install button.copy{ width: 34px; height: 34px; }
+  /* Section labels read as clear headers on a phone, with a divider above
+     each (except the first) so the long card breaks into scannable groups. */
+  .card-label{
+    font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--ink-3); margin: 18px 0 9px;
+    padding-top: 16px; border-top: 1px solid var(--hair);
+  }
+  .card-label:first-of-type{ margin-top: 6px; padding-top: 0; border-top: none; }
+
+  .install{ padding: 11px 12px; font-size: 13px; }
+  .install button.copy{ width: 36px; height: 36px; }
 
   .dl-selectors{ grid-template-columns: 1fr; gap: 8px; }
-  .dl-select{ padding: 8px 12px; }
+  .dl-select{ padding: 10px 12px; }
   .dl-btn{ min-height: 48px; padding: 12px 14px; }
+  .dl-caption{ font-size: 12px; }
+  /* Primary download is the main mobile action — make it tall and unmissable. */
   .bundle-cta{
-    padding: 14px 12px; font-size: 12.5px;
-    line-height: 1.3;
+    padding: 15px 14px; font-size: 14px; min-height: 50px;
+    line-height: 1.3; border-radius: var(--r-10);
   }
-  .dl-hint{ font-size: 11.5px; }
+  .bundle-cta svg{ width: 17px; height: 17px; }
+  .add-to-cart{ padding: 11px 12px; font-size: 12.5px; min-height: 44px; }
+  .dl-hint{ font-size: 12px; }
 
-  .meta-row{ font-size: 12.5px; padding: 9px 0; }
-  .meta-key{ width: 78px; gap: 6px; font-size: 12px; }
+  .meta-row{ font-size: 13px; padding: 10px 0; }
+  .meta-key{ width: 84px; gap: 6px; font-size: 12.5px; }
   .meta-val{ font-size: 13px; }
 
-  .stats{ grid-template-columns: repeat(2, 1fr); gap: 8px; padding-top: 14px; margin-top: 14px; }
-  .stat{ padding: 10px; }
-  .stat-num{ font-size: 18px; }
+  /* Stats become two tappable-looking cards so the numbers stand on their own. */
+  .stats{ grid-template-columns: repeat(2, 1fr); gap: 10px; padding-top: 16px; margin-top: 16px; }
+  .stat{
+    padding: 12px 8px; background: var(--surface-2);
+    border: 1px solid var(--hair); border-radius: var(--r-10);
+  }
+  .stat-num{ font-size: 22px; }
+  .stat-lbl{ font-size: 10.5px; margin-top: 5px; }
 
   /* ----- TABS ----- */
+  .right-col{ position: relative; }
+  /* Fade on the right edge hints that the tab strip scrolls horizontally. */
   .tabs{
     width: 100%;
     flex-wrap: nowrap;
@@ -2469,27 +2541,40 @@ footer a{ color: var(--blue); text-decoration: none; }
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 22px), transparent 100%);
+    mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 22px), transparent 100%);
   }
   .tabs::-webkit-scrollbar{ display: none; }
   .tab{
     flex: 0 0 auto;
     min-width: 0;
     white-space: nowrap;
-    font-size: 12.5px;
-    padding: 9px 12px;
+    font-size: 13px;
+    padding: 11px 14px;
     justify-content: center;
+    scroll-snap-align: start;
   }
+  .tab.active{ font-weight: 600; }
   .tab svg{ flex-shrink: 0; }
   .tab .count{ flex-shrink: 0; }
 
   /* ----- TREE ----- */
   .panel{ padding: 16px; border-radius: 12px; }
+  /* The orientation line is the key "what am I looking at" explainer — give
+     it a soft card on mobile so first-time users actually read it. */
+  .tree-orient{
+    font-size: 12.5px; line-height: 1.5;
+    margin: 0 0 12px; padding: 10px 12px;
+    background: var(--blue-wash); border: 1px solid var(--blue-soft);
+    border-radius: var(--r-10); color: var(--ink-2);
+  }
   .tree-toolbar{ padding: 10px; gap: 8px; flex-direction: column; align-items: stretch; }
   .tree-actions{ display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
-  .tree-action{ flex: 1 1 auto; min-width: 0; font-size: 11.5px; padding: 9px 8px; justify-content: center; min-height: 36px; }
-  .tree-action svg{ width: 12px; height: 12px; }
-  .tree-search{ max-width: 100%; padding: 8px 12px; }
-  .tree-search input{ font-size: 14px; }
+  .tree-action{ flex: 1 1 auto; min-width: 0; font-size: 12px; padding: 10px 8px; justify-content: center; min-height: 40px; }
+  .tree-action svg{ width: 13px; height: 13px; }
+  .tree-search{ max-width: 100%; padding: 10px 12px; }
+  .tree-search input{ font-size: 16px; }
 
   .tree-pane{ padding: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; max-height: 60vh; max-width: 100%; }
   /* Ensure the tree pane is the only thing that scrolls sideways: its
@@ -2591,9 +2676,12 @@ footer a{ color: var(--blue); text-decoration: none; }
   .toast.show{ transform: translateY(0); }
 
   /* ----- AUTOCOMPLETE ----- */
-  .ac-item{ padding: 12px 14px; min-height: 52px; }
-  .ac-name{ font-size: 13.5px; }
-  .ac-desc{ font-size: 12px; }
+  .ac-item{ padding: 13px 14px; min-height: 56px; }
+  .ac-name{ font-size: 14px; }
+  .ac-desc{ font-size: 12.5px; }
+  .ac-verified{ width: 16px; height: 16px; }
+  .ac-footer{ padding: 13px 16px; font-size: 13px; }
+  .ac-meta-pill{ font-size: 10.5px; }
 }
 
 /* Standalone (PWA) mode tweaks */
@@ -2891,6 +2979,7 @@ html[data-theme="hacker"] .brand-text .grad{
       </div>
       <div class="pkg-summary" id="pkg-summary"></div>
 
+      <div class="card-label">Install</div>
       <div class="install">
         <span class="prompt">$</span>
         <span class="cmd" id="pip-cmd">pip install —</span>
@@ -2899,6 +2988,7 @@ html[data-theme="hacker"] .brand-text .grad{
         </button>
       </div>
 
+      <div class="card-label">Download &amp; bundle</div>
       <div class="dl-selectors">
         <div class="dl-select">
           <label for="sel-pyver">
@@ -2918,15 +3008,17 @@ html[data-theme="hacker"] .brand-text .grad{
 
       <div class="dl-row" id="dl-row"></div>
       <div class="dl-hint" id="dl-hint" style="display:none;"></div>
-      <button class="bundle-cta" id="bundle-btn">
+      <p class="dl-caption">Choices above filter which wheels are bundled and listed below.</p>
+      <button class="bundle-cta" id="bundle-btn" title="Download this package plus every dependency as one .zip">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-        Download bundle (package + all dependencies)
+        Download bundle
       </button>
-      <button class="add-to-cart" id="add-to-cart-btn">
+      <button class="add-to-cart" id="add-to-cart-btn" title="Queue this package to bundle several together at once">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         <span id="add-to-cart-label">Add to multi-bundle</span>
       </button>
 
+      <div class="card-label">Details</div>
       <div class="meta">
         <div class="meta-row">
           <span class="meta-key">Author</span>
@@ -2947,8 +3039,8 @@ html[data-theme="hacker"] .brand-text .grad{
       </div>
 
       <div class="stats">
-        <div class="stat"><div class="stat-num" id="stat-direct">0</div><div class="stat-lbl">Direct deps</div></div>
-        <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Loaded</div></div>
+        <div class="stat" title="Dependencies this package requires directly"><div class="stat-num" id="stat-direct">0</div><div class="stat-lbl">Direct deps</div></div>
+        <div class="stat" title="All dependencies loaded so far, including dependencies of dependencies"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Total deps</div></div>
       </div>
     </aside>
 
@@ -2977,17 +3069,17 @@ html[data-theme="hacker"] .brand-text .grad{
       <div class="panel active" id="panel-deps" style="padding: 0; background: transparent; border: none; box-shadow: none;">
         <div class="tree-toolbar">
           <div class="tree-actions">
-            <button class="tree-action" id="expand-all">
+            <button class="tree-action" id="expand-all" title="Open every branch of the tree">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
               Expand all
             </button>
-            <button class="tree-action" id="collapse-all">
+            <button class="tree-action" id="collapse-all" title="Close all branches back to the top level">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
               Collapse all
             </button>
-            <button class="tree-action toggle" id="toggle-conditional">
+            <button class="tree-action toggle" id="toggle-conditional" title="Show or hide optional dependencies that only install on certain Python versions or platforms">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              Conditional
+              Show optional
             </button>
           </div>
           <div class="tree-search">
@@ -2995,6 +3087,7 @@ html[data-theme="hacker"] .brand-text .grad{
             <input type="text" id="tree-filter" placeholder="Filter…" />
           </div>
         </div>
+        <p class="tree-orient" id="tree-orient">Each row is a dependency. Expand a row to see what <em>it</em> depends on — indentation shows how deep in the chain you are.</p>
         <div class="tree-pane">
           <ul class="dep-tree" id="dep-tree" role="tree"></ul>
           <div id="empty-deps" class="tree-msg" style="text-align:center; padding: 30px; font-style: italic; display:none;">
@@ -3044,9 +3137,6 @@ html[data-theme="hacker"] .brand-text .grad{
         <div class="modal-title" id="bundle-title">Bundle all dependencies</div>
         <div class="modal-sub" id="bundle-sub">—</div>
       </div>
-      <button class="modal-close" id="bundle-close" title="Close">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
     </div>
     <div class="modal-body">
       <div class="progress-summary">
@@ -3352,7 +3442,6 @@ const nrSectionLabel = $('#nr-section-label');
 
 const bundleBtn = $('#bundle-btn');
 const bundleModal = $('#bundle-modal');
-const bundleClose = $('#bundle-close');
 const bundleCancel = $('#bundle-cancel');
 const bundleStart = $('#bundle-start');
 const bundleStatus = $('#bundle-status');
@@ -3939,7 +4028,7 @@ nameInput.addEventListener('input', () => {
   loadTopPypi(); // kick off lazy load
   loadFullIndex(); // kick off full-namespace lazy load (covers obscure packages)
   showAcSuggestions(q);
-  acTimer = setTimeout(() => fetchExactMatch(q), 280);
+  acTimer = setTimeout(() => fetchExactMatch(q), 160);
 });
 
 nameInput.addEventListener('focus', () => {
@@ -4035,8 +4124,64 @@ async function fetchExactMatch(q){
       acResults = acResults.slice(0, 9);
     }
     renderAcDom(null, q);
-  }catch(_){}
+    // Now that the exact match is in, enrich the rest live too.
+    enrichSuggestionsLive(q);
+  }catch(_){
+    // Even when there is no exact match, enrich the predicted list live so
+    // real summaries/verification stream in for the candidates we do show.
+    enrichSuggestionsLive(q);
+  }
 }
+
+/* ---- Live realtime enrichment ----
+   For the top visible suggestions, hit PyPI's live JSON endpoint in parallel
+   to (a) confirm the package really exists right now (verified ✓) and
+   (b) pull its real one-line summary so descriptions fill in as data lands.
+   A monotonic token guards against races: only the newest query may write. */
+let acLiveToken = 0;
+let acLiveActive = 0;
+
+function setAcLiveBusy(on){
+  if(on) acLiveActive++; else acLiveActive = Math.max(0, acLiveActive - 1);
+  const dot = ac.querySelector('.ac-live-dot');
+  if(dot) dot.classList.toggle('on', acLiveActive > 0);
+}
+
+async function enrichOne(item, q, token){
+  // Skip ones we already verified or that carry a description already.
+  if(item.verified && item.desc) return;
+  setAcLiveBusy(true);
+  try{
+    const data = await cachedFetch(`https://pypi.org/pypi/${encodeURIComponent(item.name)}/json`);
+    if(token !== acLiveToken) return;            // a newer query superseded us
+    if(nameInput.value.trim().toLowerCase() !== q) return;
+    const live = acResults.find(r => r.name.toLowerCase() === item.name.toLowerCase());
+    if(!live) return;
+    live.verified = true;
+    if(data.info){
+      if(!live.desc && data.info.summary) live.desc = data.info.summary;
+      if(data.info.name) live.name = data.info.name; // canonical casing from PyPI
+    }
+    renderAcDom(null, q);
+  }catch(_){
+    // Network/404 — leave the entry unverified, no badge added.
+  }finally{
+    if(token === acLiveToken) setAcLiveBusy(false);
+    else acLiveActive = Math.max(0, acLiveActive - 1);
+  }
+}
+
+function enrichSuggestionsLive(q){
+  q = (q || '').toLowerCase();
+  acLiveToken++;
+  const token = acLiveToken;
+  acLiveActive = 0;
+  // Enrich every visible row — the dropdown shows at most 10, so this fills
+  // all of them with live descriptions and verified badges.
+  const targets = acResults.filter(r => !r.isRecent).slice(0, 10);
+  targets.forEach(item => enrichOne(item, q, token));
+}
+
 
 function renderAcDom(sectionLabel, q){
   ac.innerHTML = '';
@@ -4089,7 +4234,7 @@ function renderAcDom(sectionLabel, q){
     div.innerHTML = `
       <div class="ac-icon ${av}">${escapeHtml(letter)}</div>
       <div class="ac-body">
-        <div class="ac-name">${highlightAcName(p.name, trimmedQ)}</div>
+        <div class="ac-name">${highlightAcName(p.name, trimmedQ)}${p.verified ? '<span class="ac-verified" title="Confirmed live on PyPI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>' : ''}</div>
         ${p.desc ? `<div class="ac-desc">${escapeHtml(p.desc)}</div>` : ''}
       </div>
       ${pill}
@@ -4109,6 +4254,7 @@ function appendAcFooter(q){
   footer.innerHTML = `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <span>Search PyPI for &ldquo;<strong>${escapeHtml(q)}</strong>&rdquo;</span>
+    <span class="ac-live"><span class="ac-live-dot${acLiveActive > 0 ? ' on' : ''}"></span>live</span>
     <span class="ac-footer-kbd">Enter</span>
   `;
   footer.addEventListener('mousedown', (e) => {
@@ -5215,15 +5361,32 @@ renderCart();
 ========================================================= */
 let bundleCancelled = false;
 let bundleRunning = false;
+let bundleDone = false; // true once a bundle has finished successfully
 
 bundleBtn.addEventListener('click', () => openBundleModal({ multi: false }));
-bundleClose.addEventListener('click', () => closeBundleModal());
+
+// Top-right control: a Close (X) button at rest, a Cancel button while the
+// bundle is downloading/compressing.
+//
+// The top-right X has been removed. The single bottom button (bundleCancel)
+// handles everything: it cancels while a bundle is running, and closes the
+// modal when idle. After a successful bundle it is hidden so that only the
+// "Done — close" primary button remains.
 bundleCancel.addEventListener('click', () => {
   if(bundleRunning){ bundleCancelled = true; bundleStatus.textContent = 'Cancelling…'; }
   else closeBundleModal();
 });
-bundleModal.addEventListener('click', (e) => { if(e.target === bundleModal && !bundleRunning) closeBundleModal(); });
-bundleStart.addEventListener('click', () => runBundle());
+// Backdrop click closes only while idle. It is disabled during a run and
+// after a successful bundle — in the finished state, only the bottom "Done"
+// button closes the modal.
+bundleModal.addEventListener('click', (e) => { if(e.target === bundleModal && !bundleRunning && !bundleDone) closeBundleModal(); });
+// Drive the primary button through onclick only (set per-state in
+// openBundleModal / finishBundle). Using addEventListener here as well would
+// stack a second handler that re-runs the bundle when "Done" is clicked.
+
+// No-op retained so existing call sites stay valid now that the top-right X
+// control has been removed from the markup.
+function setCloseControl(){}
 
 let bundleMode = 'single'; // 'single' or 'multi'
 
@@ -5244,7 +5407,7 @@ function openBundleModal({ multi = false } = {}){
     const pyLbl = selPyver.value === 'any' ? 'any Python' : `Python ${selPyver.value}`;
     bundleSub.textContent = `Will resolve the full dependency graph and pack matching wheels for ${pyLbl} · ${platLbl} into a single .zip archive.`;
   }
-  bundleCancelled = false; bundleRunning = false;
+  bundleCancelled = false; bundleRunning = false; bundleDone = false;
   bundleStatus.textContent = 'Ready.';
   bundleCount.textContent = '0 / 0';
   bundleProgress.style.width = '0%';
@@ -5252,12 +5415,16 @@ function openBundleModal({ multi = false } = {}){
   bundleStart.disabled = false;
   bundleStart.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Start bundling`;
   bundleCancel.textContent = 'Cancel';
+  bundleCancel.style.display = '';
   bundleStart.onclick = runBundle;
+  setCloseControl();
   bundleModal.classList.add('visible');
 }
 function closeBundleModal(){
   if(bundleRunning) return;
   bundleModal.classList.remove('visible');
+  bundleDone = false;
+  setCloseControl();
 }
 
 function logLine(kind, html){
@@ -5368,8 +5535,10 @@ async function runBundle(){
   }
   bundleRunning = true;
   bundleCancelled = false;
+  bundleDone = false;
   bundleStart.disabled = true;
   bundleStart.innerHTML = `${ICON.spinner}<span>Working…</span>`;
+  setCloseControl();
   bundleLog.innerHTML = '';
   bundleStatus.textContent = 'Resolving dependency graph…';
   bundleCount.textContent = '0 / ?';
@@ -5574,13 +5743,25 @@ Files:
 
 function finishBundle(success, msg){
   bundleRunning = false;
+  bundleDone = success;
   bundleStart.disabled = false;
   bundleStart.innerHTML = `${success
     ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
     : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>'
   }<span>${success ? 'Done — close' : 'Try again'}</span>`;
+  // Drive the primary button via onclick only — never re-add a runBundle
+  // listener, or "Done" would both close the modal AND start a new download.
   bundleStart.onclick = success ? closeBundleModal : runBundle;
-  bundleCancel.textContent = success ? 'Close' : 'Cancel';
+  // On success, hide the light footer button entirely so the only remaining
+  // control is the "Done — close" primary button. On failure it stays as
+  // "Cancel" alongside "Try again".
+  if(success){
+    bundleCancel.style.display = 'none';
+  } else {
+    bundleCancel.style.display = '';
+    bundleCancel.textContent = 'Cancel';
+  }
+  setCloseControl();
   bundleStatus.textContent = msg;
   if(success) showToast('Bundle downloaded');
 }
