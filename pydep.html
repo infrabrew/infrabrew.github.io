@@ -3485,6 +3485,66 @@ function setView(mode){
   }
 }
 
+/* ============================================================
+   Shareable URLs.
+   ?p=<package>&v=<version>  →  open that package on load.
+   Visiting "/" alone shows the landing view.
+   Submitting a search updates the URL (replaceState during a session so the
+   back button skips intermediate searches; the initial load uses the URL as
+   the entry point so reload/share both work).
+============================================================ */
+const ShareURL = {
+  // Read ?p= and ?v= from the current location.
+  read(){
+    try{
+      const u = new URLSearchParams(window.location.search);
+      const p = (u.get('p') || u.get('package') || '').trim();
+      const v = (u.get('v') || u.get('version') || '').trim();
+      return { name: p, version: v && v.toLowerCase() !== 'latest' ? v : '' };
+    }catch(_){ return { name: '', version: '' }; }
+  },
+  // Write the URL to reflect the package currently being viewed. Uses
+  // replaceState so a session of searches doesn't pollute the back stack;
+  // back returns the user to wherever they came from outside the app.
+  write(name, version){
+    try{
+      const u = new URLSearchParams();
+      if(name) u.set('p', name);
+      if(version && version.toLowerCase() !== 'latest') u.set('v', version);
+      const qs = u.toString();
+      const newUrl = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+      history.replaceState({ p: name || null, v: version || null }, '', newUrl);
+    }catch(_){}
+  },
+  // Clear the package param when returning to landing.
+  clear(){
+    try{
+      history.replaceState({}, '', window.location.pathname + window.location.hash);
+    }catch(_){}
+  }
+};
+
+// Browser back/forward: if the URL changes to (or from) a package param,
+// reflect that in the app without a full reload.
+window.addEventListener('popstate', () => {
+  const { name, version } = ShareURL.read();
+  if(name){
+    if(nameInput.value.trim().toLowerCase() === name.toLowerCase() &&
+       document.body.dataset.view === 'results') return; // already there
+    nameInput.value = name;
+    verInput.value = version || '';
+    form.dispatchEvent(new Event('submit'));
+  } else {
+    // URL went back to clean — show landing.
+    if(document.body.dataset.view !== 'landing'){
+      nameInput.value = '';
+      verInput.value = '';
+      hideAc();
+      setView('landing');
+    }
+  }
+});
+
 // Brand click → home
 $('.brand').addEventListener('click', (e) => {
   e.preventDefault();
@@ -3492,6 +3552,7 @@ $('.brand').addEventListener('click', (e) => {
   verInput.value = '';
   hideAc();
   setView('landing');
+  ShareURL.clear();
 });
 
 /* Detect platform for ⌘/Ctrl hint */
@@ -3524,6 +3585,7 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('keydown', (e) => {
   if(e.key === 'Escape' && document.body.dataset.view === 'results' && document.activeElement !== nameInput && document.activeElement !== verInput){
     setView('landing');
+    ShareURL.clear();
   }
 });
 
@@ -3837,19 +3899,73 @@ async function loadTopPypi(){
    ANY package — not just the popular ones. Names are bucketed by their
    first two characters for fast prefix lookup, and we also keep a flat
    array for substring/fuzzy passes. Falls back silently on failure. */
-let FULL_INDEX = null;          // { buckets: Map<prefix2, string[]>, all: string[] }
+/* ============================================================
+   Hand-curated alias table for the long tail of misspellings that
+   Levenshtein-distance-2 still misses — usually because the typo
+   changes length or breaks the prefix. ~30 entries cover the bulk
+   of top-100 package misspellings. Lowercase only.
+============================================================ */
+const PKG_ALIASES = {
+  // numpy / pandas
+  'numpie':'numpy', 'nupmy':'numpy', 'numphy':'numpy',
+  'panadas':'pandas', 'pamdas':'pandas', 'pandass':'pandas', 'pandsa':'pandas',
+  // requests
+  'requets':'requests', 'requsts':'requests', 'reqeusts':'requests', 'requst':'requests',
+  // tensorflow / pytorch
+  'tensowflow':'tensorflow', 'tensorlfow':'tensorflow', 'tensorfow':'tensorflow', 'tensoflow':'tensorflow',
+  'pytroch':'torch', 'pythorch':'torch', 'pytourch':'torch', 'pytorhc':'torch',
+  // sklearn family
+  'scikitlearn':'scikit-learn', 'sklean':'scikit-learn', 'sckit-learn':'scikit-learn', 'scilearn':'scikit-learn',
+  // beautifulsoup
+  'beautifullsoup':'beautifulsoup4', 'beautifulsoup':'beautifulsoup4', 'bs4':'beautifulsoup4', 'beatifulsoup':'beautifulsoup4',
+  // pillow / matplotlib
+  'pillw':'pillow', 'pilow':'pillow', 'pllow':'pillow',
+  'matplolib':'matplotlib', 'matplotib':'matplotlib', 'matploltib':'matplotlib',
+  // flask / django
+  'flsk':'flask', 'flaks':'flask',
+  'djano':'django', 'djnago':'django', 'djnago':'django',
+  // misc
+  'colorma':'colorama', 'colrama':'colorama',
+  'pyhton':'python', 'phyton':'python',
+  'opencv':'opencv-python', 'cv2':'opencv-python',
+  'yamll':'pyyaml', 'pyaml':'pyyaml',
+};
+
+/* ============================================================
+   Full-namespace index from PyPI's Simple API. We bucket names by
+   first two characters for fast prefix lookup, also keep a flat
+   array for substring/fuzzy passes, AND a bigram index that lets
+   us find candidates by any 2-char window in the name — so obscure
+   packages whose names don't START with the query become findable.
+============================================================ */
+let FULL_INDEX = null;          // { buckets, bigrams, all }
 let FULL_INDEX_LOADING = null;
-const FULL_INDEX_CACHE = 'pydep-pypi-names-v1';
+const FULL_INDEX_CACHE = 'pydep-pypi-names-v2';
 
 function buildIndex(names){
-  const buckets = new Map();
+  const buckets = new Map();          // prefix-2 → names[] (existing fast path)
+  const bigrams = new Map();          // 2-char window → names[] (new)
   for(const n of names){
-    const k = n.slice(0, 2).toLowerCase();
+    const ln = n.toLowerCase();
+    const k = ln.slice(0, 2);
     let arr = buckets.get(k);
     if(!arr){ arr = []; buckets.set(k, arr); }
     arr.push(n);
+    // Bigram index: every adjacent pair in the lowercase, separator-stripped
+    // form. We dedupe per-name to keep buckets compact.
+    const flat = ln.replace(/[-_.]/g, '');
+    if(flat.length < 2) continue;
+    const seenBg = new Set();
+    for(let i = 0; i < flat.length - 1; i++){
+      const bg = flat.slice(i, i+2);
+      if(seenBg.has(bg)) continue;
+      seenBg.add(bg);
+      let bgArr = bigrams.get(bg);
+      if(!bgArr){ bgArr = []; bigrams.set(bg, bgArr); }
+      bgArr.push(n);
+    }
   }
-  return { buckets, all: names };
+  return { buckets, bigrams, all: names };
 }
 
 async function loadFullIndex(){
@@ -3898,7 +4014,7 @@ async function fetchFullIndex(){
     }
     return FULL_INDEX;
   }catch(e){
-    FULL_INDEX = FULL_INDEX || { buckets: new Map(), all: [] };
+    FULL_INDEX = FULL_INDEX || { buckets: new Map(), bigrams: new Map(), all: [] };
     return FULL_INDEX;
   }
 }
@@ -3908,6 +4024,13 @@ function fullIndexCandidates(ql){
   if(!FULL_INDEX) return [];
   const qNoSep = ql.replace(/[-_.]/g, '');
   const out = [];
+  const seen = new Set();
+  const push = (name) => {
+    const k = name.toLowerCase();
+    if(seen.has(k)) return;
+    seen.add(k);
+    out.push(name);
+  };
   const limit = 400; // cap how many names we score from the giant list
 
   // Fast path: prefix bucket by first two chars (and the no-sep variant).
@@ -3916,7 +4039,7 @@ function fullIndexCandidates(ql){
     if(!arr) return;
     for(let i = 0; i < arr.length && out.length < limit; i++){
       const n = arr[i].toLowerCase();
-      if(n.startsWith(ql) || n.replace(/[-_.]/g, '').startsWith(qNoSep)) out.push(arr[i]);
+      if(n.startsWith(ql) || n.replace(/[-_.]/g, '').startsWith(qNoSep)) push(arr[i]);
     }
   };
   if(ql.length >= 2){
@@ -3927,10 +4050,49 @@ function fullIndexCandidates(ql){
     for(const [k, arr] of FULL_INDEX.buckets){
       if(k[0] === ql[0]){
         for(let i = 0; i < arr.length && out.length < limit; i++){
-          if(arr[i].toLowerCase().startsWith(ql)) out.push(arr[i]);
+          if(arr[i].toLowerCase().startsWith(ql)) push(arr[i]);
         }
       }
       if(out.length >= limit) break;
+    }
+  }
+
+  // Bigram pass: pull candidates that contain the query's bigrams anywhere
+  // in their name (not just as a prefix). This is what makes obscure packages
+  // findable when the user types a substring or partial fuzzy query.
+  if(qNoSep.length >= 2 && out.length < limit && FULL_INDEX.bigrams){
+    const queryBgs = new Set();
+    for(let i = 0; i < qNoSep.length - 1; i++) queryBgs.add(qNoSep.slice(i, i+2));
+    // Score each candidate by how many of the query's bigrams it contains.
+    // We pick the rarest query bigram as our seed so the candidate pool stays
+    // small, then count overlap to rank.
+    let seed = null, seedSize = Infinity;
+    for(const bg of queryBgs){
+      const arr = FULL_INDEX.bigrams.get(bg);
+      if(arr && arr.length < seedSize){ seed = bg; seedSize = arr.length; }
+    }
+    if(seed){
+      const seedNames = FULL_INDEX.bigrams.get(seed) || [];
+      // Tally overlap counts cheaply: for very large seed pools (e.g. common
+      // bigrams), cap the scan to keep this O(n) bounded.
+      const scanCap = Math.min(seedNames.length, 8000);
+      const overlap = new Map();
+      for(let i = 0; i < scanCap; i++){
+        const nm = seedNames[i];
+        const flat = nm.toLowerCase().replace(/[-_.]/g, '');
+        let hits = 0;
+        for(const bg of queryBgs){
+          if(flat.includes(bg)){ hits++; if(hits === queryBgs.size) break; }
+        }
+        if(hits >= 2 || (queryBgs.size === 1 && hits === 1)){
+          overlap.set(nm, hits);
+        }
+      }
+      // Pull top by overlap, capped.
+      [...overlap.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, Math.max(0, limit - out.length))
+        .forEach(([nm]) => push(nm));
     }
   }
   return out;
@@ -3942,7 +4104,72 @@ function isSubsequence(needle, hay){
   }
   return i === needle.length;
 }
-function acScore(q, name, downloads, curated){
+
+/* Smith-Waterman / fzf-style fuzzy match scorer.
+   Returns 0 when not all query characters can be matched in order, otherwise
+   a positive score that rewards:
+     - matches at the very start of the name (earlier = better),
+     - matches at word boundaries (after -, _, ., or camelCase humps),
+     - consecutive matches (a run of 3 chars is much better than 3 isolated),
+     - tighter spans (fewer non-match gaps between first and last hit). */
+function fuzzyScore(needle, hay){
+  if(!needle) return 0;
+  const n = needle.length, h = hay.length;
+  if(n > h) return 0;
+
+  // Greedy left-to-right match: find each query char in order, tracking
+  // where it landed so we can compute run bonuses and span penalties.
+  const hits = [];
+  let hi = 0;
+  for(let i = 0; i < n; i++){
+    const c = needle[i];
+    let found = -1;
+    for(let j = hi; j < h; j++){
+      if(hay[j] === c){ found = j; break; }
+    }
+    if(found === -1) return 0;
+    hits.push(found);
+    hi = found + 1;
+  }
+
+  let score = 60;                   // base for matching at all
+  const firstHit = hits[0];
+  const lastHit = hits[hits.length - 1];
+
+  // Earlier-start bonus (matching at position 0 is worth +40).
+  score += Math.max(0, 40 - firstHit * 4);
+
+  // Word-boundary bonuses: a match right after -, _, ., or at index 0.
+  const isBoundary = (idx) => {
+    if(idx === 0) return true;
+    const p = hay[idx - 1];
+    return p === '-' || p === '_' || p === '.';
+  };
+  let runLen = 0, runStart = -1;
+  let consecutiveBonus = 0, boundaryHits = 0;
+  for(let k = 0; k < hits.length; k++){
+    if(isBoundary(hits[k])) boundaryHits++;
+    if(k > 0 && hits[k] === hits[k - 1] + 1){
+      runLen++;
+      // Quadratic-ish run reward: a 4-run beats four 1-runs by a lot.
+      consecutiveBonus += 6 + runLen * 4;
+    } else {
+      runLen = 1; runStart = hits[k];
+    }
+  }
+  score += boundaryHits * 14;
+  score += consecutiveBonus;
+
+  // Tightness: penalize wide spans (lots of gaps between first and last hit).
+  const span = lastHit - firstHit + 1;
+  score -= Math.max(0, span - n) * 2;
+
+  // Coverage: short names that are mostly matched score higher.
+  score += Math.round((n / h) * 30);
+
+  return Math.max(0, score);
+}
+function acScore(q, name, downloads, curated, desc){
   q = q.toLowerCase();
   const nm = name.toLowerCase();
   const qNoSep = q.replace(/[-_.]/g, '');
@@ -3961,12 +4188,42 @@ function acScore(q, name, downloads, curated){
   else if(qNoSep.length >= 2 && acronym === qNoSep) score = 980;          // full acronym
   else if(nm.includes(q)) score = 700 - Math.min(nm.length, 40);          // substring
   else if(nmNoSep.includes(qNoSep)) score = 650 - Math.min(nm.length, 40);
-  else if(q.length >= 3 && isSubsequence(qNoSep, nmNoSep)) score = 380 - Math.min(nm.length, 40); // fuzzy subseq
+  else if(q.length >= 3 && isSubsequence(qNoSep, nmNoSep)){
+    // Promote subsequence matches via the proper fuzzy ranker so character
+    // placement matters (a run beats four scattered hits).
+    score = 380 - Math.min(nm.length, 40) + fuzzyScore(qNoSep, nmNoSep);
+  }
   else {
     const dist = levenshtein(qNoSep, nmNoSep);
     if(dist <= 1 && nm.length >= 3) score = 420;               // 1 typo
     else if(dist <= 2 && nm.length >= 6) score = 240;          // 2 typos on longer names
-    else return 0;
+    else {
+      // Last-chance: weak fuzzy match — only kept if it's strong enough.
+      const fz = fuzzyScore(qNoSep, nmNoSep);
+      if(fz >= 80) score = 180 + fz;
+      else return 0;
+    }
+  }
+
+  // For all tiers above, the fuzzy ranker adds a small refinement so two
+  // candidates that landed in the same tier rank by *how well* they matched.
+  if(score < 1300){ // don't perturb already-confident matches
+    score += Math.min(60, fuzzyScore(qNoSep, nmNoSep) * 0.25);
+  }
+
+  // Description match: a secondary signal that lets users search by what
+  // a package DOES, not just by its name. Lower weight than name matches.
+  if(desc && desc.length >= 3){
+    const dl = desc.toLowerCase();
+    if(dl.includes(q)){
+      score += 90; // straightforward phrase hit in description
+    } else if(q.length >= 4){
+      // Token-level match: at least one query token over 3 chars appears.
+      const tokens = q.split(/\s+/).filter(t => t.length >= 4);
+      let tokHits = 0;
+      for(const t of tokens){ if(dl.includes(t)) tokHits++; }
+      if(tokHits) score += 40 * tokHits;
+    }
   }
 
   // Popularity boost — Google-style: heavily favor what most people install.
@@ -4065,9 +4322,21 @@ function showAcSuggestions(q){
   const seen = new Set();
   const candidates = [];
 
+  // Alias resolution: if the lowercase query is a known misspelling, prepend
+  // the canonical package name so it lands at (or near) the top.
+  const aliasTarget = PKG_ALIASES[ql] || PKG_ALIASES[ql.replace(/[-_.]/g, '')];
+  if(aliasTarget){
+    candidates.push({
+      name: aliasTarget, desc: '',
+      downloads: null, curated: false, _aliasBoost: 1500
+    });
+    seen.add(aliasTarget.toLowerCase());
+  }
+
   // Curated POPULAR (descriptions)
   POPULAR.forEach(p => {
     const key = p.name.toLowerCase();
+    if(seen.has(key)) return;
     seen.add(key);
     candidates.push({ name: p.name, desc: p.desc || '', downloads: null, curated: true });
   });
@@ -4084,7 +4353,7 @@ function showAcSuggestions(q){
     candidates.push({ name: p.name, desc: '', downloads: p.downloads, curated: false });
   }
 
-  // Full PyPI namespace (every package, popular or not) — prefix matches
+  // Full PyPI namespace (every package, popular or not) — prefix + bigram matches
   for(const name of fullIndexCandidates(ql)){
     const key = name.toLowerCase();
     if(seen.has(key)) continue;
@@ -4092,9 +4361,12 @@ function showAcSuggestions(q){
     candidates.push({ name, desc: '', downloads: null, curated: false });
   }
 
-  // Score + sort + slice
+  // Score + sort + slice. Descriptions are searched for queries >= 3 chars.
   const scored = candidates
-    .map(p => ({ ...p, _score: acScore(ql, p.name, p.downloads, p.curated) }))
+    .map(p => {
+      const s = acScore(ql, p.name, p.downloads, p.curated, ql.length >= 3 ? p.desc : '');
+      return { ...p, _score: s + (p._aliasBoost || 0) };
+    })
     .filter(p => p._score > 0)
     .sort((a, b) => b._score - a._score || (b.downloads||0) - (a.downloads||0))
     .slice(0, 10);
@@ -4626,6 +4898,8 @@ form.addEventListener('submit', async (e) => {
     pushRecent(data.info.name);
     updateSidebarActive();
     updateAddBtnState(data.info.name);
+    // Update the address bar so the user can copy/share this exact result.
+    ShareURL.write(data.info.name, ver);
   }catch(err){
     if(/HTTP\s*404/i.test(err.message || '') || /not found/i.test(err.message || '')){
       showNoResults(name);
@@ -6121,6 +6395,18 @@ function showError(msg){
   errorEl.classList.add('visible');
   welcome.style.display = 'none';
 }
+
+/* Deep-link boot: if the URL contains ?p=<package>, auto-load that package
+   on initial page load. Runs once at startup, after all UI is wired. */
+(function bootFromShareURL(){
+  const { name, version } = ShareURL.read();
+  if(!name) return;
+  nameInput.value = name;
+  if(version) verInput.value = version;
+  // Defer one tick so the rest of init (recents sidebar, top-pypi load) has
+  // a chance to attach event listeners that fire on the submit event.
+  setTimeout(() => form.dispatchEvent(new Event('submit')), 0);
+})();
 </script>
 </body>
 </html>
