@@ -1591,7 +1591,7 @@
 
   <!-- ========== HEADER ========== -->
   <section class="docs-header">
-    <div class="docs-eyebrow">Documentation · v2.0</div>
+    <div class="docs-eyebrow">Documentation · v2.0.1</div>
     <h1>Everything you need to ship.</h1>
     <p>Install, configure, and run SwiftLLM for LLM inference, serving, and training — on Linux, macOS, x86_64, or
       ARM64.</p>
@@ -1659,7 +1659,8 @@
       <div class="sb-panel" data-panel="changelog" style="display:none">
         <div class="sb-section">
           <div class="sb-label">Releases</div>
-          <a href="#v20" class="sb-link active"><i data-icon="sparkles"></i> v2.0</a>
+          <a href="#v201-stable" class="sb-link active"><i data-icon="sparkles"></i> v2.0.1</a>
+          <a href="#v20" class="sb-link"><i data-icon="check"></i> v2.0</a>
           <a href="#v206" class="sb-link"><i data-icon="git-branch"></i> v2.0.6-beta</a>
           <a href="#v205" class="sb-link"><i data-icon="git-branch"></i> v2.0.5-beta</a>
           <a href="#v204" class="sb-link"><i data-icon="git-branch"></i> v2.0.4-beta</a>
@@ -3398,14 +3399,42 @@ swiftllm dataset --hf-dataset HuggingFaceFW/fineweb --hf-subset sample-10BT \
           </div>
 
           <div class="timeline">
+            <!-- v2.0.1 Stable -->
+            <div class="tl-entry latest" id="v201-stable" data-cats="fixed">
+              <div class="tl-dot"></div>
+              <div class="tl-card">
+                <div class="tl-head">
+                  <div class="tl-ver">v2.0.1</div>
+                  <div class="tl-meta">
+                    <span class="tl-tag tag-latest">Latest</span>
+                    <span class="tl-tag tag-stable">Stable</span>
+                    <span class="tl-date">June 2026</span>
+                  </div>
+                </div>
+                <p class="tl-sum">CUDA build fixes and installer improvements — resolves build failures on systems where the CUDA toolkit is installed but not on PATH.</p>
+                <ul class="change-list">
+                  <li class="change-item" data-type="fixed"><span class="change-badge badge-fixed">Fixed</span><span
+                      class="change-text"><code>install.sh</code> now exports <code>PATH</code>, <code>LD_LIBRARY_PATH</code>, and <code>CUDA_HOME</code> after detecting <code>nvcc</code> — fixes <code>cc-rs</code> / <code>maturin</code> build failures when CUDA toolkit is installed but not on the shell PATH</span></li>
+                  <li class="change-item" data-type="fixed"><span class="change-badge badge-fixed">Fixed</span><span
+                      class="change-text">Variable binding typo in <code>tensor.rs</code> — match arm bound <code>_dev_idx</code> (unused prefix) but the body referenced <code>dev_idx</code>, causing compilation failure with <code>--features cuda</code></span></li>
+                  <li class="change-item" data-type="fixed"><span class="change-badge badge-fixed">Fixed</span><span
+                      class="change-text">Added missing <code>tracing</code> dependency to root <code>Cargo.toml</code> — <code>src/lib.rs</code> used <code>tracing::info!</code> but the crate was not declared</span></li>
+                  <li class="change-item" data-type="feature"><span class="change-badge badge-added">Added</span><span
+                      class="change-text">System-wide CLI wrapper — <code>install.sh</code> now installs a <code>/usr/local/bin/swiftllm</code> wrapper script so the CLI works without activating the venv, dynamically resolved via <code>SWIFTLLM_HOME</code></span></li>
+                </ul>
+                <div class="tl-foot">
+                  <div class="avatar">IB</div>
+                </div>
+              </div>
+            </div>
+
             <!-- v2.0 Stable -->
-            <div class="tl-entry latest" id="v20" data-cats="feature">
+            <div class="tl-entry" id="v20" data-cats="feature">
               <div class="tl-dot"></div>
               <div class="tl-card">
                 <div class="tl-head">
                   <div class="tl-ver">v2.0</div>
                   <div class="tl-meta">
-                    <span class="tl-tag tag-latest">Latest</span>
                     <span class="tl-tag tag-stable">Stable</span>
                     <span class="tl-date">2026</span>
                   </div>
