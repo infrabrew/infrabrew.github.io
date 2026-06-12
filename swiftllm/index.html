@@ -198,10 +198,132 @@
       letter-spacing: var(--tr-tight);
       font-weight: var(--w-heavy);
       margin-bottom: var(--s-4);
-      background: linear-gradient(180deg, #000 0%, #1d1d1f 50%, #424245 100%);
+      /* Slow sheen: a faint blue glint drifts across the wordmark */
+      background: linear-gradient(110deg, #000 0%, #1d1d1f 38%, #2364b8 50%, #1d1d1f 62%, #424245 100%);
+      background-size: 220% 100%;
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
+      animation: hero-sheen 10s var(--ease-standard) infinite;
+    }
+
+    @keyframes hero-sheen {
+
+      0%,
+      100% {
+        background-position: 0% 0;
+      }
+
+      50% {
+        background-position: 100% 0;
+      }
+    }
+
+    /* ---------- AURORA (subtle drifting color washes) ---------- */
+    .hero-aurora {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .hero-aurora span {
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      border-radius: 50%;
+      filter: blur(90px);
+      will-change: transform;
+    }
+
+    .hero-aurora span:nth-child(1) {
+      background: rgba(30, 127, 255, 0.13);
+      top: -160px;
+      left: 10%;
+      animation: aurora-drift-a 18s ease-in-out infinite alternate;
+    }
+
+    .hero-aurora span:nth-child(2) {
+      background: rgba(88, 86, 214, 0.09);
+      top: 6%;
+      right: 6%;
+      animation: aurora-drift-b 24s ease-in-out infinite alternate;
+    }
+
+    .hero-aurora span:nth-child(3) {
+      background: rgba(0, 199, 190, 0.08);
+      bottom: -200px;
+      left: 36%;
+      animation: aurora-drift-a 28s ease-in-out infinite alternate;
+    }
+
+    @keyframes aurora-drift-a {
+      from {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+
+      to {
+        transform: translate3d(60px, 40px, 0) scale(1.15);
+      }
+    }
+
+    @keyframes aurora-drift-b {
+      from {
+        transform: translate3d(0, 0, 0) scale(1.1);
+      }
+
+      to {
+        transform: translate3d(-70px, 30px, 0) scale(0.95);
+      }
+    }
+
+    /* ---------- "NEW IN" PILLS ---------- */
+    .hero-pills {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: var(--s-6);
+    }
+
+    .hero-pills .pills-label {
+      font-size: 11px;
+      font-weight: var(--w-semibold);
+      letter-spacing: var(--tr-loose);
+      text-transform: uppercase;
+      color: var(--fg-tertiary);
+      margin-right: 4px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 13px;
+      border-radius: var(--r-full);
+      background: var(--white);
+      border: 1px solid var(--gray-100);
+      box-shadow: var(--shadow-1);
+      font-size: 12px;
+      font-weight: var(--w-medium);
+      color: var(--fg-secondary);
+      text-decoration: none;
+      transition: all var(--d-fast) var(--ease-standard);
+    }
+
+    .pill:hover {
+      color: var(--fg-primary);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-2);
+    }
+
+    .pill .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex: none;
     }
 
     .hero-tagline {
@@ -1357,6 +1479,19 @@
         padding: var(--s-6) !important;
       }
     }
+
+    /* ---------- REDUCED MOTION ---------- */
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
   </style>
 </head>
 
@@ -1397,11 +1532,12 @@
   <!-- ========== HERO ========== -->
   <section class="hero">
     <div class="hero-bg"></div>
+    <div class="hero-aurora" aria-hidden="true"><span></span><span></span><span></span></div>
     <div class="hero-grid"></div>
 
     <div class="hero-badge reveal in">
       <span class="hero-badge-dot"></span>
-      v2.0.1 Stable Release — CUDA Build Fixes, System-Wide CLI Wrapper
+      v2.0.1 — HF Transformers Backend, SSE Streaming, RLM Quality Pipeline
       <a href="docs.html#changelog" class="hero-badge-link">Read more →</a>
     </div>
 
@@ -1413,6 +1549,20 @@
       <a href="https://github.com/infrabrew/swiftllm" target="_blank" class="btn btn-secondary">
         <i data-icon="github" data-size="14"></i> View on GitHub
       </a>
+    </div>
+
+    <div class="command-chip reveal in d5" onclick="copyText(this)" title="Copy install command" role="button" tabindex="0">
+      <span class="prompt">$</span>
+      <span class="cmd">git clone https://github.com/infrabrew/swiftllm.git && cd swiftllm && ./install.sh</span>
+      <button aria-label="Copy install command" tabindex="-1"><i data-icon="copy" data-size="14" class="icon"></i></button>
+    </div>
+
+    <div class="hero-pills reveal in d5" aria-label="New in v2.0.1">
+      <span class="pills-label">New in v2.0.1</span>
+      <a class="pill" href="docs.html#models"><span class="dot" style="background:var(--blue)"></span>Transformers backend</a>
+      <a class="pill" href="docs.html#serving"><span class="dot" style="background:var(--green)"></span>SSE streaming</a>
+      <a class="pill" href="docs.html#serving"><span class="dot" style="background:var(--purple)"></span>RLM + DV quality pipeline</a>
+      <a class="pill" href="docs.html#models"><span class="dot" style="background:var(--orange)"></span>4-bit / 8-bit loading</a>
     </div>
 
   </section>
@@ -1488,7 +1638,7 @@
               </div>
               <div>
                 <h4>Lifecycle Management</h4>
-                <p><code>install.sh</code>, <code>update.sh</code>, <code>uninstall.sh</code> — auto-detect GPU, switch branches/tags, purge cleanly</p>
+                <p><code>install.sh</code>, <code>update.sh</code>, <code>uninstall.sh</code> — auto-detect GPU, switch branches/tags, purge cleanly. Installs a system-wide <code>swiftllm</code> command, no venv activation needed</p>
               </div>
             </div>
             <div class="hl">
@@ -1509,9 +1659,10 @@
             <span class="code-file">quickstart.py</span>
           </div>
           <pre style="margin:0; font-family:inherit;"><span class="kw">from</span> swiftllm <span class="kw">import</span> LLM, SamplingParams
+<span class="kw">from</span> swiftllm.config <span class="kw">import</span> SelfConsistencyConfig
 
-<span class="cm"># Load model with automatic GPU detection</span>
-llm = <span class="cls">LLM</span>(<span class="str">"meta-llama/Llama-3-8B"</span>)
+<span class="cm"># GGUF or safetensors — backend is auto-detected</span>
+llm = <span class="cls">LLM</span>(<span class="str">"Qwen/Qwen2.5-0.5B-Instruct"</span>)
 
 <span class="cm"># Configure sampling</span>
 params = <span class="cls">SamplingParams</span>(
@@ -1523,7 +1674,7 @@ params = <span class="cls">SamplingParams</span>(
 <span class="cm"># Generate with self-consistency voting</span>
 results = llm.<span class="fn">generate_with_self_consistency</span>(
     <span class="str">"What is 12 x 15?"</span>,
-    num_samples=<span class="num">8</span>,
+    config=<span class="cls">SelfConsistencyConfig</span>(num_samples=<span class="num">8</span>),
 )
 <span class="fn">print</span>(results[<span class="num">0</span>].answer)
 
@@ -1566,17 +1717,17 @@ outputs = llm.<span class="fn">generate</span>(
         <div class="feature reveal" data-tilt>
           <div class="feature-icon fi-pink"><i data-icon="layers"></i></div>
           <h3>Multi-GPU Scaling</h3>
-          <p>Tensor parallelism and pipeline parallelism scale seamlessly across NVIDIA GPUs. Automatic sharding with configurable <code>--tensor-parallel</code>.</p>
+          <p>Tensor parallelism and pipeline parallelism scale seamlessly across NVIDIA GPUs. Automatic sharding with configurable <code>--tensor-parallel-size</code>.</p>
         </div>
         <div class="feature reveal d1" data-tilt>
           <div class="feature-icon fi-green"><i data-icon="plug"></i></div>
           <h3>OpenAI-Compatible API</h3>
-          <p>Drop-in replacement with <code>/v1/completions</code>, <code>/v1/chat/completions</code>, streaming SSE, API key auth, CORS, and Prometheus <code>/metrics</code>. Default bind is <code>127.0.0.1</code> with security hardening.</p>
+          <p>Drop-in replacement for the OpenAI API. <code>swiftllm serve</code> streams chat completions token-by-token over SSE — including <code>&lt;think&gt;</code> reasoning for Open WebUI — with API key auth and a <code>127.0.0.1</code> default bind. The Rust server adds <code>/v1/completions</code> and Prometheus <code>/metrics</code>.</p>
         </div>
         <div class="feature reveal d2" data-tilt>
           <div class="feature-icon fi-blue"><i data-icon="package"></i></div>
-          <h3>Multi-Format Models</h3>
-          <p>HuggingFace repos, GGUF quantized models (via llama-cpp-python), SafeTensors, and PyTorch <code>.bin</code> formats — all with auto-detection and seamless loading.</p>
+          <h3>Dual Inference Backends</h3>
+          <p>GGUF quantized models run via llama-cpp-python with full GPU offload; safetensors checkpoints run via the HuggingFace transformers backend — with bitsandbytes 4-bit/8-bit loading (<code>-q 4bit</code> / <code>-q 8bit</code>). Auto-detected by format.</p>
         </div>
         <div class="feature reveal" data-tilt>
           <div class="feature-icon fi-indigo"><i data-icon="shield"></i></div>
@@ -1697,12 +1848,12 @@ outputs = llm.<span class="fn">generate</span>(
         <div class="feature reveal" data-tilt>
           <div class="feature-icon fi-indigo"><i data-icon="zap"></i></div>
           <h3>Recursive Language Model (RLM)</h3>
-          <p>Bounded recursive self-calling for complex sub-problem decomposition. REPL sandbox with four step types: Assign, Compute, Verify, Recurse. Variable binding table via soft-attention key-value store. Complexity-classifier MLP with early exit. Modes: DISABLED, SHALLOW (depth=1), REASONING (depth=3), AGENTIC (depth=5).</p>
+          <p>Bounded recursive self-calling for complex sub-problem decomposition. REPL sandbox with four step types: Assign, Compute, Verify, Recurse. Variable binding table via soft-attention key-value store. Modes: DISABLED, SHALLOW (depth=1), REASONING (depth=3), AGENTIC (depth=5). Toggle on the server with <code>--rlm</code>.</p>
         </div>
         <div class="feature reveal d1" data-tilt>
           <div class="feature-icon fi-teal"><i data-icon="shield"></i></div>
           <h3>Dense Verification Layer</h3>
-          <p>Cross-attention draft-token scoring against embedded REPL execution traces. Per-token and per-step confidence scores via sigmoid projection. Strategies: SCORE_ONLY (always accept), GATE (reject below threshold), GATE_AND_REGEN (reject and regenerate up to max attempts).</p>
+          <p>Cross-attention draft-token scoring with per-token and per-step confidence. Strategies: SCORE_ONLY (always accept), GATE (reject below threshold), GATE_AND_REGEN (reject and regenerate up to max attempts). Gate live chat responses with <code>--dense-verification</code> on serve and chat.</p>
         </div>
         <div class="feature reveal d2" data-tilt>
           <div class="feature-icon fi-orange"><i data-icon="wrench"></i></div>
@@ -1777,8 +1928,8 @@ outputs = llm.<span class="fn">generate</span>(
           </tbody>
         </table>
       </div>
-      <p style="text-align:center; font-size:12px; color:var(--fg-tertiary); margin-top:var(--s-5); max-width:600px; margin-inline:auto;">
-        Formats supported: HuggingFace <code style="background:var(--gray-100); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">transformers</code> repos, GGUF quantized models (via llama-cpp-python), SafeTensors, and PyTorch <code style="background:var(--gray-100); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">.bin</code> checkpoints with automatic detection.
+      <p style="text-align:center; font-size:12px; color:var(--fg-tertiary); margin-top:var(--s-5); max-width:640px; margin-inline:auto;">
+        GGUF models run via llama-cpp-python; safetensors checkpoints run via the HuggingFace <code style="background:var(--gray-100); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">transformers</code> backend, optionally in 4-bit/8-bit via bitsandbytes. Compressed-tensors checkpoints are detected with a warning — use the GGUF variant or the base model with <code style="background:var(--gray-100); padding:2px 6px; border-radius:4px; font-family:var(--font-mono); font-size:11px;">-q 4bit</code> instead.
       </p>
     </div>
   </section>
@@ -1923,7 +2074,7 @@ outputs = llm.<span class="fn">generate</span>(
           <div class="step-num">1</div>
           <h3>Clone &amp; install</h3>
           <p>Installer auto-detects GPU and CUDA toolkit, creates a Python venv, installs Rust if needed, builds the wheel with maturin, and installs <code>[serve]</code> extras for the API server.</p>
-          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>git clone https://github.com/swiftllm/swiftllm.git && cd swiftllm && ./install.sh</span></div>
+          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>git clone https://github.com/infrabrew/swiftllm.git && cd swiftllm && ./install.sh</span></div>
         </div>
         <div class="step reveal d1">
           <div class="step-num">2</div>
@@ -1935,13 +2086,13 @@ outputs = llm.<span class="fn">generate</span>(
           <div class="step-num">3</div>
           <h3>Run inference</h3>
           <p>Batch generate, interactive <code>swiftllm chat</code> REPL, or pipe prompts from a file. Add <code>--self-consistency 8</code> for majority voting, <code>--best-of-n 4</code> for dense verification, or <code>--rlm 3</code> for recursive reasoning.</p>
-          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>swiftllm generate -p "Explain PagedAttention" --self-consistency 8</span></div>
+          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>swiftllm generate -m Qwen/Qwen2.5-7B -p "Explain PagedAttention" --self-consistency 8</span></div>
         </div>
         <div class="step reveal d3">
           <div class="step-num">4</div>
           <h3>Serve an API</h3>
-          <p>OpenAI-compatible HTTP server with API key auth (via <code>SWIFTLLM_API_KEY</code>), CORS, SSE streaming, <code>/health</code>, and Prometheus <code>/metrics</code>. Default bind is <code>127.0.0.1</code> for security.</p>
-          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>swiftllm serve --port 8000</span></div>
+          <p>OpenAI-compatible HTTP server with SSE token streaming, API key auth (via <code>--api-key</code> or <code>SWIFTLLM_API_KEY</code>), and a default bind of <code>127.0.0.1</code> for security. Add <code>--rlm</code> / <code>--dense-verification</code> to enable the quality pipeline.</p>
+          <div class="step-cmd" onclick="copyText(this)"><span class="prompt">$</span><span>swiftllm serve -m Qwen/Qwen2.5-7B --port 8000</span></div>
         </div>
       </div>
 
@@ -1983,7 +2134,7 @@ outputs = llm.<span class="fn">generate</span>(
   <section class="cta-section">
     <div class="cta-card reveal">
       <h2>Ready to run LLMs<br>at full speed?</h2>
-      <p>SwiftLLM v2.0 ships hybrid Mamba-3 architectures, GRPO training, TurboQuant KV cache compression, and six test-time inference enhancements — all in one Rust-powered package.</p>
+      <p>SwiftLLM v2.0.1 ships hybrid Mamba-3 architectures, GRPO training, TurboQuant KV cache compression, dual GGUF + transformers backends, SSE streaming, and a flip-of-a-flag quality pipeline — all in one Rust-powered package.</p>
       <div class="hero-actions">
         <a href="https://github.com/infrabrew/swiftllm" class="btn btn-primary">
           <i data-icon="github" data-size="14"></i> Star on GitHub
